@@ -98,21 +98,22 @@
 
 <div class="flex min-h-screen flex-col">
 	<!-- Header -->
-	<header class="border-b border-border/40 px-6 py-4">
-		<div class="mx-auto flex max-w-4xl items-center justify-between">
-			<div class="flex items-center gap-4">
-				<Button href="/dashboard" variant="ghost" size="sm" class="gap-2">
+	<header class="border-b border-border/40 px-4 py-3 sm:px-6 sm:py-4">
+		<div class="mx-auto max-w-4xl space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between">
+			<!-- Left side: Back + repo name -->
+			<div class="flex items-center gap-2 sm:gap-4 min-w-0">
+				<Button href="/dashboard" variant="ghost" size="sm" class="shrink-0">
 					<ArrowLeft class="h-4 w-4" />
-					Back
+					<span class="hidden sm:inline ml-2">Back</span>
 				</Button>
-				<Separator orientation="vertical" class="h-6" />
-				<div class="flex items-center gap-2">
-					<img src={logo} alt="sumgit" class="h-7 w-7 rounded-md" />
-					<span class="font-semibold">{data.repository.repo_owner}/{data.repository.repo_name}</span
-					>
+				<Separator orientation="vertical" class="h-6 hidden sm:block" />
+				<div class="flex items-center gap-2 min-w-0">
+					<img src={logo} alt="sumgit" class="h-6 w-6 sm:h-7 sm:w-7 rounded-md shrink-0" />
+					<span class="font-semibold truncate text-sm sm:text-base">{data.repository.repo_owner}/{data.repository.repo_name}</span>
 				</div>
 			</div>
-			<div class="flex items-center gap-2">
+			<!-- Right side: Actions -->
+			<div class="flex items-center gap-2 justify-end">
 				{#if data.milestones.length > 0}
 					<Button
 						href="/project/{data.repository.id}/timeline"
@@ -121,7 +122,7 @@
 						class="gap-2"
 					>
 						<Clock class="h-4 w-4" />
-						Timeline
+						<span class="hidden sm:inline">Timeline</span>
 					</Button>
 				{/if}
 				<Button
@@ -133,10 +134,10 @@
 				>
 					{#if isAnalyzing}
 						<Loader2 class="h-4 w-4 animate-spin" />
-						Analyzing...
+						<span class="hidden sm:inline">Analyzing...</span>
 					{:else}
 						<RefreshCw class="h-4 w-4" />
-						{data.milestones.length > 0 ? 'Re-analyze' : 'Analyze'}
+						<span class="hidden sm:inline">{data.milestones.length > 0 ? 'Re-analyze' : 'Analyze'}</span>
 					{/if}
 				</Button>
 				<Button
@@ -144,7 +145,7 @@
 					disabled={isDeleting}
 					variant="ghost"
 					size="sm"
-					class="gap-2 text-destructive hover:text-destructive"
+					class="text-destructive hover:text-destructive"
 				>
 					<Trash2 class="h-4 w-4" />
 				</Button>

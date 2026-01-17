@@ -136,22 +136,22 @@
 
 <div class="flex min-h-screen flex-col">
 	<!-- Header -->
-	<header class="border-b border-border/40 px-6 py-4">
+	<header class="border-b border-border/40 px-4 py-3 sm:px-6 sm:py-4">
 		<div class="mx-auto flex max-w-6xl items-center justify-between">
 			<a href="/" class="flex items-center gap-2">
-				<img src={logo} alt="sumgit" class="h-8 w-8 rounded-md" />
-				<span class="text-xl font-bold tracking-tight">sumgit</span>
+				<img src={logo} alt="sumgit" class="h-7 w-7 sm:h-8 sm:w-8 rounded-md" />
+				<span class="text-lg sm:text-xl font-bold tracking-tight">sumgit</span>
 			</a>
-			<div class="flex items-center gap-4">
+			<div class="flex items-center gap-2 sm:gap-4">
 				{#if data.installations.length > 0}
-					<Badge variant="secondary" class="gap-1">
+					<Badge variant="secondary" class="gap-1 hidden sm:flex">
 						<Shield class="h-3 w-3" />
 						{data.installations.length} installation{data.installations.length > 1 ? 's' : ''}
 					</Badge>
 				{/if}
 				<Button onclick={signOut} variant="ghost" size="sm" class="gap-2">
 					<LogOut class="h-4 w-4" />
-					Sign out
+					<span class="hidden sm:inline">Sign out</span>
 				</Button>
 			</div>
 		</div>
@@ -221,19 +221,21 @@
 					</CardContent>
 				</Card>
 			{:else}
-				<div class="mb-8 flex items-center justify-between">
+				<div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 					<div>
-						<h1 class="text-2xl font-bold">Your Projects</h1>
-						<p class="text-muted-foreground">Connect repositories to analyze milestones</p>
+						<h1 class="text-xl sm:text-2xl font-bold">Your Projects</h1>
+						<p class="text-muted-foreground text-sm sm:text-base">Connect repositories to analyze milestones</p>
 					</div>
 					<div class="flex gap-2">
 						<Button onclick={installGitHubApp} variant="outline" size="sm" class="gap-2">
 							<Github class="h-4 w-4" />
-							Manage App
+							<span class="hidden sm:inline">Manage App</span>
+							<span class="sm:hidden">Manage</span>
 						</Button>
-						<Button onclick={toggleRepoSelector} class="gap-2">
+						<Button onclick={toggleRepoSelector} class="gap-2" size="sm">
 							<Plus class="h-4 w-4" />
-							Add Repository
+							<span class="hidden sm:inline">Add Repository</span>
+							<span class="sm:hidden">Add</span>
 						</Button>
 					</div>
 				</div>
