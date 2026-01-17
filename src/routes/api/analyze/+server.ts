@@ -309,6 +309,17 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		const commitsWithoutDiffs = commitsForAnalysis.length - commitsWithDiffs;
 		console.log(`Analyzing ${commitsForAnalysis.length} commits (${commitsWithDiffs} with diffs, ${commitsWithoutDiffs} without diffs)`);
 
+		// Estimate payload size before sending (rough estimate)
+		const estimatedPayloadSize = commitsForAnalysis.reduce((size, commit) => {
+			let commitSize = commit.message.length + commit.date.length + commit.sha.length;
+			if (commit.diff) {
+				commitSize += Math.min(commit.diff.length, 1000); // Account for truncation
+			}
+			return size + commitSize;
+		}, 0);
+		
+		console.log(`Estimated payload size: ${(estimatedPayloadSize / 1024).toFixed(2)} KB`);
+
 		// Ensure we have commits to analyze
 		if (commitsForAnalysis.length === 0) {
 			throw error(400, 'No commits available for analysis');
@@ -319,19 +330,38 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		let milestones: Milestone[] = [];
 		const maxRetries = 3; // Increased retries for connection issues
 		let retryCount = 0;
+		let lastError: Error | null = null;
 
 		while (retryCount <= maxRetries) {
 			try {
 				milestones = await analyzeMilestones(`${repo.repo_owner}/${repo.repo_name}`, commitsForAnalysis);
+				console.log(`OpenAI analysis successful: ${milestones.length} milestones found`);
 				break; // Success, exit retry loop
 			} catch (err) {
-				const errorMessage = err instanceof Error ? err.message : String(err);
-				const isConnectionError = errorMessage.includes('Connection error') || 
-				                          errorMessage.includes('timeout') ||
-				                          errorMessage.includes('ECONNREFUSED') ||
-				                          errorMessage.includes('ETIMEDOUT');
+				lastError = err instanceof Error ? err : new Error(String(err));
+				const errorMessage = lastError.message.toLowerCase();
 				
-				if (isConnectionError) {
+				// Check for retryable errors (network, timeout, connection issues)
+				const isRetryableError = errorMessage.includes('connection error') || 
+				                          errorMessage.includes('timeout') ||
+				                          errorMessage.includes('econnrefused') ||
+				                          errorMessage.includes('etimedout') ||
+				                          errorMessage.includes('network') ||
+				                          errorMessage.includes('fetch failed');
+				
+				// Check for payload errors - might need to reduce commits
+				const isPayloadError = errorMessage.includes('payload') || 
+				                      errorMessage.includes('too large');
+				
+				if (isPayloadError && commitsForAnalysis.length > 20) {
+					// If payload is too large, try with fewer commits
+					console.warn(`Payload too large, reducing commits from ${commitsForAnalysis.length} to ${Math.floor(commitsForAnalysis.length * 0.7)}`);
+					commitsForAnalysis.splice(Math.floor(commitsForAnalysis.length * 0.7));
+					retryCount = 0; // Reset retry count for new attempt
+					continue;
+				}
+				
+				if (isRetryableError) {
 					retryCount++;
 					if (retryCount <= maxRetries) {
 						console.warn(`OpenAI connection error, retrying (${retryCount}/${maxRetries})...`);
@@ -340,20 +370,27 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 						await new Promise((resolve) => setTimeout(resolve, backoffDelay));
 						continue;
 					} else {
-						// Max retries reached, but try one more time with a longer timeout
+						// Max retries reached, but try one more time
 						console.warn('Max retries reached for OpenAI, attempting final request...');
 						try {
 							milestones = await analyzeMilestones(`${repo.repo_owner}/${repo.repo_name}`, commitsForAnalysis);
+							console.log(`OpenAI analysis successful on final attempt: ${milestones.length} milestones found`);
 							break; // Success on final attempt
 						} catch (finalErr) {
 							// If final attempt fails, throw with helpful message
-							throw new Error('OpenAI service unavailable after multiple retries. Please try again later.');
+							const finalErrorMsg = finalErr instanceof Error ? finalErr.message : String(finalErr);
+							throw new Error(`OpenAI service unavailable after ${maxRetries + 1} attempts: ${finalErrorMsg}`);
 						}
 					}
 				}
-				// Re-throw if not a connection error
-				throw err;
+				// Re-throw if not a retryable error (API errors, validation errors, etc.)
+				throw lastError;
 			}
+		}
+
+		// If we exhausted retries without success, throw the last error
+		if (milestones.length === 0 && lastError) {
+			throw lastError;
 		}
 
 		// Clear existing milestones for this repo
