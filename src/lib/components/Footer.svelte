@@ -21,9 +21,6 @@
 				<h4 class="mb-3 text-sm font-semibold">Links</h4>
 				<ul class="space-y-2 text-sm text-muted-foreground">
 					<li>
-						<a href="/#features" class="transition-colors hover:text-foreground">Features</a>
-					</li>
-					<li>
 						<a href="/dashboard" class="transition-colors hover:text-foreground">Dashboard</a>
 					</li>
 					<li>
@@ -94,6 +91,16 @@
 							class="transition-colors hover:text-foreground"
 						>
 							PostChad
+						</a>
+					</li>
+					<li>
+						<a
+							href="https://islamjeopardy.com"
+							target="_blank"
+							rel="noopener noreferrer"
+							class="transition-colors hover:text-foreground"
+						>
+							IslamJeopardy
 						</a>
 					</li>
 				</ul>

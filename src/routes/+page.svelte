@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import { Github, Sparkles, Clock } from '@lucide/svelte';
+	import { FAQ, FAQItem } from '$lib/components/ui/faq';
 	import logo from '$lib/assets/logo.png';
 	import MilestoneMarquee from '$lib/components/MilestoneMarquee.svelte';
 	import Footer from '$lib/components/Footer.svelte';
@@ -136,7 +137,7 @@
 					</p>
 					<div class="mt-4 border-l-2 border-emerald-500/50 pl-4">
 						<p class="font-semibold text-foreground">2024-01-15</p>
-						<p class="text-muted-foreground">🚀 Launched v1.0 with full authentication system</p>
+						<p class="text-muted-foreground">Launched v1.0 with full authentication system</p>
 						<p class="mt-1 text-xs text-muted-foreground/70">
 							"Just shipped auth for awesome-app! OAuth, magic links, and 2FA all working. 3 months
 							of work → production. #buildinpublic"
@@ -144,7 +145,7 @@
 					</div>
 					<div class="mt-4 border-l-2 border-emerald-500/50 pl-4">
 						<p class="font-semibold text-foreground">2024-01-08</p>
-						<p class="text-muted-foreground">⚡ Performance boost: 3x faster page loads</p>
+						<p class="text-muted-foreground">Performance boost: 3x faster page loads</p>
 						<p class="mt-1 text-xs text-muted-foreground/70">
 							"Optimized our SvelteKit app—SSR + lazy loading = 3x faster loads. Users are gonna
 							love this. #webdev"
@@ -152,6 +153,29 @@
 					</div>
 				</div>
 			</div>
+		</div>
+
+		<!-- FAQ Section -->
+		<div class="mt-20 w-full max-w-2xl">
+			<h2 class="mb-8 text-center text-2xl font-bold">Frequently Asked Questions</h2>
+			<FAQ class="rounded-lg border border-border/40 bg-card/50 px-6">
+				<FAQItem
+					question="What permissions does sumgit need?"
+					answer="sumgit only requests read-only permissions for your GitHub repositories. We can view your commit history and repository metadata, but we cannot modify your code, push commits, or make any changes to your repositories. Your code stays completely safe."
+				/>
+				<FAQItem
+					question="How does the AI analysis work?"
+					answer="Our AI agents analyze your commit messages, timestamps, and patterns to identify significant milestones in your development journey. This includes feature launches, major refactors, performance improvements, and other noteworthy achievements."
+				/>
+				<FAQItem
+					question="Can I choose which repositories to analyze?"
+					answer="Yes! After connecting your GitHub account, you can select specific repositories to analyze. You have full control over which projects sumgit can access."
+				/>
+				<FAQItem
+					question="Is my code stored or shared?"
+					answer="No. We only analyze your commit metadata (messages, dates, authors). Your actual source code is never stored on our servers or shared with any third parties."
+				/>
+			</FAQ>
 		</div>
 	</main>
 

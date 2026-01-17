@@ -16,7 +16,8 @@
       "Bash(find:*)",
       "Bash(ls:*)",
       "WebFetch(domain:svelteship.com)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(npm run check:*)"
     ]
   }
 }
