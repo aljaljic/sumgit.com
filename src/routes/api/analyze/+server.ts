@@ -76,9 +76,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		const commits: Commit[] = [];
 		let page = 1;
 		const perPage = 100;
-		const maxCommitsWithDiff = 200; // Limit commits we fetch diffs for
+		const maxCommitsWithDiff = 50; // Reduced to stay under Cloudflare's subrequest limit
+		const maxCommitsToAnalyze = 100; // Limit commits sent to OpenAI
 
-		// Fetch up to 500 commits (5 pages)
+		// First, collect all commits without diffs
 		while (page <= 5) {
 			const { data } = await octokit.repos.listCommits({
 				owner: repo.repo_owner,
@@ -90,58 +91,19 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			if (data.length === 0) break;
 
 			for (const commit of data) {
-				const commitData: Commit = {
-					sha: commit.sha,
-					message: (commit.commit.message ?? '').split('\n')[0] ?? '',
-					date: commit.commit.author?.date ?? new Date().toISOString(),
-					author: commit.commit.author?.name ?? 'Unknown'
-				};
-
-				// Fetch diff for commits within the limit
-				if (commits.length < maxCommitsWithDiff) {
-					try {
-						const { data: commitDetail } = await octokit.repos.getCommit({
-							owner: repo.repo_owner,
-							repo: repo.repo_name,
-							ref: commit.sha
-						});
-
-						// Extract stats and build diff summary
-						commitData.files_changed = commitDetail.files?.length ?? 0;
-						commitData.additions = commitDetail.stats?.additions ?? 0;
-						commitData.deletions = commitDetail.stats?.deletions ?? 0;
-
-						// Build a truncated diff summary (max 2000 chars per commit)
-						if (commitDetail.files && commitDetail.files.length > 0) {
-							const diffParts: string[] = [];
-							let totalDiffLength = 0;
-							const maxDiffLength = 2000;
-
-							for (const file of commitDetail.files) {
-								if (totalDiffLength >= maxDiffLength) break;
-
-								const fileHeader = `\n--- ${file.filename} (${file.status})\n`;
-								const patch = file.patch || '';
-								
-								// Truncate patch if needed
-								const remaining = maxDiffLength - totalDiffLength - fileHeader.length;
-								const truncatedPatch = patch.length > remaining 
-									? patch.substring(0, remaining) + '\n... (truncated)'
-									: patch;
-
-								diffParts.push(fileHeader + truncatedPatch);
-								totalDiffLength += fileHeader.length + truncatedPatch.length;
-							}
-
-							commitData.diff = diffParts.join('\n');
-						}
-					} catch (err) {
-						// If we can't fetch the diff, continue without it
-						console.warn(`Failed to fetch diff for commit ${commit.sha}:`, err);
-					}
+				const message = (commit.commit.message ?? '').split('\n')[0] ?? '';
+				
+				// Skip merge commits and very small commits early
+				if (message.toLowerCase().startsWith('merge') || message.toLowerCase().startsWith('wip')) {
+					continue;
 				}
 
-				commits.push(commitData);
+				commits.push({
+					sha: commit.sha,
+					message,
+					date: commit.commit.author?.date ?? new Date().toISOString(),
+					author: commit.commit.author?.name ?? 'Unknown'
+				});
 			}
 
 			if (data.length < perPage) break;
@@ -152,8 +114,96 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			throw error(400, 'No commits found in repository');
 		}
 
-		// Analyze commits with OpenAI
-		const milestones = await analyzeMilestones(`${repo.repo_owner}/${repo.repo_name}`, commits);
+		// Helper function to fetch and process a single commit diff
+		const fetchCommitDiff = async (commit: Commit): Promise<void> => {
+			try {
+				const { data: commitDetail } = await octokit.repos.getCommit({
+					owner: repo.repo_owner,
+					repo: repo.repo_name,
+					ref: commit.sha
+				});
+
+				// Extract stats
+				commit.files_changed = commitDetail.files?.length ?? 0;
+				commit.additions = commitDetail.stats?.additions ?? 0;
+				commit.deletions = commitDetail.stats?.deletions ?? 0;
+
+				// Build a truncated diff summary (max 2000 chars per commit)
+				if (commitDetail.files && commitDetail.files.length > 0) {
+					const diffParts: string[] = [];
+					let totalDiffLength = 0;
+					const maxDiffLength = 2000;
+
+					for (const file of commitDetail.files) {
+						if (totalDiffLength >= maxDiffLength) break;
+
+						const fileHeader = `\n--- ${file.filename} (${file.status})\n`;
+						const patch = file.patch || '';
+						
+						// Truncate patch if needed
+						const remaining = maxDiffLength - totalDiffLength - fileHeader.length;
+						const truncatedPatch = patch.length > remaining 
+							? patch.substring(0, remaining) + '\n... (truncated)'
+							: patch;
+
+						diffParts.push(fileHeader + truncatedPatch);
+						totalDiffLength += fileHeader.length + truncatedPatch.length;
+					}
+
+					commit.diff = diffParts.join('\n');
+				}
+			} catch (err) {
+				// If we can't fetch the diff, continue without it
+				if (err instanceof Error && err.message.includes('Too many subrequests')) {
+					throw err; // Re-throw to stop processing
+				}
+				console.warn(`Failed to fetch diff for commit ${commit.sha}:`, err);
+			}
+		};
+
+		// Fetch diffs in parallel batches (concurrency limit: 5)
+		const commitsToFetchDiffs = commits.slice(0, maxCommitsWithDiff);
+		const concurrencyLimit = 5;
+		let hitSubrequestLimit = false;
+
+		for (let i = 0; i < commitsToFetchDiffs.length; i += concurrencyLimit) {
+			if (hitSubrequestLimit) break;
+
+			const batch = commitsToFetchDiffs.slice(i, i + concurrencyLimit);
+			
+			await Promise.allSettled(
+				batch.map(async (commit) => {
+					try {
+						await fetchCommitDiff(commit);
+					} catch (err) {
+						if (err instanceof Error && err.message.includes('Too many subrequests')) {
+							hitSubrequestLimit = true;
+							console.warn(`Hit subrequest limit, stopping diff fetches at commit ${i + batch.length}`);
+						}
+					}
+				})
+			);
+
+			// Small delay between batches to avoid rate limits
+			if (i + concurrencyLimit < commitsToFetchDiffs.length && !hitSubrequestLimit) {
+				await new Promise((resolve) => setTimeout(resolve, 50));
+			}
+		}
+
+		// Prioritize commits with diffs for OpenAI analysis
+		// Sort: commits with diffs first, then by date
+		const commitsForAnalysis = commits
+			.sort((a, b) => {
+				// Commits with diffs first
+				if (a.diff && !b.diff) return -1;
+				if (!a.diff && b.diff) return 1;
+				// Then by date (newest first)
+				return new Date(b.date).getTime() - new Date(a.date).getTime();
+			})
+			.slice(0, maxCommitsToAnalyze);
+
+		// Analyze commits with OpenAI (using prioritized subset)
+		const milestones = await analyzeMilestones(`${repo.repo_owner}/${repo.repo_name}`, commitsForAnalysis);
 
 		// Clear existing milestones for this repo
 		await locals.supabase.from('milestones').delete().eq('repository_id', repository_id);
@@ -189,7 +239,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return json({
 			success: true,
 			milestones_count: milestones.length,
-			commits_analyzed: commits.length
+			commits_analyzed: commitsForAnalysis.length,
+			total_commits: commits.length
 		});
 	} catch (err) {
 		console.error('Analysis error:', err);

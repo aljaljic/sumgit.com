@@ -62,8 +62,20 @@ export async function analyzeMilestones(repoName: string, commits: Commit[]): Pr
 	}
 
 	// Prepare commits for analysis (limit context size)
-	const commitsText = commits
-		.slice(0, 200) // Limit to last 200 commits to stay within context
+	// Prioritize commits with diffs, then by impact (files changed, additions/deletions)
+	const sortedCommits = commits
+		.sort((a, b) => {
+			// Commits with diffs first
+			if (a.diff && !b.diff) return -1;
+			if (!a.diff && b.diff) return 1;
+			// Then by impact (files changed + lines changed)
+			const aImpact = (a.files_changed ?? 0) + (a.additions ?? 0) + (a.deletions ?? 0);
+			const bImpact = (b.files_changed ?? 0) + (b.additions ?? 0) + (b.deletions ?? 0);
+			return bImpact - aImpact;
+		})
+		.slice(0, 100); // Limit to top 100 most promising commits
+
+	const commitsText = sortedCommits
 		.map((c) => {
 			let commitLine = `[${c.date}] ${c.sha.slice(0, 7)}: ${c.message}`;
 			
