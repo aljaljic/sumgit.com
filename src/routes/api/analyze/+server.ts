@@ -72,57 +72,38 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 
 	try {
-		// Fetch commits from the repository with pagination (up to 5000 commits)
+		// Fetch commits from the repository (limited to 100 commits with diffs)
 		const commits: Commit[] = [];
-		const perPage = 100;
-		const maxPages = 50; // 50 pages * 100 = 5000 commits max
-		const maxCommitsWithDiff = 40; // Stay within Cloudflare's 50 subrequest limit
+		const maxCommits = 100; // Only analyze the most recent 100 commits
+		const maxCommitsWithDiff = 100; // Get diffs for all 100 commits
 		const maxCommitsToAnalyze = 100; // Limit commits sent to OpenAI per chunk
 
-		// Fetch all commits with pagination
-		let page = 1;
-		let hasMoreCommits = true;
+		// Fetch recent commits (up to 100)
+		const { data } = await octokit.repos.listCommits({
+			owner: repo.repo_owner,
+			repo: repo.repo_name,
+			per_page: maxCommits
+		});
 
-		while (hasMoreCommits && page <= maxPages) {
-			const { data } = await octokit.repos.listCommits({
-				owner: repo.repo_owner,
-				repo: repo.repo_name,
-				per_page: perPage,
-				page
-			});
+		for (const commit of data) {
+			const message = (commit.commit.message ?? '').split('\n')[0] ?? '';
 
-			if (data.length === 0) {
-				hasMoreCommits = false;
-				break;
+			// Skip merge commits and very small commits early
+			if (message.toLowerCase().startsWith('merge') || message.toLowerCase().startsWith('wip')) {
+				continue;
 			}
 
-			for (const commit of data) {
-				const message = (commit.commit.message ?? '').split('\n')[0] ?? '';
+			const commitData: Commit = {
+				sha: commit.sha,
+				message,
+				date: commit.commit.author?.date ?? new Date().toISOString(),
+				author: commit.commit.author?.name ?? 'Unknown'
+			};
 
-				// Skip merge commits and very small commits early
-				if (message.toLowerCase().startsWith('merge') || message.toLowerCase().startsWith('wip')) {
-					continue;
-				}
-
-				const commitData: Commit = {
-					sha: commit.sha,
-					message,
-					date: commit.commit.author?.date ?? new Date().toISOString(),
-					author: commit.commit.author?.name ?? 'Unknown'
-				};
-
-				commits.push(commitData);
-			}
-
-			// If we got fewer commits than requested, we've reached the end
-			if (data.length < perPage) {
-				hasMoreCommits = false;
-			}
-
-			page++;
+			commits.push(commitData);
 		}
 
-		console.log(`Fetched ${commits.length} commits across ${page - 1} pages`);
+		console.log(`Fetched ${commits.length} commits`);
 
 		if (commits.length === 0) {
 			throw error(400, 'No commits found in repository');

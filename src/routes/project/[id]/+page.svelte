@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent } from '$lib/components/ui/card';
-	import { Badge } from '$lib/components/ui/badge';
 	import { Separator } from '$lib/components/ui/separator';
 	import {
 		ArrowLeft,
@@ -23,7 +22,6 @@
 	let isAnalyzing = $state(false);
 	let copiedId = $state<string | null>(null);
 	let isDeleting = $state(false);
-	let viewMode = $state<'feed' | 'timeline'>('feed');
 
 	async function analyzeRepository() {
 		isAnalyzing = true;
@@ -71,18 +69,6 @@
 		});
 	}
 
-	// Helper function for month ordering (newest first)
-	function monthOrder(month: string): number {
-		const months = ['January', 'February', 'March', 'April', 'May', 'June',
-		                'July', 'August', 'September', 'October', 'November', 'December'];
-		return months.indexOf(month);
-	}
-
-	// Helper function to count milestones in a month's days
-	function countMilestones(days: Record<string, unknown[]>): number {
-		return Object.values(days).reduce((sum, dayMilestones) => sum + dayMilestones.length, 0);
-	}
-
 	async function deleteRepository() {
 		if (
 			!confirm('Are you sure you want to remove this repository? All milestones will be deleted.')
@@ -127,6 +113,17 @@
 				</div>
 			</div>
 			<div class="flex items-center gap-2">
+				{#if data.milestones.length > 0}
+					<Button
+						href="/project/{data.repository.id}/timeline"
+						variant="outline"
+						size="sm"
+						class="gap-2"
+					>
+						<Clock class="h-4 w-4" />
+						Timeline
+					</Button>
+				{/if}
 				<Button
 					onclick={analyzeRepository}
 					disabled={isAnalyzing}
@@ -199,186 +196,66 @@
 					</Button>
 				</div>
 			{:else}
-				<!-- View Toggle -->
-				<div class="mb-6 flex gap-2">
-					<Button
-						onclick={() => (viewMode = 'feed')}
-						variant={viewMode === 'feed' ? 'default' : 'outline'}
-						size="sm"
-						class="gap-2"
-					>
-						<Calendar class="h-4 w-4" />
-						Feed
-					</Button>
-					<Button
-						onclick={() => (viewMode = 'timeline')}
-						variant={viewMode === 'timeline' ? 'default' : 'outline'}
-						size="sm"
-						class="gap-2"
-					>
-						<Clock class="h-4 w-4" />
-						Timeline
-					</Button>
-				</div>
+				<!-- Milestones Feed -->
+				<div class="space-y-4">
+					{#each data.milestones as milestone}
+						<!-- X Post Card -->
+						<Card class="border-border/40 bg-card transition-colors hover:bg-card/80">
+							<CardContent class="p-4">
+								<!-- Post Content -->
+								<div class="mb-3">
+									<p class="whitespace-pre-wrap text-[15px] leading-relaxed">
+										{milestone.x_post_suggestion || milestone.title}
+									</p>
+								</div>
 
-				{#if viewMode === 'feed'}
-					<!-- Feed View: Milestones as X Posts (newest first) -->
-					<div class="space-y-4">
-						{#each data.milestones as milestone}
-							<!-- X Post Card -->
-							<Card class="border-border/40 bg-card transition-colors hover:bg-card/80">
-								<CardContent class="p-4">
-									<!-- Post Content -->
-									<div class="mb-3">
-										<p class="whitespace-pre-wrap text-[15px] leading-relaxed">
-											{milestone.x_post_suggestion || milestone.title}
-										</p>
+								<!-- Footer: Date, Commit Link, Actions -->
+								<div class="flex items-center justify-between border-t border-border/40 pt-3">
+									<div class="flex items-center gap-4 text-xs text-muted-foreground">
+										<span>{formatDate(milestone.milestone_date)}</span>
+										{#if milestone.commit_sha}
+											<a
+												href="{data.repository.github_repo_url}/commit/{milestone.commit_sha}"
+												target="_blank"
+												rel="noopener noreferrer"
+												class="flex items-center gap-1 transition-colors hover:text-foreground"
+											>
+												<GitCommit class="h-3 w-3" />
+												{milestone.commit_sha.slice(0, 7)}
+											</a>
+										{/if}
 									</div>
 
-									<!-- Footer: Date, Commit Link, Actions -->
-									<div class="flex items-center justify-between border-t border-border/40 pt-3">
-										<div class="flex items-center gap-4 text-xs text-muted-foreground">
-											<span>{formatDate(milestone.milestone_date)}</span>
-											{#if milestone.commit_sha}
-												<a
-													href="{data.repository.github_repo_url}/commit/{milestone.commit_sha}"
-													target="_blank"
-													rel="noopener noreferrer"
-													class="flex items-center gap-1 transition-colors hover:text-foreground"
-												>
-													<GitCommit class="h-3 w-3" />
-													{milestone.commit_sha.slice(0, 7)}
-												</a>
+									<div class="flex items-center gap-2">
+										<Button
+											onclick={() => copyToClipboard(milestone.x_post_suggestion || milestone.title, milestone.id)}
+											variant="ghost"
+											size="sm"
+											class="h-8 gap-1.5 px-3 text-xs"
+										>
+											{#if copiedId === milestone.id}
+												<Check class="h-3.5 w-3.5 text-green-500" />
+												Copied
+											{:else}
+												<Copy class="h-3.5 w-3.5" />
+												Copy
 											{/if}
-										</div>
-
-										<div class="flex items-center gap-2">
-											<Button
-												onclick={() => copyToClipboard(milestone.x_post_suggestion || milestone.title, milestone.id)}
-												variant="ghost"
-												size="sm"
-												class="h-8 gap-1.5 px-3 text-xs"
-											>
-												{#if copiedId === milestone.id}
-													<Check class="h-3.5 w-3.5 text-green-500" />
-													Copied
-												{:else}
-													<Copy class="h-3.5 w-3.5" />
-													Copy
-												{/if}
-											</Button>
-											<Button
-												onclick={() => shareToX(milestone.x_post_suggestion || milestone.title)}
-												variant="ghost"
-												size="sm"
-												class="h-8 gap-1.5 px-3 text-xs"
-											>
-												<Share2 class="h-3.5 w-3.5" />
-												Share
-											</Button>
-										</div>
+										</Button>
+										<Button
+											onclick={() => shareToX(milestone.x_post_suggestion || milestone.title)}
+											variant="ghost"
+											size="sm"
+											class="h-8 gap-1.5 px-3 text-xs"
+										>
+											<Share2 class="h-3.5 w-3.5" />
+											Share
+										</Button>
 									</div>
-								</CardContent>
-							</Card>
-						{/each}
-					</div>
-				{:else}
-					<!-- Timeline View: Grouped by Year/Month -->
-					<div class="space-y-8">
-						{#each Object.entries(data.groupedMilestones).sort((a, b) => Number(b[0]) - Number(a[0])) as [year, months]}
-							<div>
-								<!-- Year Header -->
-								<h2 class="text-xl font-bold mb-4 text-emerald-500">{year}</h2>
-
-								{#each Object.entries(months).sort((a, b) => monthOrder(b[0]) - monthOrder(a[0])) as [month, days]}
-									<div class="mb-6">
-										<!-- Month Header with summary -->
-										<div class="flex items-center gap-3 mb-3">
-											<Badge variant="secondary">{month}</Badge>
-											<span class="text-sm text-muted-foreground">
-												{countMilestones(days)} milestone{countMilestones(days) === 1 ? '' : 's'}
-											</span>
-										</div>
-
-										<!-- Milestones in this month -->
-										<div class="relative pl-6 border-l-2 border-emerald-500/30">
-											{#each Object.entries(days).flatMap(([_, m]) => m) as milestone}
-												<div class="relative mb-4 pl-4">
-													<!-- Bullet point -->
-													<div
-														class="absolute left-[-9px] top-2 h-3 w-3 rounded-full border-2 border-emerald-500 bg-background"
-													></div>
-
-													<!-- Milestone Card -->
-													<Card class="border-border/40 bg-card transition-colors hover:bg-card/80">
-														<CardContent class="p-4">
-															<!-- Date Badge -->
-															<div class="mb-3">
-																<Badge variant="outline" class="text-xs">
-																	{formatDate(milestone.milestone_date)}
-																</Badge>
-															</div>
-
-															<!-- Post Content -->
-															<div class="mb-3">
-																<p class="whitespace-pre-wrap text-[15px] leading-relaxed">
-																	{milestone.x_post_suggestion || milestone.title}
-																</p>
-															</div>
-
-															<!-- Footer: Commit Link, Actions -->
-															<div class="flex items-center justify-between border-t border-border/40 pt-3">
-																<div class="flex items-center gap-4 text-xs text-muted-foreground">
-																	{#if milestone.commit_sha}
-																		<a
-																			href="{data.repository.github_repo_url}/commit/{milestone.commit_sha}"
-																			target="_blank"
-																			rel="noopener noreferrer"
-																			class="flex items-center gap-1 transition-colors hover:text-foreground"
-																		>
-																			<GitCommit class="h-3 w-3" />
-																			{milestone.commit_sha.slice(0, 7)}
-																		</a>
-																	{/if}
-																</div>
-
-																<div class="flex items-center gap-2">
-																	<Button
-																		onclick={() => copyToClipboard(milestone.x_post_suggestion || milestone.title, milestone.id)}
-																		variant="ghost"
-																		size="sm"
-																		class="h-8 gap-1.5 px-3 text-xs"
-																	>
-																		{#if copiedId === milestone.id}
-																			<Check class="h-3.5 w-3.5 text-green-500" />
-																			Copied
-																		{:else}
-																			<Copy class="h-3.5 w-3.5" />
-																			Copy
-																		{/if}
-																	</Button>
-																	<Button
-																		onclick={() => shareToX(milestone.x_post_suggestion || milestone.title)}
-																		variant="ghost"
-																		size="sm"
-																		class="h-8 gap-1.5 px-3 text-xs"
-																	>
-																		<Share2 class="h-3.5 w-3.5" />
-																		Share
-																	</Button>
-																</div>
-															</div>
-														</CardContent>
-													</Card>
-												</div>
-											{/each}
-										</div>
-									</div>
-								{/each}
-							</div>
-						{/each}
-					</div>
-				{/if}
+								</div>
+							</CardContent>
+						</Card>
+					{/each}
+				</div>
 			{/if}
 		</div>
 	</main>

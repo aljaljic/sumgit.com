@@ -10,7 +10,10 @@
       "Bash(xxd:*)",
       "Bash(npm run build:*)",
       "WebSearch",
-      "WebFetch(domain:x.com)"
+      "WebFetch(domain:x.com)",
+      "Bash(npx svelte-check:*)",
+      "Bash(npx tsc:*)",
+      "Bash(find:*)"
     ]
   }
 }
