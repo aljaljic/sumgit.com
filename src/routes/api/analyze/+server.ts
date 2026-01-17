@@ -75,7 +75,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		// Fetch commits from the repository (limited to 100 commits with diffs)
 		const commits: Commit[] = [];
 		const maxCommits = 100; // Only analyze the most recent 100 commits
-		const maxCommitsWithDiff = 100; // Get diffs for all 100 commits
+		// Cloudflare Workers has a 50 subrequest limit (free plan)
+		// Reserve ~10 for: listCommits, repo access check, OpenAI call + retries
+		const maxCommitsWithDiff = 40; // Get diffs for top 40 commits to stay under subrequest limit
 		const maxCommitsToAnalyze = 100; // Limit commits sent to OpenAI per chunk
 
 		// Fetch recent commits (up to 100)

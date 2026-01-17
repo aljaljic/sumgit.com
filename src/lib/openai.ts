@@ -6,7 +6,7 @@ const openai = new OpenAI({
 	apiKey: PRIVATE_OPENAI_API_KEY,
 	fetch: globalThis.fetch, // Explicit fetch for Cloudflare Workers
 	timeout: 120000, // 120 seconds (within Workers duration limits)
-	maxRetries: 2 // Client-level retries
+	maxRetries: 0 // Disable SDK retries - we handle retries manually to avoid hitting CF subrequest limits
 });
 
 export interface Commit {
