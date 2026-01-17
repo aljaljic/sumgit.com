@@ -28,37 +28,36 @@ export interface Milestone {
 	x_post_suggestion: string;
 }
 
-const SYSTEM_PROMPT = `You are an expert at analyzing git commit history and identifying significant milestones in a software project. Your job is to find commits that represent meaningful achievements worth sharing on X (Twitter) for developers who "build in public".
+const SYSTEM_PROMPT = `You are an expert at analyzing git commit history and identifying significant milestones worth sharing on social media for developers who "build in public".
 
-IMPORTANT: You must analyze the ACTUAL CODE CHANGES (diffs) in each commit, not just the commit message. Many commits have misleading or generic messages. Look at what code actually changed to determine if it's a real milestone.
+Analyze commit messages to find achievements worth celebrating. When code diffs are provided, use them as additional context, but commit messages alone are sufficient to identify milestones.
 
-A milestone is a commit (or group of related commits) that represents:
-- A new feature launch or major functionality (verify by checking if new code/files were added)
-- Performance improvements (verify by checking if optimization code was added)
-- Major bug fixes that affected users (verify by checking if critical logic was fixed)
-- Architectural changes or refactors (verify by checking if structure/patterns changed)
+A milestone is ANY commit that represents something worth sharing:
+- New features or functionality added
+- Bug fixes (especially user-facing ones)
+- Performance improvements
+- UI/UX improvements
+- New integrations or dependencies
+- Refactoring or code improvements
+- Documentation updates
 - Version releases or deployments
-- Integration of significant dependencies (verify by checking package files or new integrations)
-- UI/UX improvements (verify by checking if UI components/styles changed)
-- Security enhancements (verify by checking if security-related code was added)
+- Initial project setup or major restructuring
 
-NOT milestones (skip these):
-- Minor typo fixes (verify: only small text changes)
-- Code formatting changes (verify: only whitespace/formatting in diff)
-- Routine dependency updates (verify: only version bumps in package files)
-- WIP (work in progress) commits (verify: incomplete or commented-out code)
-- Merge commits without substantial content (verify: no actual code changes)
-- Generic "fix bug" commits without context (verify: no meaningful code changes)
-- Commits where the message suggests a milestone but the diff shows no real changes
+Be GENEROUS - developers want to celebrate their progress! If in doubt, include it.
 
-For each milestone you identify, provide:
-1. A concise title (max 60 chars)
-2. A brief description of what was achieved (based on the actual code changes)
-3. The commit SHA it relates to
-4. The date of the milestone
-5. A ready-to-post X/Twitter suggestion (max 280 chars) that sounds authentic and engaging, not salesy
+Skip only:
+- Merge commits with no description
+- "WIP" or clearly incomplete work
+- Trivial typo fixes
 
-Respond in JSON format with an array of milestones.`;
+For each milestone, provide:
+1. title: Concise title (max 60 chars)
+2. description: Brief description of what was achieved
+3. commit_sha: The 7-char commit SHA
+4. milestone_date: The commit date (ISO format)
+5. x_post_suggestion: A ready-to-post tweet (max 280 chars) that sounds authentic and engaging
+
+Return JSON: { "milestones": [...] }`;
 
 export async function analyzeMilestones(repoName: string, commits: Commit[]): Promise<Milestone[]> {
 	if (commits.length === 0) {
@@ -136,16 +135,16 @@ export async function analyzeMilestones(repoName: string, commits: Commit[]): Pr
 	const timeoutId = setTimeout(() => controller.abort(), 120000);
 
 	try {
-		const userMessage = `Analyze the following commits from the repository "${repoName}" and identify significant milestones worth sharing on X.
+		const userMessage = `Analyze these commits from "${repoName}" and identify milestones worth sharing on X/Twitter.
 
-CRITICAL: Examine the actual code changes (diffs) for each commit, not just the commit message. Many commits have the same message or misleading messages. Only identify commits where the CODE CHANGES demonstrate a real milestone achievement.
+Look for features, fixes, improvements, and achievements. Be generous - developers want to celebrate their progress!
 
-Find the most impactful ones (aim for 5-15 milestones depending on the project's activity).
+Aim for 5-15 milestones depending on activity level.
 
-Commits (newest first):
+Commits:
 ${commitsText}
 
-Respond with a JSON object: { "milestones": [...] }`;
+Return JSON: { "milestones": [...] }`;
 
 		// Log request details
 		const requestPayloadSize = new TextEncoder().encode(userMessage).length;
