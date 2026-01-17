@@ -4,7 +4,6 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import { Separator } from '$lib/components/ui/separator';
 	import {
-		Terminal,
 		ArrowLeft,
 		Loader2,
 		RefreshCw,
@@ -16,6 +15,7 @@
 		Trash2
 	} from '@lucide/svelte';
 	import { invalidateAll, goto } from '$app/navigation';
+	import logo from '$lib/assets/logo.png';
 
 	let { data } = $props();
 	let isAnalyzing = $state(false);
@@ -117,7 +117,7 @@
 				</Button>
 				<Separator orientation="vertical" class="h-6" />
 				<div class="flex items-center gap-2">
-					<Terminal class="h-5 w-5 text-primary" />
+					<img src={logo} alt="sumgit" class="h-7 w-7 rounded-md" />
 					<span class="font-semibold">{data.repository.repo_owner}/{data.repository.repo_name}</span
 					>
 				</div>

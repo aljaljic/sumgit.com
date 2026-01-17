@@ -1,6 +1,6 @@
 <script lang="ts">
 	import './layout.css';
-	import favicon from '$lib/assets/favicon.svg';
+	import logo from '$lib/assets/logo.png';
 	import { invalidate } from '$app/navigation';
 	import { onMount } from 'svelte';
 
@@ -20,7 +20,7 @@
 </script>
 
 <svelte:head>
-	<link rel="icon" href={favicon} />
+	<link rel="icon" href={logo} />
 	<title>sumgit - Git Milestone Summarizer</title>
 	<meta name="description" content="Summarize milestones in your codebase for X posts" />
 </svelte:head>

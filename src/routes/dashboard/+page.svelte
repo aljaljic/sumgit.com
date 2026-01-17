@@ -11,7 +11,6 @@
 	import { Separator } from '$lib/components/ui/separator';
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import {
-		Terminal,
 		Github,
 		Plus,
 		LogOut,
@@ -23,6 +22,7 @@
 		Lock
 	} from '@lucide/svelte';
 	import { invalidateAll } from '$app/navigation';
+	import logo from '$lib/assets/logo.png';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 
@@ -128,7 +128,7 @@
 	<header class="border-b border-border/40 px-6 py-4">
 		<div class="mx-auto flex max-w-6xl items-center justify-between">
 			<a href="/" class="flex items-center gap-2">
-				<Terminal class="h-6 w-6 text-primary" />
+				<img src={logo} alt="sumgit" class="h-8 w-8 rounded-md" />
 				<span class="text-xl font-bold tracking-tight">sumgit</span>
 			</a>
 			<div class="flex items-center gap-4">

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
-	import { Github, Terminal, Sparkles, Clock } from '@lucide/svelte';
+	import { Github, Sparkles, Clock } from '@lucide/svelte';
+	import logo from '$lib/assets/logo.png';
 
 	let { data } = $props();
 
@@ -20,7 +21,7 @@
 	<header class="border-b border-border/40 px-6 py-4">
 		<div class="mx-auto flex max-w-6xl items-center justify-between">
 			<div class="flex items-center gap-2">
-				<Terminal class="h-6 w-6 text-primary" />
+				<img src={logo} alt="sumgit" class="h-8 w-8 rounded-md" />
 				<span class="text-xl font-bold tracking-tight">sumgit</span>
 			</div>
 			{#if data.user}
@@ -59,7 +60,7 @@
 
 			<p class="mb-10 text-lg text-muted-foreground md:text-xl">
 				sumgit analyzes your git history and extracts significant milestones worth sharing. Perfect
-				for building in public on X.
+				for building in public.
 			</p>
 
 			{#if data.user}
