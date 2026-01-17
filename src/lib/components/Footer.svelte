@@ -25,7 +25,7 @@
 					</li>
 					<li>
 						<a
-							href="https://github.com/apps/sumgit"
+							href="https://github.com/apps/sumgitapp"
 							target="_blank"
 							rel="noopener noreferrer"
 							class="transition-colors hover:text-foreground"
