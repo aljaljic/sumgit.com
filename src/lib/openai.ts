@@ -55,9 +55,81 @@ For each milestone, provide:
 2. description: Brief description of what was achieved
 3. commit_sha: The 7-char commit SHA
 4. milestone_date: The commit date (ISO format)
-5. x_post_suggestion: A ready-to-post tweet (max 280 chars) that sounds authentic and engaging
+5. x_post_suggestion: A casual, story-driven tweet (max 280 chars) in first person.
+
+   RULES:
+   - NEVER use hashtags
+   - NEVER use excessive emojis (0-1 max)
+   - Write like you're texting a dev friend
+   - lowercase is fine, feels more authentic
+
+   GOOD FORMATS:
+   - Dev log: "just shipped dark mode. my eyes thank me after mass editing at midnight"
+   - Mini-story: "spent 2 days on this auth bug. turns out i was hashing passwords twice"
+   - Progress: "small win: search actually works now. on to the hard stuff"
+   - Learning: "TIL you can't trust browser localStorage during SSR. fixed the hydration errors"
+
+   BAD (never do this):
+   - "🚀 Just launched dark mode! #buildinpublic #indiehacker #coding"
+   - "Excited to announce our new feature!"
+   - Generic marketing speak
 
 Return JSON: { "milestones": [...] }`;
+
+// Helper function to group commits by month
+function groupCommitsByMonth(commits: Commit[]): Map<string, Commit[]> {
+	const groups = new Map<string, Commit[]>();
+
+	for (const commit of commits) {
+		const date = new Date(commit.date);
+		const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+
+		if (!groups.has(key)) {
+			groups.set(key, []);
+		}
+		groups.get(key)!.push(commit);
+	}
+
+	return groups;
+}
+
+// Analyze commits in time-based chunks (by month)
+export async function analyzeCommitsInChunks(repoName: string, commits: Commit[]): Promise<Milestone[]> {
+	if (commits.length === 0) {
+		return [];
+	}
+
+	// Group commits by month
+	const monthlyGroups = groupCommitsByMonth(commits);
+	const sortedMonths = Array.from(monthlyGroups.keys()).sort();
+
+	console.log(`Analyzing ${commits.length} commits across ${sortedMonths.length} months`);
+
+	const allMilestones: Milestone[] = [];
+
+	// Process each month's commits
+	for (const month of sortedMonths) {
+		const monthCommits = monthlyGroups.get(month)!;
+		console.log(`Analyzing ${month}: ${monthCommits.length} commits`);
+
+		try {
+			const milestones = await analyzeMilestones(repoName, monthCommits);
+			allMilestones.push(...milestones);
+			console.log(`Found ${milestones.length} milestones for ${month}`);
+		} catch (err) {
+			console.error(`Error analyzing ${month}:`, err);
+			// Continue with other months even if one fails
+		}
+
+		// Small delay between chunks to avoid rate limits
+		if (sortedMonths.indexOf(month) < sortedMonths.length - 1) {
+			await new Promise(resolve => setTimeout(resolve, 500));
+		}
+	}
+
+	console.log(`Total milestones found: ${allMilestones.length}`);
+	return allMilestones;
+}
 
 export async function analyzeMilestones(repoName: string, commits: Commit[]): Promise<Milestone[]> {
 	if (commits.length === 0) {

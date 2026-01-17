@@ -1,7 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getInstallationOctokit } from '$lib/github-app';
-import { analyzeMilestones, type Commit } from '$lib/openai';
+import { analyzeMilestones, analyzeCommitsInChunks, type Commit } from '$lib/openai';
 import type { Repository, Milestone, GitHubInstallation } from '$lib/database.types';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
@@ -72,44 +72,61 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 
 	try {
-		// Fetch commits from the repository - get exactly the last 100 commits
+		// Fetch commits from the repository with pagination (up to 5000 commits)
 		const commits: Commit[] = [];
 		const perPage = 100;
+		const maxPages = 50; // 50 pages * 100 = 5000 commits max
 		const maxCommitsWithDiff = 40; // Stay within Cloudflare's 50 subrequest limit
-		const maxCommitsToAnalyze = 100; // Limit commits sent to OpenAI
+		const maxCommitsToAnalyze = 100; // Limit commits sent to OpenAI per chunk
 
-		// Fetch exactly the last 100 commits
-		const { data } = await octokit.repos.listCommits({
-			owner: repo.repo_owner,
-			repo: repo.repo_name,
-			per_page: perPage,
-			page: 1
-		});
+		// Fetch all commits with pagination
+		let page = 1;
+		let hasMoreCommits = true;
 
-		if (data.length === 0) {
-			throw error(400, 'No commits found in repository');
-		}
+		while (hasMoreCommits && page <= maxPages) {
+			const { data } = await octokit.repos.listCommits({
+				owner: repo.repo_owner,
+				repo: repo.repo_name,
+				per_page: perPage,
+				page
+			});
 
-		for (const commit of data) {
-			const message = (commit.commit.message ?? '').split('\n')[0] ?? '';
-			
-			// Skip merge commits and very small commits early
-			if (message.toLowerCase().startsWith('merge') || message.toLowerCase().startsWith('wip')) {
-				continue;
+			if (data.length === 0) {
+				hasMoreCommits = false;
+				break;
 			}
 
-			const commitData: Commit = {
-				sha: commit.sha,
-				message,
-				date: commit.commit.author?.date ?? new Date().toISOString(),
-				author: commit.commit.author?.name ?? 'Unknown'
-			};
+			for (const commit of data) {
+				const message = (commit.commit.message ?? '').split('\n')[0] ?? '';
 
-			// Note: listCommits doesn't include file stats or diffs, but we can use it
-			// to get basic info without making additional API calls
-			commits.push(commitData);
+				// Skip merge commits and very small commits early
+				if (message.toLowerCase().startsWith('merge') || message.toLowerCase().startsWith('wip')) {
+					continue;
+				}
+
+				const commitData: Commit = {
+					sha: commit.sha,
+					message,
+					date: commit.commit.author?.date ?? new Date().toISOString(),
+					author: commit.commit.author?.name ?? 'Unknown'
+				};
+
+				commits.push(commitData);
+			}
+
+			// If we got fewer commits than requested, we've reached the end
+			if (data.length < perPage) {
+				hasMoreCommits = false;
+			}
+
+			page++;
 		}
 
+		console.log(`Fetched ${commits.length} commits across ${page - 1} pages`);
+
+		if (commits.length === 0) {
+			throw error(400, 'No commits found in repository');
+		}
 
 		// Helper function to fetch and process a single commit diff
 		const fetchCommitDiff = async (commit: Commit): Promise<void> => {
@@ -292,17 +309,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			}
 		}
 
-		// Prioritize commits with diffs for OpenAI analysis
-		// Sort: commits with diffs first, then by date
-		const commitsForAnalysis = commits
-			.sort((a, b) => {
-				// Commits with diffs first
-				if (a.diff && !b.diff) return -1;
-				if (!a.diff && b.diff) return 1;
-				// Then by date (newest first)
-				return new Date(b.date).getTime() - new Date(a.date).getTime();
-			})
-			.slice(0, maxCommitsToAnalyze);
+		// Sort commits by date for chronological analysis
+		const commitsForAnalysis = commits.sort((a, b) => {
+			return new Date(a.date).getTime() - new Date(b.date).getTime();
+		});
 
 		// Log summary of what we're analyzing
 		const commitsWithDiffs = commitsForAnalysis.filter(c => c.diff).length;
@@ -325,42 +335,48 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			throw error(400, 'No commits available for analysis');
 		}
 
-		// Analyze commits with OpenAI (using prioritized subset)
-		// Add retry logic for connection errors
+		// Analyze commits with OpenAI
+		// Use chunked analysis for large repositories (>100 commits or spanning multiple months)
 		let milestones: Milestone[] = [];
-		const maxRetries = 3; // Increased retries for connection issues
+
+		// Determine unique months in commit history
+		const uniqueMonths = new Set(
+			commitsForAnalysis.map(c => {
+				const date = new Date(c.date);
+				return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+			})
+		);
+
+		const useChunkedAnalysis = commitsForAnalysis.length > 100 || uniqueMonths.size > 3;
+		console.log(`Analysis mode: ${useChunkedAnalysis ? 'chunked' : 'single'} (${uniqueMonths.size} months)`);
+
+		const maxRetries = 3;
 		let retryCount = 0;
 		let lastError: Error | null = null;
 
 		while (retryCount <= maxRetries) {
 			try {
-				milestones = await analyzeMilestones(`${repo.repo_owner}/${repo.repo_name}`, commitsForAnalysis);
+				if (useChunkedAnalysis) {
+					// Use chunked analysis for large repositories
+					milestones = await analyzeCommitsInChunks(`${repo.repo_owner}/${repo.repo_name}`, commitsForAnalysis);
+				} else {
+					// Use single analysis for smaller repositories
+					milestones = await analyzeMilestones(`${repo.repo_owner}/${repo.repo_name}`, commitsForAnalysis);
+				}
 				console.log(`OpenAI analysis successful: ${milestones.length} milestones found`);
 				break; // Success, exit retry loop
 			} catch (err) {
 				lastError = err instanceof Error ? err : new Error(String(err));
 				const errorMessage = lastError.message.toLowerCase();
-				
+
 				// Check for retryable errors (network, timeout, connection issues)
-				const isRetryableError = errorMessage.includes('connection error') || 
+				const isRetryableError = errorMessage.includes('connection error') ||
 				                          errorMessage.includes('timeout') ||
 				                          errorMessage.includes('econnrefused') ||
 				                          errorMessage.includes('etimedout') ||
 				                          errorMessage.includes('network') ||
 				                          errorMessage.includes('fetch failed');
-				
-				// Check for payload errors - might need to reduce commits
-				const isPayloadError = errorMessage.includes('payload') || 
-				                      errorMessage.includes('too large');
-				
-				if (isPayloadError && commitsForAnalysis.length > 20) {
-					// If payload is too large, try with fewer commits
-					console.warn(`Payload too large, reducing commits from ${commitsForAnalysis.length} to ${Math.floor(commitsForAnalysis.length * 0.7)}`);
-					commitsForAnalysis.splice(Math.floor(commitsForAnalysis.length * 0.7));
-					retryCount = 0; // Reset retry count for new attempt
-					continue;
-				}
-				
+
 				if (isRetryableError) {
 					retryCount++;
 					if (retryCount <= maxRetries) {
@@ -373,7 +389,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 						// Max retries reached, but try one more time
 						console.warn('Max retries reached for OpenAI, attempting final request...');
 						try {
-							milestones = await analyzeMilestones(`${repo.repo_owner}/${repo.repo_name}`, commitsForAnalysis);
+							if (useChunkedAnalysis) {
+								milestones = await analyzeCommitsInChunks(`${repo.repo_owner}/${repo.repo_name}`, commitsForAnalysis);
+							} else {
+								milestones = await analyzeMilestones(`${repo.repo_owner}/${repo.repo_name}`, commitsForAnalysis);
+							}
 							console.log(`OpenAI analysis successful on final attempt: ${milestones.length} milestones found`);
 							break; // Success on final attempt
 						} catch (finalErr) {

@@ -3,7 +3,14 @@
     "allow": [
       "WebFetch(domain:developers.cloudflare.com)",
       "Bash(pnpm add:*)",
-      "Bash(pnpm build:*)"
+      "Bash(pnpm build:*)",
+      "Bash(tree:*)",
+      "Bash(wc:*)",
+      "Bash(grep:*)",
+      "Bash(xxd:*)",
+      "Bash(npm run build:*)",
+      "WebSearch",
+      "WebFetch(domain:x.com)"
     ]
   }
 }
