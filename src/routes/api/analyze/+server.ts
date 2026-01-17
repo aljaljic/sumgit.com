@@ -1,7 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getInstallationOctokit } from '$lib/github-app';
-import { analyzeMilestones, analyzeCommitsInChunks, type Commit } from '$lib/openai';
+import { analyzeMilestones, type Commit } from '$lib/openai';
 import type { Repository, Milestone, GitHubInstallation } from '$lib/database.types';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
@@ -319,19 +319,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		}
 
 		// Analyze commits with OpenAI
-		// Use chunked analysis for large repositories (>100 commits or spanning multiple months)
+		// Always use single analysis for regular endpoint (max 100 commits fits in one call)
+		// Chunked analysis is only for timeline endpoint with thousands of commits
+		// This keeps subrequest count low: ~40 diff fetches + 1 OpenAI call + 2 Supabase calls
 		let milestones: Milestone[] = [];
-
-		// Determine unique months in commit history
-		const uniqueMonths = new Set(
-			commitsForAnalysis.map(c => {
-				const date = new Date(c.date);
-				return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-			})
-		);
-
-		const useChunkedAnalysis = commitsForAnalysis.length > 100 || uniqueMonths.size > 3;
-		console.log(`Analysis mode: ${useChunkedAnalysis ? 'chunked' : 'single'} (${uniqueMonths.size} months)`);
+		console.log(`Analysis mode: single (regular endpoint always uses single mode)`);
 
 		const maxRetries = 3;
 		let retryCount = 0;
@@ -339,13 +331,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		while (retryCount <= maxRetries) {
 			try {
-				if (useChunkedAnalysis) {
-					// Use chunked analysis for large repositories
-					milestones = await analyzeCommitsInChunks(`${repo.repo_owner}/${repo.repo_name}`, commitsForAnalysis);
-				} else {
-					// Use single analysis for smaller repositories
-					milestones = await analyzeMilestones(`${repo.repo_owner}/${repo.repo_name}`, commitsForAnalysis);
-				}
+				// Always use single analysis for regular endpoint
+				milestones = await analyzeMilestones(`${repo.repo_owner}/${repo.repo_name}`, commitsForAnalysis);
 				console.log(`OpenAI analysis successful: ${milestones.length} milestones found`);
 				break; // Success, exit retry loop
 			} catch (err) {
@@ -372,11 +359,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 						// Max retries reached, but try one more time
 						console.warn('Max retries reached for OpenAI, attempting final request...');
 						try {
-							if (useChunkedAnalysis) {
-								milestones = await analyzeCommitsInChunks(`${repo.repo_owner}/${repo.repo_name}`, commitsForAnalysis);
-							} else {
-								milestones = await analyzeMilestones(`${repo.repo_owner}/${repo.repo_name}`, commitsForAnalysis);
-							}
+							milestones = await analyzeMilestones(`${repo.repo_owner}/${repo.repo_name}`, commitsForAnalysis);
 							console.log(`OpenAI analysis successful on final attempt: ${milestones.length} milestones found`);
 							break; // Success on final attempt
 						} catch (finalErr) {

@@ -13,7 +13,8 @@
       "WebFetch(domain:x.com)",
       "Bash(npx svelte-check:*)",
       "Bash(npx tsc:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(ls:*)"
     ]
   }
 }

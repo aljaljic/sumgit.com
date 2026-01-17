@@ -183,7 +183,7 @@
 					</div>
 					<h3 class="mb-2 text-lg font-semibold">No milestones yet</h3>
 					<p class="mb-6 max-w-sm text-muted-foreground">
-						Click "Analyze" to scan your commit history and extract significant milestones
+						Click "Analyze" to scan your last 100 commits and extract significant milestones
 					</p>
 					<Button onclick={analyzeRepository} disabled={isAnalyzing} class="gap-2">
 						{#if isAnalyzing}
