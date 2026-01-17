@@ -112,7 +112,18 @@
 	}
 
 	function installGitHubApp() {
-		window.location.href = `https://github.com/apps/${data.githubAppName}/installations/new`;
+		// Include setup_url to ensure GitHub redirects back to our callback
+		const setupUrl = `${window.location.origin}/github/callback`;
+		const installUrl = `https://github.com/apps/${data.githubAppName}/installations/new?setup_url=${encodeURIComponent(setupUrl)}`;
+		window.location.href = installUrl;
+	}
+
+	function verifyInstallation() {
+		// Take user to the app's installation page - if already installed, GitHub will show "Configure"
+		// Clicking "Configure" will redirect back to our callback with the installation_id
+		const setupUrl = `${window.location.origin}/github/callback`;
+		const verifyUrl = `https://github.com/apps/${data.githubAppName}/installations/new?setup_url=${encodeURIComponent(setupUrl)}`;
+		window.location.href = verifyUrl;
 	}
 
 	// Filter out already connected repos
@@ -185,10 +196,28 @@
 								</p>
 							</div>
 						</div>
-						<Button onclick={installGitHubApp} class="gap-2">
-							<Github class="h-4 w-4" />
-							Install GitHub App
-						</Button>
+						<div class="mb-4 rounded-lg border border-blue-500/30 bg-blue-500/5 p-4">
+							<p class="text-sm text-blue-400">
+								<strong>After installing:</strong> GitHub will automatically redirect you back to sumgit.
+								If you don't see the redirect, you can manually return to this page.
+							</p>
+						</div>
+						<div class="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/5 p-4">
+							<p class="text-sm text-amber-400">
+								<strong>Already installed?</strong> If you've already installed the app on GitHub,
+								click "Verify Installation" to connect it to your account.
+							</p>
+						</div>
+						<div class="flex gap-2">
+							<Button onclick={installGitHubApp} class="gap-2">
+								<Github class="h-4 w-4" />
+								Install GitHub App
+							</Button>
+							<Button onclick={verifyInstallation} variant="outline" class="gap-2">
+								<Check class="h-4 w-4" />
+								Verify Installation
+							</Button>
+						</div>
 					</CardContent>
 				</Card>
 			{:else}

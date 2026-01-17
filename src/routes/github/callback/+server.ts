@@ -5,16 +5,32 @@ import type { GitHubInstallation } from '$lib/database.types';
 
 // GitHub App installation callback
 // GitHub redirects here after a user installs or configures the app
-export const GET: RequestHandler = async ({ url, locals }) => {
+export const GET: RequestHandler = async ({ url, locals, cookies }) => {
 	const { session, user } = await locals.safeGetSession();
+
+	const installationId = url.searchParams.get('installation_id') || cookies.get('pending_installation_id');
+	// setupAction can be 'install', 'update', or 'request' - we handle all the same way
 
 	if (!session || !user) {
 		// Store the installation_id in a cookie and redirect to login
-		throw redirect(303, '/?error=auth_required');
+		if (installationId) {
+			cookies.set('pending_installation_id', installationId, {
+				path: '/',
+				maxAge: 60 * 10, // 10 minutes
+				httpOnly: true,
+				sameSite: 'lax',
+				secure: process.env.NODE_ENV === 'production'
+			});
+		}
+		// Redirect to login with next parameter to come back here
+		const callbackUrl = `/github/callback${url.search}`;
+		throw redirect(303, `/?error=auth_required&next=${encodeURIComponent(callbackUrl)}`);
 	}
 
-	const installationId = url.searchParams.get('installation_id');
-	// setupAction can be 'install', 'update', or 'request' - we handle all the same way
+	// Clear the cookie if it exists
+	if (cookies.get('pending_installation_id')) {
+		cookies.delete('pending_installation_id', { path: '/' });
+	}
 
 	if (!installationId) {
 		throw error(400, 'Missing installation_id');

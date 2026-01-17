@@ -6,10 +6,14 @@
 	let { data } = $props();
 
 	async function signInWithGitHub() {
+		// Check if there's a next parameter in the URL (from GitHub app installation)
+		const urlParams = new URLSearchParams(window.location.search);
+		const next = urlParams.get('next') || '/dashboard';
+		
 		await data.supabase.auth.signInWithOAuth({
 			provider: 'github',
 			options: {
-				redirectTo: `${window.location.origin}/auth/callback`,
+				redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
 				scopes: 'read:user'
 			}
 		});

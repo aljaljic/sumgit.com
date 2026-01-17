@@ -28,12 +28,22 @@ export async function getInstallationOctokit(installationId: number): Promise<Oc
 }
 
 // Get the GitHub App installation URL for a user to install the app
-export function getInstallationUrl(state?: string): string {
+export function getInstallationUrl(state?: string, setupUrl?: string): string {
 	const baseUrl = `https://github.com/apps/${PUBLIC_GITHUB_APP_NAME}/installations/new`;
+	const params = new URLSearchParams();
+	
 	if (state) {
-		return `${baseUrl}?state=${encodeURIComponent(state)}`;
+		params.set('state', state);
 	}
-	return baseUrl;
+	
+	// Add setup_url to tell GitHub where to redirect after installation
+	// This should match the callback URL configured in your GitHub App settings
+	if (setupUrl) {
+		params.set('setup_url', setupUrl);
+	}
+	
+	const queryString = params.toString();
+	return queryString ? `${baseUrl}?${queryString}` : baseUrl;
 }
 
 // Verify the installation belongs to the expected account
