@@ -2,6 +2,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Github, Sparkles, Clock } from '@lucide/svelte';
 	import logo from '$lib/assets/logo.png';
+	import MilestoneMarquee from '$lib/components/MilestoneMarquee.svelte';
 
 	let { data } = $props();
 
@@ -79,6 +80,9 @@
 				</Button>
 			{/if}
 		</div>
+
+		<!-- Milestone marquee -->
+		<MilestoneMarquee />
 
 		<!-- Features grid -->
 		<div class="mt-20 grid max-w-4xl gap-6 md:grid-cols-3">

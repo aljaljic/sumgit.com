@@ -62,12 +62,13 @@ For each milestone, provide:
    - NEVER use excessive emojis (0-1 max)
    - Write like you're texting a dev friend
    - lowercase is fine, feels more authentic
+   - Naturally mention the project/repo name so readers know what app/site the update is for
 
    GOOD FORMATS:
-   - Dev log: "just shipped dark mode. my eyes thank me after mass editing at midnight"
-   - Mini-story: "spent 2 days on this auth bug. turns out i was hashing passwords twice"
-   - Progress: "small win: search actually works now. on to the hard stuff"
-   - Learning: "TIL you can't trust browser localStorage during SSR. fixed the hydration errors"
+   - Dev log: "just shipped dark mode on [project]. my eyes thank me after mass editing at midnight"
+   - Mini-story: "spent 2 days on this auth bug in [project]. turns out i was hashing passwords twice"
+   - Progress: "[project] small win: search actually works now. on to the hard stuff"
+   - Learning: "TIL you can't trust browser localStorage during SSR. fixed the hydration errors in [project]"
 
    BAD (never do this):
    - "🚀 Just launched dark mode! #buildinpublic #indiehacker #coding"
