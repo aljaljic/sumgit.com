@@ -131,13 +131,12 @@ export async function analyzeMilestones(repoName: string, commits: Commit[]): Pr
 		return [];
 	}
 
-	try {
-		// Add timeout to prevent hanging (120 seconds to match client timeout)
-		const timeoutPromise = new Promise((_, reject) => {
-			setTimeout(() => reject(new Error('OpenAI request timeout')), 120000);
-		});
+	// Use AbortController for proper timeout handling on Cloudflare Workers
+	const controller = new AbortController();
+	const timeoutId = setTimeout(() => controller.abort(), 120000);
 
-		const userMessage = `Analyze the following commits from the repository "${repoName}" and identify significant milestones worth sharing on X. 
+	try {
+		const userMessage = `Analyze the following commits from the repository "${repoName}" and identify significant milestones worth sharing on X.
 
 CRITICAL: Examine the actual code changes (diffs) for each commit, not just the commit message. Many commits have the same message or misleading messages. Only identify commits where the CODE CHANGES demonstrate a real milestone achievement.
 
@@ -152,26 +151,22 @@ Respond with a JSON object: { "milestones": [...] }`;
 		const requestPayloadSize = new TextEncoder().encode(userMessage).length;
 		console.log(`Sending OpenAI request: ${requestPayloadSize} bytes, ${commitsText.split('\n\n---\n\n').length} commits`);
 
-		const response = await Promise.race([
-			openai.chat.completions.create({
-				model: 'gpt-4o',
-				messages: [
-					{ role: 'system', content: SYSTEM_PROMPT },
-					{ role: 'user', content: userMessage }
-				],
-				response_format: { type: 'json_object' },
-				temperature: 0.7,
-				max_tokens: 4000
-			}),
-			timeoutPromise
-		]);
+		const response = await openai.chat.completions.create({
+			model: 'gpt-4o',
+			messages: [
+				{ role: 'system', content: SYSTEM_PROMPT },
+				{ role: 'user', content: userMessage }
+			],
+			response_format: { type: 'json_object' },
+			temperature: 0.7,
+			max_tokens: 4000
+		}, {
+			signal: controller.signal
+		});
 
-		// Type guard to ensure we have a ChatCompletion, not a Stream
-		if (!response || typeof response !== 'object' || !('choices' in response)) {
-			throw new Error('Invalid response from OpenAI API');
-		}
+		clearTimeout(timeoutId);
 
-		const content = (response as { choices: Array<{ message?: { content?: string } }> }).choices[0]?.message?.content;
+		const content = response.choices[0]?.message?.content;
 		if (!content) {
 			console.warn('OpenAI returned empty response');
 			return [];
@@ -182,6 +177,13 @@ Respond with a JSON object: { "milestones": [...] }`;
 		console.log(`OpenAI analysis successful: ${milestones.length} milestones identified`);
 		return milestones;
 	} catch (error) {
+		clearTimeout(timeoutId);
+
+		// Handle AbortError from AbortController timeout
+		if (error instanceof Error && error.name === 'AbortError') {
+			throw new Error('OpenAI request timeout');
+		}
+
 		// Enhanced error logging
 		interface ErrorDetails {
 			message: string;
