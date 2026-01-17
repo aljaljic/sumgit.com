@@ -1,14 +1,16 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
-	import { Github, Sparkles, Clock } from '@lucide/svelte';
+	import { Github, Sparkles, Clock, Loader2 } from '@lucide/svelte';
 	import { FAQ, FAQItem } from '$lib/components/ui/faq';
 	import logo from '$lib/assets/logo.png';
 	import MilestoneMarquee from '$lib/components/MilestoneMarquee.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 
 	let { data } = $props();
+	let isConnecting = $state(false);
 
 	async function signInWithGitHub() {
+		isConnecting = true;
 		// Check if there's a next parameter in the URL (from GitHub app installation)
 		const urlParams = new URLSearchParams(window.location.search);
 		const next = urlParams.get('next') || '/dashboard';
@@ -37,8 +39,12 @@
 					{data.user.user_metadata?.user_name ?? 'Dashboard'}
 				</Button>
 			{:else}
-				<Button onclick={signInWithGitHub} variant="outline" class="gap-2">
-					<Github class="h-4 w-4" />
+				<Button onclick={signInWithGitHub} variant="outline" class="gap-2" disabled={isConnecting}>
+					{#if isConnecting}
+						<Loader2 class="h-4 w-4 animate-spin" />
+					{:else}
+						<Github class="h-4 w-4" />
+					{/if}
 					Sign in with GitHub
 				</Button>
 			{/if}
@@ -76,9 +82,14 @@
 					<span class="text-lg">→</span>
 				</Button>
 			{:else}
-				<Button onclick={signInWithGitHub} size="lg" class="gap-2 px-8 text-base">
-					<Github class="h-5 w-5" />
-					Connect your GitHub
+				<Button onclick={signInWithGitHub} size="lg" class="gap-2 px-8 text-base" disabled={isConnecting}>
+					{#if isConnecting}
+						<Loader2 class="h-5 w-5 animate-spin" />
+						Connecting...
+					{:else}
+						<Github class="h-5 w-5" />
+						Connect your GitHub
+					{/if}
 				</Button>
 			{/if}
 		</div>
