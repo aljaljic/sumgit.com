@@ -93,13 +93,19 @@ export async function analyzeMilestones(repoName: string, commits: Commit[]): Pr
 		.join('\n\n---\n\n');
 
 	try {
-		const response = await openai.chat.completions.create({
-			model: 'gpt-4o',
-			messages: [
-				{ role: 'system', content: SYSTEM_PROMPT },
-				{
-					role: 'user',
-					content: `Analyze the following commits from the repository "${repoName}" and identify significant milestones worth sharing on X. 
+		// Add timeout to prevent hanging (60 seconds)
+		const timeoutPromise = new Promise((_, reject) => {
+			setTimeout(() => reject(new Error('OpenAI request timeout')), 60000);
+		});
+
+		const response = await Promise.race([
+			openai.chat.completions.create({
+				model: 'gpt-4o',
+				messages: [
+					{ role: 'system', content: SYSTEM_PROMPT },
+					{
+						role: 'user',
+						content: `Analyze the following commits from the repository "${repoName}" and identify significant milestones worth sharing on X. 
 
 CRITICAL: Examine the actual code changes (diffs) for each commit, not just the commit message. Many commits have the same message or misleading messages. Only identify commits where the CODE CHANGES demonstrate a real milestone achievement.
 
@@ -109,12 +115,14 @@ Commits (newest first):
 ${commitsText}
 
 Respond with a JSON object: { "milestones": [...] }`
-				}
-			],
-			response_format: { type: 'json_object' },
-			temperature: 0.7,
-			max_tokens: 4000
-		});
+					}
+				],
+				response_format: { type: 'json_object' },
+				temperature: 0.7,
+				max_tokens: 4000
+			}),
+			timeoutPromise
+		]) as Awaited<ReturnType<typeof openai.chat.completions.create>>;
 
 		const content = response.choices[0]?.message?.content;
 		if (!content) {
@@ -125,6 +133,16 @@ Respond with a JSON object: { "milestones": [...] }`
 		return (parsed.milestones ?? []) as Milestone[];
 	} catch (error) {
 		console.error('OpenAI analysis error:', error);
+		
+		// Preserve connection/timeout errors for retry logic
+		const errorMessage = error instanceof Error ? error.message : String(error);
+		if (errorMessage.includes('Connection error') || 
+		    errorMessage.includes('timeout') || 
+		    errorMessage.includes('ECONNREFUSED') ||
+		    errorMessage.includes('ETIMEDOUT')) {
+			throw error; // Re-throw to allow retry
+		}
+		
 		throw new Error('Failed to analyze commits with OpenAI');
 	}
 }
