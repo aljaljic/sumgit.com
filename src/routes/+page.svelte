@@ -3,6 +3,7 @@
 	import { Github, Sparkles, Clock } from '@lucide/svelte';
 	import logo from '$lib/assets/logo.png';
 	import MilestoneMarquee from '$lib/components/MilestoneMarquee.svelte';
+	import Footer from '$lib/components/Footer.svelte';
 
 	let { data } = $props();
 
@@ -154,8 +155,5 @@
 		</div>
 	</main>
 
-	<!-- Footer -->
-	<footer class="border-t border-border/40 px-6 py-6 text-center text-sm text-muted-foreground">
-		<p>Built for developers who build in public</p>
-	</footer>
+	<Footer />
 </div>
