@@ -76,6 +76,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		const commits: Commit[] = [];
 		let page = 1;
 		const perPage = 100;
+		const maxCommitsWithDiff = 200; // Limit commits we fetch diffs for
 
 		// Fetch up to 500 commits (5 pages)
 		while (page <= 5) {
@@ -89,12 +90,58 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			if (data.length === 0) break;
 
 			for (const commit of data) {
-				commits.push({
+				const commitData: Commit = {
 					sha: commit.sha,
-					message: (commit.commit.message ?? '').split('\n')[0] ?? '', // First line only
+					message: (commit.commit.message ?? '').split('\n')[0] ?? '',
 					date: commit.commit.author?.date ?? new Date().toISOString(),
 					author: commit.commit.author?.name ?? 'Unknown'
-				});
+				};
+
+				// Fetch diff for commits within the limit
+				if (commits.length < maxCommitsWithDiff) {
+					try {
+						const { data: commitDetail } = await octokit.repos.getCommit({
+							owner: repo.repo_owner,
+							repo: repo.repo_name,
+							ref: commit.sha
+						});
+
+						// Extract stats and build diff summary
+						commitData.files_changed = commitDetail.files?.length ?? 0;
+						commitData.additions = commitDetail.stats?.additions ?? 0;
+						commitData.deletions = commitDetail.stats?.deletions ?? 0;
+
+						// Build a truncated diff summary (max 2000 chars per commit)
+						if (commitDetail.files && commitDetail.files.length > 0) {
+							const diffParts: string[] = [];
+							let totalDiffLength = 0;
+							const maxDiffLength = 2000;
+
+							for (const file of commitDetail.files) {
+								if (totalDiffLength >= maxDiffLength) break;
+
+								const fileHeader = `\n--- ${file.filename} (${file.status})\n`;
+								const patch = file.patch || '';
+								
+								// Truncate patch if needed
+								const remaining = maxDiffLength - totalDiffLength - fileHeader.length;
+								const truncatedPatch = patch.length > remaining 
+									? patch.substring(0, remaining) + '\n... (truncated)'
+									: patch;
+
+								diffParts.push(fileHeader + truncatedPatch);
+								totalDiffLength += fileHeader.length + truncatedPatch.length;
+							}
+
+							commitData.diff = diffParts.join('\n');
+						}
+					} catch (err) {
+						// If we can't fetch the diff, continue without it
+						console.warn(`Failed to fetch diff for commit ${commit.sha}:`, err);
+					}
+				}
+
+				commits.push(commitData);
 			}
 
 			if (data.length < perPage) break;
