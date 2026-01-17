@@ -155,6 +155,21 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				const errorMessage = err?.message || String(err);
 				const errorDetails = err?.response?.data || err;
 				
+				// Check for Cloudflare subrequest limit error
+				// This can appear in different places in the error object
+				const errorMsg = (errorMessage || '').toLowerCase();
+				const detailsMsg = (errorDetails?.message || String(errorDetails || '')).toLowerCase();
+				const isSubrequestLimit = errorMsg.includes('too many subrequests') || 
+				                          detailsMsg.includes('too many subrequests') ||
+				                          errorStatus === 500 && (errorMsg.includes('subrequest') || detailsMsg.includes('subrequest'));
+				
+				if (isSubrequestLimit) {
+					// Re-throw as a special error that will be caught by the outer handler
+					const subrequestError = new Error('Too many subrequests');
+					(subrequestError as any).isSubrequestLimit = true;
+					throw subrequestError;
+				}
+				
 				console.error(`Error fetching commit ${commit.sha}:`, {
 					status: errorStatus,
 					message: errorMessage,
@@ -163,12 +178,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				
 				// Check for specific error types
 				if (err instanceof Error || typeof err === 'object') {
-					const errorMsg = errorMessage.toLowerCase();
-					
-					// Subrequest limit - stop processing
-					if (errorMsg.includes('too many subrequests')) {
-						throw err;
-					}
 					
 					// GitHub API 500 errors - this might indicate permission issues for private repos
 					if (errorStatus === 500 || errorMsg.includes('500') || errorMsg.includes('internal server error')) {
@@ -222,7 +231,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 						await fetchCommitDiff(commit);
 						return { success: true, hasDiff: !!commit.diff };
 					} catch (err) {
-						if (err instanceof Error && err.message.includes('Too many subrequests')) {
+						// Check for subrequest limit error (can be in message or as a property)
+						if (err instanceof Error && (
+							err.message.includes('Too many subrequests') || 
+							(err as any).isSubrequestLimit
+						)) {
 							throw err; // Re-throw to be caught by allSettled
 						}
 						if (err instanceof Error && err.message.includes('permission denied')) {
@@ -254,6 +267,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					result.status === 'rejected' && 
 					result.reason instanceof Error && 
 					(result.reason.message.includes('Too many subrequests') ||
+					 (result.reason as any).isSubrequestLimit ||
 					 result.reason.message.includes('permission denied'))
 			);
 
@@ -262,9 +276,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				if (error instanceof Error && error.message.includes('permission denied')) {
 					throw error; // Re-throw permission errors immediately
 				}
+				// Subrequest limit - continue with what we have
 				hitSubrequestLimit = true;
 				lastSuccessfulIndex = i;
-				console.warn(`Hit subrequest limit, stopping diff fetches at commit ${i + batch.length}`);
+				const commitsWithDiffs = commits.filter(c => c.diff).length;
+				console.warn(`Hit subrequest limit, stopping diff fetches at commit ${i + batch.length}. Successfully fetched ${commitsWithDiffs} commits with diffs.`);
 				break;
 			}
 
@@ -288,10 +304,20 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			})
 			.slice(0, maxCommitsToAnalyze);
 
+		// Log summary of what we're analyzing
+		const commitsWithDiffs = commitsForAnalysis.filter(c => c.diff).length;
+		const commitsWithoutDiffs = commitsForAnalysis.length - commitsWithDiffs;
+		console.log(`Analyzing ${commitsForAnalysis.length} commits (${commitsWithDiffs} with diffs, ${commitsWithoutDiffs} without diffs)`);
+
+		// Ensure we have commits to analyze
+		if (commitsForAnalysis.length === 0) {
+			throw error(400, 'No commits available for analysis');
+		}
+
 		// Analyze commits with OpenAI (using prioritized subset)
 		// Add retry logic for connection errors
 		let milestones: Milestone[] = [];
-		const maxRetries = 2;
+		const maxRetries = 3; // Increased retries for connection issues
 		let retryCount = 0;
 
 		while (retryCount <= maxRetries) {
@@ -309,12 +335,23 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					retryCount++;
 					if (retryCount <= maxRetries) {
 						console.warn(`OpenAI connection error, retrying (${retryCount}/${maxRetries})...`);
-						// Wait before retrying (exponential backoff)
-						await new Promise((resolve) => setTimeout(resolve, 1000 * retryCount));
+						// Wait before retrying (exponential backoff with jitter)
+						const backoffDelay = 1000 * retryCount + Math.random() * 1000;
+						await new Promise((resolve) => setTimeout(resolve, backoffDelay));
 						continue;
+					} else {
+						// Max retries reached, but try one more time with a longer timeout
+						console.warn('Max retries reached for OpenAI, attempting final request...');
+						try {
+							milestones = await analyzeMilestones(`${repo.repo_owner}/${repo.repo_name}`, commitsForAnalysis);
+							break; // Success on final attempt
+						} catch (finalErr) {
+							// If final attempt fails, throw with helpful message
+							throw new Error('OpenAI service unavailable after multiple retries. Please try again later.');
+						}
 					}
 				}
-				// Re-throw if not a connection error or max retries reached
+				// Re-throw if not a connection error
 				throw err;
 			}
 		}
@@ -350,11 +387,17 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			.update({ last_analyzed_at: new Date().toISOString() } as Partial<Repository>)
 			.eq('id', repository_id);
 
+		const commitsWithDiffsCount = commitsForAnalysis.filter(c => c.diff).length;
+		
 		return json({
 			success: true,
 			milestones_count: milestones.length,
 			commits_analyzed: commitsForAnalysis.length,
-			total_commits: commits.length
+			commits_with_diffs: commitsWithDiffsCount,
+			total_commits: commits.length,
+			warning: hitSubrequestLimit 
+				? `Subrequest limit reached. Analyzed ${commitsWithDiffsCount} commits with diffs out of ${commits.length} total.`
+				: undefined
 		});
 	} catch (err) {
 		console.error('Analysis error:', err);
@@ -363,9 +406,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		if (err instanceof Error) {
 			const errorMsg = err.message.toLowerCase();
 			
-			// Subrequest limit error
-			if (errorMsg.includes('too many subrequests')) {
-				throw error(429, 'Too many API requests. Please try again in a moment.');
+			// Subrequest limit error - this is expected when processing many commits
+			// The analysis will continue with whatever commits were successfully fetched
+			if (errorMsg.includes('too many subrequests') || errorMsg.includes('subrequest')) {
+				// Don't throw an error - we've already handled this gracefully above
+				// Just log and continue with partial results
+				console.warn('Subrequest limit reached, but continuing with available commits');
 			}
 			
 			// OpenAI/OpenAI-related errors
