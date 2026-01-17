@@ -91,7 +91,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			for (const commit of data) {
 				commits.push({
 					sha: commit.sha,
-					message: commit.commit.message.split('\n')[0] ?? '', // First line only
+					message: (commit.commit.message ?? '').split('\n')[0] ?? '', // First line only
 					date: commit.commit.author?.date ?? new Date().toISOString(),
 					author: commit.commit.author?.name ?? 'Unknown'
 				});
@@ -113,14 +113,16 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		// Insert new milestones
 		if (milestones.length > 0) {
-			const milestonesToInsert = milestones.map((m) => ({
-				repository_id,
-				title: m.title,
-				description: m.description,
-				commit_sha: m.commit_sha,
-				milestone_date: m.milestone_date.split('T')[0], // Just the date part
-				x_post_suggestion: m.x_post_suggestion
-			}));
+			const milestonesToInsert = milestones
+				.filter((m) => m.milestone_date) // Filter out milestones without dates
+				.map((m) => ({
+					repository_id,
+					title: m.title,
+					description: m.description,
+					commit_sha: m.commit_sha,
+					milestone_date: (m.milestone_date ?? new Date().toISOString()).split('T')[0], // Just the date part
+					x_post_suggestion: m.x_post_suggestion
+				}));
 
 			const { error: insertError } = await locals.supabase
 				.from('milestones')

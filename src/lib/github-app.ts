@@ -8,11 +8,40 @@ import {
 } from '$env/static/private';
 import { PUBLIC_GITHUB_APP_NAME } from '$env/static/public';
 
+// Normalize private key format for Cloudflare Workers/Pages compatibility
+// Note: GitHub provides keys in PKCS#1 format, but @octokit/auth-app requires PKCS#8
+// Since we can't use Node.js crypto in Cloudflare Workers, the key must be pre-converted
+// Convert using: openssl pkcs8 -topk8 -inform PEM -outform PEM -nocrypt -in key.pem -out key-pkcs8.pem
+function normalizePrivateKey(key: string): string {
+	const cleanKey = key.trim();
+	
+	// Handle escaped newlines from environment variables
+	const normalizedKey = cleanKey.replace(/\\n/g, '\n');
+	
+	// Check if key is in PKCS#1 format (not supported)
+	if (normalizedKey.includes('-----BEGIN RSA PRIVATE KEY-----')) {
+		throw new Error(
+			'Private key is in PKCS#1 format. Please convert to PKCS#8 format.\n' +
+			'Run: openssl pkcs8 -topk8 -inform PEM -outform PEM -nocrypt -in key.pem -out key-pkcs8.pem\n' +
+			'Or use an online converter to convert from PKCS#1 to PKCS#8 format.'
+		);
+	}
+	
+	// PKCS#8 format should start with -----BEGIN PRIVATE KEY-----
+	if (!normalizedKey.includes('-----BEGIN PRIVATE KEY-----')) {
+		console.warn('Private key format may be invalid. Expected PKCS#8 format (-----BEGIN PRIVATE KEY-----)');
+	}
+	
+	return normalizedKey;
+}
+
 // Create an authenticated Octokit instance for a specific installation
 export async function getInstallationOctokit(installationId: number): Promise<Octokit> {
+	const normalizedKey = normalizePrivateKey(PRIVATE_GITHUB_APP_PRIVATEKEY);
+	
 	const auth = createAppAuth({
 		appId: PRIVATE_GITHUB_APP_ID,
-		privateKey: PRIVATE_GITHUB_APP_PRIVATEKEY,
+		privateKey: normalizedKey,
 		clientId: PRIVATE_GITHUB_APP_CLIENTID,
 		clientSecret: PRIVATE_GITHUB_APP_SECRET
 	});
@@ -52,9 +81,11 @@ export async function verifyInstallation(installationId: number): Promise<{
 	account?: { login: string; type: string };
 }> {
 	try {
+		const normalizedKey = normalizePrivateKey(PRIVATE_GITHUB_APP_PRIVATEKEY);
+		
 		const auth = createAppAuth({
 			appId: PRIVATE_GITHUB_APP_ID,
-			privateKey: PRIVATE_GITHUB_APP_PRIVATEKEY,
+			privateKey: normalizedKey,
 			clientId: PRIVATE_GITHUB_APP_CLIENTID,
 			clientSecret: PRIVATE_GITHUB_APP_SECRET
 		});
