@@ -37,6 +37,11 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	const typedMilestones = (milestones ?? []) as Milestone[];
 	const typedRepository = repository as Repository;
 
+	// Sort milestones chronologically (oldest first) for timeline view
+	const sortedMilestones = [...typedMilestones].sort((a, b) => {
+		return new Date(a.milestone_date).getTime() - new Date(b.milestone_date).getTime();
+	});
+
 	// Group milestones by year/month/day
 	type GroupedMilestones = Record<string, Record<string, Record<string, Milestone[]>>>;
 	const groupedMilestones: GroupedMilestones = {};
@@ -62,6 +67,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	return {
 		repository: typedRepository,
 		milestones: typedMilestones,
+		sortedMilestones,
 		groupedMilestones
 	};
 };

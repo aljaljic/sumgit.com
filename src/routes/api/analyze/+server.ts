@@ -72,51 +72,44 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 
 	try {
-		// Fetch commits from the repository
+		// Fetch commits from the repository - get exactly the last 100 commits
 		const commits: Commit[] = [];
-		let page = 1;
 		const perPage = 100;
-		const maxCommitsWithDiff = 20; // Reduced further - Cloudflare has ~50 subrequest limit, but we also have listCommits calls
+		const maxCommitsWithDiff = 100; // Fetch diffs for all 100 commits
 		const maxCommitsToAnalyze = 100; // Limit commits sent to OpenAI
 
-		// First, collect all commits - try to get stats from listCommits if available
-		while (page <= 5) {
-			const { data } = await octokit.repos.listCommits({
-				owner: repo.repo_owner,
-				repo: repo.repo_name,
-				per_page: perPage,
-				page
-			});
+		// Fetch exactly the last 100 commits
+		const { data } = await octokit.repos.listCommits({
+			owner: repo.repo_owner,
+			repo: repo.repo_name,
+			per_page: perPage,
+			page: 1
+		});
 
-			if (data.length === 0) break;
-
-			for (const commit of data) {
-				const message = (commit.commit.message ?? '').split('\n')[0] ?? '';
-				
-				// Skip merge commits and very small commits early
-				if (message.toLowerCase().startsWith('merge') || message.toLowerCase().startsWith('wip')) {
-					continue;
-				}
-
-				const commitData: Commit = {
-					sha: commit.sha,
-					message,
-					date: commit.commit.author?.date ?? new Date().toISOString(),
-					author: commit.commit.author?.name ?? 'Unknown'
-				};
-
-				// Note: listCommits doesn't include file stats or diffs, but we can use it
-				// to get basic info without making additional API calls
-				commits.push(commitData);
-			}
-
-			if (data.length < perPage) break;
-			page++;
-		}
-
-		if (commits.length === 0) {
+		if (data.length === 0) {
 			throw error(400, 'No commits found in repository');
 		}
+
+		for (const commit of data) {
+			const message = (commit.commit.message ?? '').split('\n')[0] ?? '';
+			
+			// Skip merge commits and very small commits early
+			if (message.toLowerCase().startsWith('merge') || message.toLowerCase().startsWith('wip')) {
+				continue;
+			}
+
+			const commitData: Commit = {
+				sha: commit.sha,
+				message,
+				date: commit.commit.author?.date ?? new Date().toISOString(),
+				author: commit.commit.author?.name ?? 'Unknown'
+			};
+
+			// Note: listCommits doesn't include file stats or diffs, but we can use it
+			// to get basic info without making additional API calls
+			commits.push(commitData);
+		}
+
 
 		// Helper function to fetch and process a single commit diff
 		const fetchCommitDiff = async (commit: Commit): Promise<void> => {
