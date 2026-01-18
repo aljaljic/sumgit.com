@@ -142,7 +142,11 @@ export async function createBook(
 	const openBook = async () => {
 		if (isAnimating || currentPage >= 0) return;
 		isAnimating = true;
-		await gsap.to(frontCover.rotation, { y: -Math.PI * 0.9, duration: 0.8, ease: 'power2.inOut' });
+		await Promise.all([
+			gsap.to(frontCover.rotation, { y: -Math.PI * 0.9, duration: 0.8, ease: 'power2.inOut' }),
+			gsap.to(camera.position, { z: 7, duration: 0.8, ease: 'power2.inOut' })
+		]);
+		spine.visible = false;
 		currentPage = 0;
 		updatePageVisibility();
 		isAnimating = false;
