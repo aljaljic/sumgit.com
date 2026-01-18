@@ -12,10 +12,10 @@ export function createBookScene(container: HTMLElement): BookScene {
 	const scene = new THREE.Scene();
 	scene.background = new THREE.Color(0x0a0a0a);
 
-	// Camera setup
+	// Camera setup - positioned closer to fill the viewport
 	const aspect = container.clientWidth / container.clientHeight;
-	const camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 1000);
-	camera.position.set(0, 2, 5);
+	const camera = new THREE.PerspectiveCamera(50, aspect, 0.1, 1000);
+	camera.position.set(0, 0.5, 4);
 	camera.lookAt(0, 0, 0);
 
 	// Renderer with shadows

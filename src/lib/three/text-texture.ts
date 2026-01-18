@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import type { StoryChapter } from '$lib/types/story';
 
-const TEXTURE_WIDTH = 512;
-const TEXTURE_HEIGHT = 640;
+const TEXTURE_WIDTH = 1024;
+const TEXTURE_HEIGHT = 1280;
 
 export function createTextTexture(
 	chapter: StoryChapter,
@@ -27,40 +27,40 @@ export function createTextTexture(
 		ctx.fillRect(x, y, size, size);
 	}
 
-	const padding = 40;
+	const padding = 80;
 	const contentWidth = TEXTURE_WIDTH - padding * 2;
 
 	// Chapter title
 	ctx.fillStyle = '#1a1a1a';
-	ctx.font = 'bold 24px Georgia, serif';
+	ctx.font = 'bold 48px Georgia, serif';
 	ctx.textAlign = 'left';
 
 	const title = chapter.title;
-	ctx.fillText(title, padding, 60, contentWidth);
+	ctx.fillText(title, padding, 120, contentWidth);
 
 	// Date range
-	ctx.font = 'italic 14px Georgia, serif';
+	ctx.font = 'italic 28px Georgia, serif';
 	ctx.fillStyle = '#666';
-	ctx.fillText(chapter.date_range, padding, 85);
+	ctx.fillText(chapter.date_range, padding, 170);
 
 	// Decorative line
 	ctx.strokeStyle = '#ccc';
-	ctx.lineWidth = 1;
+	ctx.lineWidth = 2;
 	ctx.beginPath();
-	ctx.moveTo(padding, 100);
-	ctx.lineTo(TEXTURE_WIDTH - padding, 100);
+	ctx.moveTo(padding, 200);
+	ctx.lineTo(TEXTURE_WIDTH - padding, 200);
 	ctx.stroke();
 
 	// Chapter content
-	ctx.font = '16px Georgia, serif';
+	ctx.font = '32px Georgia, serif';
 	ctx.fillStyle = '#333';
 	ctx.textAlign = 'left';
 
-	const lineHeight = 24;
-	const maxLines = Math.floor((TEXTURE_HEIGHT - 160) / lineHeight);
+	const lineHeight = 48;
+	const maxLines = Math.floor((TEXTURE_HEIGHT - 320) / lineHeight);
 	const words = chapter.content.split(' ');
 	let line = '';
-	let y = 130;
+	let y = 260;
 	let lineCount = 0;
 
 	for (const word of words) {
@@ -88,10 +88,10 @@ export function createTextTexture(
 	}
 
 	// Page number
-	ctx.font = '12px Georgia, serif';
+	ctx.font = '24px Georgia, serif';
 	ctx.fillStyle = '#888';
 	ctx.textAlign = 'center';
-	ctx.fillText(`${pageNum} / ${totalPages}`, TEXTURE_WIDTH / 2, TEXTURE_HEIGHT - 30);
+	ctx.fillText(`${pageNum} / ${totalPages}`, TEXTURE_WIDTH / 2, TEXTURE_HEIGHT - 60);
 
 	const texture = new THREE.CanvasTexture(canvas);
 	texture.needsUpdate = true;
@@ -114,37 +114,36 @@ export function createCoverTexture(repoName: string): THREE.CanvasTexture {
 
 	// Decorative border
 	ctx.strokeStyle = '#b8860b';
-	ctx.lineWidth = 3;
-	ctx.strokeRect(20, 20, TEXTURE_WIDTH - 40, TEXTURE_HEIGHT - 40);
+	ctx.lineWidth = 6;
+	ctx.strokeRect(40, 40, TEXTURE_WIDTH - 80, TEXTURE_HEIGHT - 80);
 
 	// Inner border
-	ctx.lineWidth = 1;
-	ctx.strokeRect(30, 30, TEXTURE_WIDTH - 60, TEXTURE_HEIGHT - 60);
+	ctx.lineWidth = 2;
+	ctx.strokeRect(60, 60, TEXTURE_WIDTH - 120, TEXTURE_HEIGHT - 120);
 
 	// Corner decorations
-	const cornerSize = 20;
 	const corners = [
-		[40, 40],
-		[TEXTURE_WIDTH - 40, 40],
-		[40, TEXTURE_HEIGHT - 40],
-		[TEXTURE_WIDTH - 40, TEXTURE_HEIGHT - 40]
+		[80, 80],
+		[TEXTURE_WIDTH - 80, 80],
+		[80, TEXTURE_HEIGHT - 80],
+		[TEXTURE_WIDTH - 80, TEXTURE_HEIGHT - 80]
 	];
 
 	ctx.fillStyle = '#b8860b';
 	corners.forEach(([x, y]) => {
 		ctx.beginPath();
-		ctx.arc(x, y, 5, 0, Math.PI * 2);
+		ctx.arc(x, y, 10, 0, Math.PI * 2);
 		ctx.fill();
 	});
 
 	// Title
 	ctx.fillStyle = '#d4af37';
-	ctx.font = 'bold 32px Georgia, serif';
+	ctx.font = 'bold 64px Georgia, serif';
 	ctx.textAlign = 'center';
 	ctx.textBaseline = 'middle';
 
 	// Word wrap for long repo names
-	const maxWidth = TEXTURE_WIDTH - 80;
+	const maxWidth = TEXTURE_WIDTH - 160;
 	const words = repoName.split(/[-_/]/);
 	let lines: string[] = [];
 	let currentLine = '';
@@ -162,7 +161,7 @@ export function createCoverTexture(repoName: string): THREE.CanvasTexture {
 	}
 	if (currentLine) lines.push(currentLine);
 
-	const lineHeight = 40;
+	const lineHeight = 80;
 	const startY = TEXTURE_HEIGHT / 2 - (lines.length - 1) * lineHeight / 2;
 
 	lines.forEach((line, i) => {
@@ -170,9 +169,9 @@ export function createCoverTexture(repoName: string): THREE.CanvasTexture {
 	});
 
 	// Subtitle
-	ctx.font = 'italic 18px Georgia, serif';
+	ctx.font = 'italic 36px Georgia, serif';
 	ctx.fillStyle = '#c4a030';
-	ctx.fillText('The Story', TEXTURE_WIDTH / 2, TEXTURE_HEIGHT - 80);
+	ctx.fillText('The Story', TEXTURE_WIDTH / 2, TEXTURE_HEIGHT - 160);
 
 	const texture = new THREE.CanvasTexture(canvas);
 	texture.needsUpdate = true;

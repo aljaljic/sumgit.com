@@ -12,10 +12,10 @@ export interface BookMesh {
 	spine: THREE.Mesh;
 }
 
-const BOOK_WIDTH = 2.5;
-const BOOK_HEIGHT = 3.2;
-const BOOK_DEPTH = 0.3;
-const PAGE_THICKNESS = 0.01;
+const BOOK_WIDTH = 3.5;
+const BOOK_HEIGHT = 4.5;
+const BOOK_DEPTH = 0.4;
+const PAGE_THICKNESS = 0.015;
 
 export function createBook(
 	chapters: StoryChapter[],
@@ -119,9 +119,9 @@ export function createBook(
 		group.add(page);
 	});
 
-	// Position the whole book
-	group.position.set(0, 0, 0);
-	group.rotation.x = -0.2;
+	// Position the whole book - centered and slightly tilted for better view
+	group.position.set(-BOOK_WIDTH / 2, 0, 0);
+	group.rotation.x = -0.3;
 
 	return {
 		group,
