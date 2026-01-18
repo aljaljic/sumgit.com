@@ -23,7 +23,9 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:platform.openai.com)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(pnpm tsc:*)",
+      "Bash(pnpm svelte-check:*)"
     ]
   }
 }

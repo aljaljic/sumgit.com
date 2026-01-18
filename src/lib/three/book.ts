@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import gsap from 'gsap';
 import type { StoryChapter } from '$lib/types/story';
-import { createTextTexture, createCoverTexture } from './text-texture';
+import { createTextTexture, createCoverTexture, createTitlePageTexture, createEndPageTexture, createBackCoverTexture } from './text-texture';
 
 // Book dimensions
 const BOOK_WIDTH = 3.5;
@@ -16,9 +16,11 @@ export interface Book {
 	currentPage: number;
 	totalPages: number;
 	isAnimating: boolean;
+	isClosed: boolean;
 	openBook: () => Promise<void>;
 	nextPage: () => Promise<void>;
 	prevPage: () => Promise<void>;
+	closeBook: () => Promise<void>;
 	dispose: () => void;
 }
 
@@ -63,10 +65,11 @@ export async function createBook(
 	// Front cover
 	const frontCoverGeometry = new THREE.BoxGeometry(BOOK_WIDTH, BOOK_HEIGHT, 0.05);
 	frontCoverGeometry.translate(-BOOK_WIDTH / 2, 0, 0);
+	const frontCoverTexture = await createCoverTexture(repoName, chapters[0]?.image_url);
 	const frontCover = new THREE.Mesh(
 		frontCoverGeometry,
 		new THREE.MeshStandardMaterial({
-			map: createCoverTexture(repoName),
+			map: frontCoverTexture,
 			roughness: 0.7,
 			metalness: 0.1
 		})
@@ -80,7 +83,11 @@ export async function createBook(
 	backCoverGeometry.translate(-BOOK_WIDTH / 2, 0, 0);
 	const backCover = new THREE.Mesh(
 		backCoverGeometry,
-		new THREE.MeshStandardMaterial({ color: 0x2d1b0e, roughness: 0.8, metalness: 0.1 })
+		new THREE.MeshStandardMaterial({
+			map: createBackCoverTexture(),
+			roughness: 0.7,
+			metalness: 0.1
+		})
 	);
 	backCover.position.set(BOOK_WIDTH / 2, 0, -BOOK_DEPTH / 2 - 0.025);
 	backCover.castShadow = true;
@@ -95,20 +102,23 @@ export async function createBook(
 	spine.castShadow = true;
 	group.add(spine);
 
-	// Create pages
-	const pageTextures = await Promise.all(
+	// Create page textures: title page + chapters + end page
+	const titleTexture = createTitlePageTexture(repoName);
+	const endTexture = createEndPageTexture();
+	const chapterTextures = await Promise.all(
 		chapters.map((chapter, i) => createTextTexture(chapter, i + 1, chapters.length))
 	);
+	const pageTextures = [titleTexture, ...chapterTextures, endTexture];
 
-	const pageSpacing = BOOK_DEPTH / (chapters.length + 1);
-	chapters.forEach((_, index) => {
+	const pageSpacing = BOOK_DEPTH / (pageTextures.length + 1);
+	pageTextures.forEach((texture, index) => {
 		const pageGeometry = new THREE.PlaneGeometry(BOOK_WIDTH - 0.1, BOOK_HEIGHT - 0.1);
 		pageGeometry.translate(-(BOOK_WIDTH - 0.1) / 2, 0, 0);
 
 		const page = new THREE.Mesh(
 			pageGeometry,
 			new THREE.MeshStandardMaterial({
-				map: pageTextures[index],
+				map: texture,
 				roughness: 0.9,
 				metalness: 0,
 				side: THREE.FrontSide
@@ -131,11 +141,12 @@ export async function createBook(
 	// Animation state
 	let currentPage = -1;
 	let isAnimating = false;
-	const totalPages = chapters.length;
+	let isClosed = false;
+	const totalPages = pageTextures.length;
 
 	const updatePageVisibility = () => {
 		pages.forEach((page, i) => {
-			page.visible = i === currentPage;
+			page.visible = i === currentPage && !isClosed;
 		});
 	};
 
@@ -144,7 +155,7 @@ export async function createBook(
 		isAnimating = true;
 		await Promise.all([
 			gsap.to(frontCover.rotation, { y: -Math.PI * 0.9, duration: 0.8, ease: 'power2.inOut' }),
-			gsap.to(camera.position, { z: 7, duration: 0.8, ease: 'power2.inOut' })
+			gsap.to(camera.position, { z: 9, duration: 0.8, ease: 'power2.inOut' })
 		]);
 		spine.visible = false;
 		currentPage = 0;
@@ -166,7 +177,11 @@ export async function createBook(
 	const nextPage = async () => {
 		if (isAnimating) return;
 		if (currentPage < 0) { await openBook(); return; }
-		if (currentPage >= totalPages - 1) return;
+		if (currentPage >= totalPages - 1) {
+			// Close the book when on last page
+			await closeBook();
+			return;
+		}
 		isAnimating = true;
 		await turnPage(pages[currentPage], 'forward');
 		currentPage++;
@@ -175,11 +190,57 @@ export async function createBook(
 	};
 
 	const prevPage = async () => {
-		if (isAnimating || currentPage <= 0) return;
+		if (isAnimating) return;
+		// If book is closed, reopen it
+		if (isClosed) {
+			await reopenBook();
+			return;
+		}
+		if (currentPage <= 0) return;
 		isAnimating = true;
 		currentPage--;
 		updatePageVisibility();
 		await turnPage(pages[currentPage], 'backward');
+		isAnimating = false;
+	};
+
+	const closeBook = async () => {
+		if (isAnimating || isClosed || currentPage < 0) return;
+		isAnimating = true;
+
+		// Hide current page
+		updatePageVisibility();
+
+		// Animate front cover closing
+		await Promise.all([
+			gsap.to(frontCover.rotation, { y: 0, duration: 0.8, ease: 'power2.inOut' }),
+			gsap.to(camera.position, { z: 5, duration: 0.8, ease: 'power2.inOut' })
+		]);
+
+		// Rotate group to show back cover
+		await gsap.to(group.rotation, { y: Math.PI, duration: 1.0, ease: 'power2.inOut' });
+
+		spine.visible = true;
+		isClosed = true;
+		isAnimating = false;
+	};
+
+	const reopenBook = async () => {
+		if (isAnimating || !isClosed) return;
+		isAnimating = true;
+
+		// Rotate back to front
+		await gsap.to(group.rotation, { y: 0, duration: 1.0, ease: 'power2.inOut' });
+
+		// Open front cover
+		await Promise.all([
+			gsap.to(frontCover.rotation, { y: -Math.PI * 0.9, duration: 0.8, ease: 'power2.inOut' }),
+			gsap.to(camera.position, { z: 9, duration: 0.8, ease: 'power2.inOut' })
+		]);
+
+		spine.visible = false;
+		isClosed = false;
+		updatePageVisibility();
 		isAnimating = false;
 	};
 
@@ -209,9 +270,11 @@ export async function createBook(
 		get currentPage() { return currentPage; },
 		totalPages,
 		get isAnimating() { return isAnimating; },
+		get isClosed() { return isClosed; },
 		openBook,
 		nextPage,
 		prevPage,
+		closeBook,
 		dispose
 	};
 }
