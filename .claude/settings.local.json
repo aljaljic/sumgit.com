@@ -25,7 +25,8 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(pnpm tsc:*)",
-      "Bash(pnpm svelte-check:*)"
+      "Bash(pnpm svelte-check:*)",
+      "Bash(git push:*)"
     ]
   }
 }

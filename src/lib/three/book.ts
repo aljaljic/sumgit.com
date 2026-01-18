@@ -91,6 +91,7 @@ export async function createBook(
 	);
 	backCover.position.set(BOOK_WIDTH / 2, 0, -BOOK_DEPTH / 2 - 0.025);
 	backCover.castShadow = true;
+	backCover.visible = false; // Hidden until book closes
 	group.add(backCover);
 
 	// Create page textures: title page + chapters
@@ -207,6 +208,7 @@ export async function createBook(
 		]);
 
 		// Rotate group to show back cover
+		backCover.visible = true;
 		await gsap.to(group.rotation, { y: Math.PI, duration: 1.0, ease: 'power2.inOut' });
 
 		isClosed = true;
@@ -219,6 +221,7 @@ export async function createBook(
 
 		// Rotate back to front
 		await gsap.to(group.rotation, { y: 0, duration: 1.0, ease: 'power2.inOut' });
+		backCover.visible = false;
 
 		// Open front cover
 		await Promise.all([
