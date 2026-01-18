@@ -111,7 +111,7 @@ export async function createBook(
 				map: pageTextures[index],
 				roughness: 0.9,
 				metalness: 0,
-				side: THREE.DoubleSide
+				side: THREE.FrontSide
 			})
 		);
 

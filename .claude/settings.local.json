@@ -21,7 +21,9 @@
       "Bash(pnpm check:*)",
       "Bash(timeout 15 pnpm dev:*)",
       "WebFetch(domain:github.com)",
-      "WebFetch(domain:platform.openai.com)"
+      "WebFetch(domain:platform.openai.com)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
