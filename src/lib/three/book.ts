@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import gsap from 'gsap';
 import type { StoryChapter } from '$lib/types/story';
-import { createTextTexture, createCoverTexture, createTitlePageTexture, createEndPageTexture, createBackCoverTexture } from './text-texture';
+import { createTextTexture, createCoverTexture, createTitlePageTexture, createBackCoverTexture } from './text-texture';
 
 // Book dimensions
 const BOOK_WIDTH = 3.5;
@@ -93,22 +93,12 @@ export async function createBook(
 	backCover.castShadow = true;
 	group.add(backCover);
 
-	// Spine
-	const spine = new THREE.Mesh(
-		new THREE.BoxGeometry(0.1, BOOK_HEIGHT, BOOK_DEPTH),
-		new THREE.MeshStandardMaterial({ color: 0x1a0f08, roughness: 0.9, metalness: 0.05 })
-	);
-	spine.position.set(-0.05, 0, 0);
-	spine.castShadow = true;
-	group.add(spine);
-
-	// Create page textures: title page + chapters + end page
+	// Create page textures: title page + chapters
 	const titleTexture = createTitlePageTexture(repoName);
-	const endTexture = createEndPageTexture();
 	const chapterTextures = await Promise.all(
 		chapters.map((chapter, i) => createTextTexture(chapter, i + 1, chapters.length))
 	);
-	const pageTextures = [titleTexture, ...chapterTextures, endTexture];
+	const pageTextures = [titleTexture, ...chapterTextures];
 
 	const pageSpacing = BOOK_DEPTH / (pageTextures.length + 1);
 	pageTextures.forEach((texture, index) => {
@@ -157,7 +147,6 @@ export async function createBook(
 			gsap.to(frontCover.rotation, { y: -Math.PI * 0.9, duration: 0.8, ease: 'power2.inOut' }),
 			gsap.to(camera.position, { z: 9, duration: 0.8, ease: 'power2.inOut' })
 		]);
-		spine.visible = false;
 		currentPage = 0;
 		updatePageVisibility();
 		isAnimating = false;
@@ -220,7 +209,6 @@ export async function createBook(
 		// Rotate group to show back cover
 		await gsap.to(group.rotation, { y: Math.PI, duration: 1.0, ease: 'power2.inOut' });
 
-		spine.visible = true;
 		isClosed = true;
 		isAnimating = false;
 	};
@@ -238,7 +226,6 @@ export async function createBook(
 			gsap.to(camera.position, { z: 9, duration: 0.8, ease: 'power2.inOut' })
 		]);
 
-		spine.visible = false;
 		isClosed = false;
 		updatePageVisibility();
 		isAnimating = false;
