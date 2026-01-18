@@ -119,6 +119,7 @@ export async function createBook(
 		page.position.set(BOOK_WIDTH / 2 - 0.05, 0, zPos);
 		page.userData.originalZ = zPos;
 		page.castShadow = true;
+		page.visible = false;
 		pages.push(page);
 		group.add(page);
 	});
@@ -132,11 +133,18 @@ export async function createBook(
 	let isAnimating = false;
 	const totalPages = chapters.length;
 
+	const updatePageVisibility = () => {
+		pages.forEach((page, i) => {
+			page.visible = i === currentPage;
+		});
+	};
+
 	const openBook = async () => {
 		if (isAnimating || currentPage >= 0) return;
 		isAnimating = true;
 		await gsap.to(frontCover.rotation, { y: -Math.PI * 0.9, duration: 0.8, ease: 'power2.inOut' });
 		currentPage = 0;
+		updatePageVisibility();
 		isAnimating = false;
 	};
 
@@ -158,6 +166,7 @@ export async function createBook(
 		isAnimating = true;
 		await turnPage(pages[currentPage], 'forward');
 		currentPage++;
+		updatePageVisibility();
 		isAnimating = false;
 	};
 
@@ -165,6 +174,7 @@ export async function createBook(
 		if (isAnimating || currentPage <= 0) return;
 		isAnimating = true;
 		currentPage--;
+		updatePageVisibility();
 		await turnPage(pages[currentPage], 'backward');
 		isAnimating = false;
 	};
