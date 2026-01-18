@@ -17,10 +17,10 @@ const BOOK_HEIGHT = 4.5;
 const BOOK_DEPTH = 0.4;
 const PAGE_THICKNESS = 0.015;
 
-export function createBook(
+export async function createBook(
 	chapters: StoryChapter[],
 	repoName: string
-): BookMesh {
+): Promise<BookMesh> {
 	const group = new THREE.Group();
 	const pages: THREE.Mesh[] = [];
 
@@ -79,9 +79,14 @@ export function createBook(
 	spine.receiveShadow = true;
 	group.add(spine);
 
-	// Create pages for each chapter
+	// Create pages for each chapter (async for image loading)
 	const totalPages = chapters.length;
 	const pageSpacing = BOOK_DEPTH / (totalPages + 1);
+
+	// Load all page textures in parallel
+	const pageTextures = await Promise.all(
+		chapters.map((chapter, index) => createTextTexture(chapter, index + 1, totalPages))
+	);
 
 	chapters.forEach((chapter, index) => {
 		// Create page with text texture
@@ -91,7 +96,7 @@ export function createBook(
 			PAGE_THICKNESS
 		);
 
-		const pageTexture = createTextTexture(chapter, index + 1, totalPages);
+		const pageTexture = pageTextures[index];
 		const pageMaterial = new THREE.MeshStandardMaterial({
 			map: pageTexture,
 			roughness: 0.9,
@@ -119,9 +124,9 @@ export function createBook(
 		group.add(page);
 	});
 
-	// Position the whole book - centered and slightly tilted for better view
-	group.position.set(-BOOK_WIDTH / 2, 0, 0);
-	group.rotation.x = -0.3;
+	// Position the whole book - centered for better visibility
+	group.position.set(0, 0, 0);
+	group.rotation.x = -0.15;
 
 	return {
 		group,

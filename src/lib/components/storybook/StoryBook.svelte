@@ -27,7 +27,7 @@
 			]);
 
 			const scene = createBookScene(container);
-			const book = createBook(chapters, repoName);
+			const book = await createBook(chapters, repoName);
 			scene.scene.add(book.group);
 
 			animator = createPageAnimator(book);

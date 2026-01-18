@@ -2,6 +2,8 @@ export interface StoryChapter {
 	title: string;
 	content: string;
 	date_range: string;
+	image_prompt?: string;
+	image_url?: string;
 }
 
 export interface Story {

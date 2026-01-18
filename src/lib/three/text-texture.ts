@@ -3,12 +3,27 @@ import type { StoryChapter } from '$lib/types/story';
 
 const TEXTURE_WIDTH = 1024;
 const TEXTURE_HEIGHT = 1280;
+const IMAGE_HEIGHT = 400; // 40% of content area for image
 
-export function createTextTexture(
+// Load image from URL and return as HTMLImageElement
+async function loadImage(url: string): Promise<HTMLImageElement | null> {
+	return new Promise((resolve) => {
+		const img = new Image();
+		img.crossOrigin = 'anonymous';
+		img.onload = () => resolve(img);
+		img.onerror = () => {
+			console.error('Failed to load image:', url);
+			resolve(null);
+		};
+		img.src = url;
+	});
+}
+
+export async function createTextTexture(
 	chapter: StoryChapter,
 	pageNum: number,
 	totalPages: number
-): THREE.CanvasTexture {
+): Promise<THREE.CanvasTexture> {
 	const canvas = document.createElement('canvas');
 	canvas.width = TEXTURE_WIDTH;
 	canvas.height = TEXTURE_HEIGHT;
@@ -30,37 +45,70 @@ export function createTextTexture(
 	const padding = 80;
 	const contentWidth = TEXTURE_WIDTH - padding * 2;
 
+	let contentStartY = 120;
+
+	// Load and draw chapter image if available
+	if (chapter.image_url) {
+		const img = await loadImage(chapter.image_url);
+		if (img) {
+			// Draw image at top of page with padding
+			const imgX = padding;
+			const imgY = padding;
+			const imgWidth = contentWidth;
+			const imgHeight = IMAGE_HEIGHT;
+
+			// Draw a decorative border around the image
+			ctx.strokeStyle = '#8B4513';
+			ctx.lineWidth = 3;
+			ctx.strokeRect(imgX - 2, imgY - 2, imgWidth + 4, imgHeight + 4);
+
+			// Draw the image, scaling to fit
+			const scale = Math.min(imgWidth / img.width, imgHeight / img.height);
+			const scaledWidth = img.width * scale;
+			const scaledHeight = img.height * scale;
+			const offsetX = imgX + (imgWidth - scaledWidth) / 2;
+			const offsetY = imgY + (imgHeight - scaledHeight) / 2;
+
+			ctx.drawImage(img, offsetX, offsetY, scaledWidth, scaledHeight);
+
+			// Update content start position to below image
+			contentStartY = imgY + imgHeight + 40;
+		}
+	}
+
 	// Chapter title
 	ctx.fillStyle = '#1a1a1a';
-	ctx.font = 'bold 48px Georgia, serif';
+	ctx.font = 'bold 44px Georgia, serif';
 	ctx.textAlign = 'left';
 
 	const title = chapter.title;
-	ctx.fillText(title, padding, 120, contentWidth);
+	ctx.fillText(title, padding, contentStartY, contentWidth);
 
 	// Date range
-	ctx.font = 'italic 28px Georgia, serif';
+	ctx.font = 'italic 24px Georgia, serif';
 	ctx.fillStyle = '#666';
-	ctx.fillText(chapter.date_range, padding, 170);
+	ctx.fillText(chapter.date_range, padding, contentStartY + 40);
 
 	// Decorative line
 	ctx.strokeStyle = '#ccc';
 	ctx.lineWidth = 2;
 	ctx.beginPath();
-	ctx.moveTo(padding, 200);
-	ctx.lineTo(TEXTURE_WIDTH - padding, 200);
+	ctx.moveTo(padding, contentStartY + 60);
+	ctx.lineTo(TEXTURE_WIDTH - padding, contentStartY + 60);
 	ctx.stroke();
 
 	// Chapter content
-	ctx.font = '32px Georgia, serif';
+	ctx.font = '28px Georgia, serif';
 	ctx.fillStyle = '#333';
 	ctx.textAlign = 'left';
 
-	const lineHeight = 48;
-	const maxLines = Math.floor((TEXTURE_HEIGHT - 320) / lineHeight);
+	const lineHeight = 40;
+	const textStartY = contentStartY + 100;
+	const availableHeight = TEXTURE_HEIGHT - textStartY - 80;
+	const maxLines = Math.floor(availableHeight / lineHeight);
 	const words = chapter.content.split(' ');
 	let line = '';
-	let y = 260;
+	let y = textStartY;
 	let lineCount = 0;
 
 	for (const word of words) {
@@ -91,7 +139,7 @@ export function createTextTexture(
 	ctx.font = '24px Georgia, serif';
 	ctx.fillStyle = '#888';
 	ctx.textAlign = 'center';
-	ctx.fillText(`${pageNum} / ${totalPages}`, TEXTURE_WIDTH / 2, TEXTURE_HEIGHT - 60);
+	ctx.fillText(`${pageNum} / ${totalPages}`, TEXTURE_WIDTH / 2, TEXTURE_HEIGHT - 40);
 
 	const texture = new THREE.CanvasTexture(canvas);
 	texture.needsUpdate = true;

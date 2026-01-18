@@ -2,6 +2,9 @@ import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import OpenAI from 'openai';
 import { PRIVATE_OPENAI_API_KEY } from '$env/static/private';
+import { PRIVATE_SUPABASE_SERVICE_ROLE_KEY } from '$env/static/private';
+import { PUBLIC_SUPABASE_URL } from '$env/static/public';
+import { createClient } from '@supabase/supabase-js';
 import type { Repository, Milestone } from '$lib/database.types';
 import type { StoryChapter } from '$lib/types/story';
 
@@ -12,25 +15,34 @@ const openai = new OpenAI({
 	maxRetries: 0
 });
 
-const STORY_SYSTEM_PROMPT = `You are a creative storyteller who writes compelling first-person narratives about software projects.
+// Supabase client with service role for storage operations
+const supabaseAdmin = createClient(PUBLIC_SUPABASE_URL, PRIVATE_SUPABASE_SERVICE_ROLE_KEY);
 
-Given a list of development milestones from a repository, write an engaging story about the project's journey. Write from the developer's perspective in first person.
+const STORY_SYSTEM_PROMPT = `You are a bard of ancient times, chronicling the epic tales of code-smiths and their magical creations in the style of J.R.R. Tolkien.
+
+Given a list of development milestones from a repository, weave them into a SHORT fantasy epic. Transform the technical journey into a tale of magic and adventure:
+
+- Code and programming = arcane magic, spells, enchantments
+- Bugs and errors = orcs, shadow creatures, dark forces
+- Features = magical artifacts, enchantments, blessed items
+- Deployments = great battles, triumphant moments
+- Refactoring = forging anew, purifying with ancient fire
 
 Each chapter should:
-- Be 200-400 words
-- Cover a meaningful period or theme in the project's development
-- Include emotional elements (challenges, victories, lessons learned)
-- Flow naturally from one chapter to the next
-- Feel authentic and personal, like a developer journal
+- Be 100-150 words MAXIMUM (keep it short!)
+- Use rich, epic fantasy language (thee, thy, hath, verily, etc.)
+- Include dramatic imagery of quests, forges, and mystical realms
+- Flow as an interconnected saga
 
-Write 3-6 chapters depending on the milestone count. Group related milestones into chapters by theme or time period.
+Write exactly 3-4 chapters total. Keep them SHORT but evocative.
 
 Return JSON: {
   "chapters": [
     {
-      "title": "Chapter title (keep it short and evocative)",
-      "content": "The narrative content...",
-      "date_range": "Month Year - Month Year" or "Month Year"
+      "title": "Epic fantasy chapter title",
+      "content": "The narrative in Tolkien-esque prose...",
+      "date_range": "Month Year - Month Year" or "Month Year",
+      "image_prompt": "A detailed prompt for generating a fantasy illustration for this chapter. Describe the scene vividly: setting, characters, lighting, mood. Style: epic fantasy oil painting, dramatic lighting, rich colors."
     }
   ]
 }`;
@@ -81,13 +93,13 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			.map((m) => `- [${m.milestone_date}] ${m.title}: ${m.description}`)
 			.join('\n');
 
-		const userMessage = `Write a narrative story about the development journey of "${repo.repo_owner}/${repo.repo_name}".
+		const userMessage = `Chronicle the epic saga of "${repo.repo_owner}/${repo.repo_name}" - a tale of code-smiths and their magical creation.
 
-Here are the milestones to weave into the story:
+Here are the legendary milestones of this quest:
 
 ${milestonesText}
 
-Create an engaging first-person narrative that captures the spirit of building this project. Make it feel personal and authentic.`;
+Weave these events into a SHORT fantasy epic (3-4 chapters, 100-150 words each). Make it dramatic and mystical!`;
 
 		const response = await openai.chat.completions.create({
 			model: 'gpt-4o',
@@ -112,11 +124,79 @@ Create an engaging first-person narrative that captures the spirit of building t
 			throw error(500, 'No chapters generated');
 		}
 
+		// Generate images for each chapter
+		const chaptersWithImages = await Promise.all(
+			chapters.map(async (chapter, index) => {
+				if (!chapter.image_prompt) {
+					return chapter;
+				}
+
+				try {
+					// Generate image using gpt-image-1
+					const imageResponse = await openai.images.generate({
+						model: 'gpt-image-1',
+						prompt: chapter.image_prompt,
+						n: 1,
+						size: '1024x1024',
+						quality: 'low'
+					});
+
+					const imageData = imageResponse.data?.[0];
+					if (!imageData) {
+						console.error(`No image data for chapter ${index}`);
+						return chapter;
+					}
+
+					let imageBuffer: Buffer;
+
+					if (imageData.b64_json) {
+						// Base64 response (gpt-image-1 default)
+						imageBuffer = Buffer.from(imageData.b64_json, 'base64');
+					} else if (imageData.url) {
+						// URL response - fetch the image
+						const imgResponse = await fetch(imageData.url);
+						const arrayBuffer = await imgResponse.arrayBuffer();
+						imageBuffer = Buffer.from(arrayBuffer);
+					} else {
+						console.error(`No image data format for chapter ${index}`);
+						return chapter;
+					}
+
+					// Upload to Supabase storage
+					const fileName = `${repository_id}/${index}.png`;
+					const { error: uploadError } = await supabaseAdmin.storage
+						.from('story-images')
+						.upload(fileName, imageBuffer, {
+							contentType: 'image/png',
+							upsert: true
+						});
+
+					if (uploadError) {
+						console.error(`Upload error for chapter ${index}:`, uploadError);
+						return chapter;
+					}
+
+					// Get public URL
+					const { data: urlData } = supabaseAdmin.storage
+						.from('story-images')
+						.getPublicUrl(fileName);
+
+					return {
+						...chapter,
+						image_url: urlData.publicUrl
+					};
+				} catch (imgError) {
+					console.error(`Image generation error for chapter ${index}:`, imgError);
+					return chapter;
+				}
+			})
+		);
+
 		return json({
 			success: true,
 			story: {
 				repository_id,
-				chapters
+				chapters: chaptersWithImages
 			}
 		});
 	} catch (err) {
