@@ -55,6 +55,7 @@
 
 	async function signOut() {
 		await data.supabase.auth.signOut();
+		await invalidateAll();
 		goto('/');
 	}
 
