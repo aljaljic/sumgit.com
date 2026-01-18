@@ -102,7 +102,7 @@ ${milestonesText}
 Weave these events into a SHORT fantasy epic (3-4 chapters, 100-150 words each). Make it dramatic and mystical!`;
 
 		const response = await openai.chat.completions.create({
-			model: 'gpt-4o',
+			model: 'gpt-5-mini',
 			messages: [
 				{ role: 'system', content: STORY_SYSTEM_PROMPT },
 				{ role: 'user', content: userMessage }
