@@ -13,7 +13,8 @@
 		GitCommit,
 		Trash2,
 		Share2,
-		Clock
+		Clock,
+		BookOpen
 	} from '@lucide/svelte';
 	import { invalidateAll, goto } from '$app/navigation';
 	import logo from '$lib/assets/logo.png';
@@ -123,6 +124,15 @@
 					>
 						<Clock class="h-4 w-4" />
 						<span class="hidden sm:inline">Timeline</span>
+					</Button>
+					<Button
+						href="/project/{data.repository.id}/story"
+						variant="outline"
+						size="sm"
+						class="gap-2"
+					>
+						<BookOpen class="h-4 w-4" />
+						<span class="hidden sm:inline">Story</span>
 					</Button>
 				{/if}
 				<Button
