@@ -147,16 +147,20 @@ Weave these events into a SHORT fantasy epic (3-4 chapters, 100-150 words each).
 						return chapter;
 					}
 
-					let imageBuffer: Buffer;
+					let imageData8: Uint8Array;
 
 					if (imageData.b64_json) {
-						// Base64 response (gpt-image-1 default)
-						imageBuffer = Buffer.from(imageData.b64_json, 'base64');
+						// Base64 response (gpt-image-1 default) - use web-compatible decoding
+						const binaryString = atob(imageData.b64_json);
+						imageData8 = new Uint8Array(binaryString.length);
+						for (let i = 0; i < binaryString.length; i++) {
+							imageData8[i] = binaryString.charCodeAt(i);
+						}
 					} else if (imageData.url) {
 						// URL response - fetch the image
 						const imgResponse = await fetch(imageData.url);
 						const arrayBuffer = await imgResponse.arrayBuffer();
-						imageBuffer = Buffer.from(arrayBuffer);
+						imageData8 = new Uint8Array(arrayBuffer);
 					} else {
 						console.error(`No image data format for chapter ${index}`);
 						return chapter;
@@ -166,7 +170,7 @@ Weave these events into a SHORT fantasy epic (3-4 chapters, 100-150 words each).
 					const fileName = `${repository_id}/${index}.png`;
 					const { error: uploadError } = await supabaseAdmin.storage
 						.from('story-images')
-						.upload(fileName, imageBuffer, {
+						.upload(fileName, imageData8, {
 							contentType: 'image/png',
 							upsert: true
 						});
