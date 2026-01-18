@@ -102,7 +102,7 @@ export async function createBook(
 
 	const pageSpacing = BOOK_DEPTH / (chapters.length + 1);
 	chapters.forEach((_, index) => {
-		const pageGeometry = new THREE.BoxGeometry(BOOK_WIDTH - 0.1, BOOK_HEIGHT - 0.1, PAGE_THICKNESS);
+		const pageGeometry = new THREE.PlaneGeometry(BOOK_WIDTH - 0.1, BOOK_HEIGHT - 0.1);
 		pageGeometry.translate(-(BOOK_WIDTH - 0.1) / 2, 0, 0);
 
 		const page = new THREE.Mesh(
