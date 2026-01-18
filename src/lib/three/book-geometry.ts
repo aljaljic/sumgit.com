@@ -124,9 +124,10 @@ export async function createBook(
 		group.add(page);
 	});
 
-	// Position the whole book - centered for better visibility
+	// Position and scale the book
 	group.position.set(0, 0, 0);
 	group.rotation.x = -0.15;
+	group.scale.set(1.8, 1.8, 1.8);
 
 	return {
 		group,

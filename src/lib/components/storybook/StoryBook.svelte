@@ -15,10 +15,20 @@
 	let isReady = $state(false);
 	let animationFrameId: number;
 	let cleanupFn: (() => void) | null = null;
+	let resizeObserver: ResizeObserver | null = null;
 
 	onMount(() => {
-		// Use an IIFE to handle async setup
-		(async () => {
+		let sceneRef: Awaited<ReturnType<typeof import('$lib/three/book-scene').createBookScene>> | null = null;
+
+		// Wait for container to have valid dimensions before initializing
+		const initScene = async () => {
+			if (!container || container.clientWidth === 0 || container.clientHeight === 0) {
+				requestAnimationFrame(initScene);
+				return;
+			}
+
+			console.log('Book container dimensions:', container.clientWidth, 'x', container.clientHeight);
+
 			// Dynamic import to avoid SSR issues
 			const [{ createBookScene }, { createBook }, { createPageAnimator }] = await Promise.all([
 				import('$lib/three/book-scene'),
@@ -26,18 +36,33 @@
 				import('$lib/three/page-animator')
 			]);
 
-			const scene = createBookScene(container);
+			sceneRef = createBookScene(container);
 			const book = await createBook(chapters, repoName);
-			scene.scene.add(book.group);
+			sceneRef.scene.add(book.group);
 
 			animator = createPageAnimator(book);
 
 			// Animation loop
 			const animate = () => {
+				if (!sceneRef) return;
 				animationFrameId = requestAnimationFrame(animate);
-				scene.renderer.render(scene.scene, scene.camera);
+				sceneRef.renderer.render(sceneRef.scene, sceneRef.camera);
 			};
 			animate();
+
+			// Use ResizeObserver for better container resize handling
+			resizeObserver = new ResizeObserver((entries) => {
+				if (!sceneRef) return;
+				for (const entry of entries) {
+					const { width, height } = entry.contentRect;
+					if (width > 0 && height > 0) {
+						sceneRef.camera.aspect = width / height;
+						sceneRef.camera.updateProjectionMatrix();
+						sceneRef.renderer.setSize(width, height);
+					}
+				}
+			});
+			resizeObserver.observe(container);
 
 			// Open book automatically
 			setTimeout(async () => {
@@ -65,9 +90,12 @@
 			cleanupFn = () => {
 				window.removeEventListener('keydown', handleKeydown);
 				cancelAnimationFrame(animationFrameId);
-				scene.dispose();
+				resizeObserver?.disconnect();
+				sceneRef?.dispose();
 			};
-		})();
+		};
+
+		initScene();
 
 		// Return synchronous cleanup
 		return () => {

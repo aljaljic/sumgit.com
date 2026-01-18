@@ -123,7 +123,7 @@
 				<!-- Story view -->
 				<div class="flex flex-1 flex-col">
 					<!-- 3D Book -->
-					<div class="relative flex-1" style="min-height: 400px;">
+					<div class="relative" style="height: 70vh;">
 						{#await import('$lib/components/storybook/StoryBook.svelte') then StoryBook}
 							<StoryBook.default
 								bind:this={storyBookRef}

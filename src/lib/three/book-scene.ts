@@ -12,10 +12,14 @@ export function createBookScene(container: HTMLElement): BookScene {
 	const scene = new THREE.Scene();
 	scene.background = new THREE.Color(0x0a0a0a);
 
-	// Camera setup - positioned closer to fill the viewport
-	const aspect = container.clientWidth / container.clientHeight;
+	// Camera - z=5 to frame the 4.5 unit tall book nicely
+	const width = container.clientWidth || 800;
+	const height = container.clientHeight || 600;
+	console.log('BookScene renderer size:', width, 'x', height);
+
+	const aspect = width / height;
 	const camera = new THREE.PerspectiveCamera(50, aspect, 0.1, 1000);
-	camera.position.set(0, 0.3, 2.5);
+	camera.position.set(0, 0.2, 5);
 	camera.lookAt(0, 0, 0);
 
 	// Renderer with shadows
@@ -23,7 +27,7 @@ export function createBookScene(container: HTMLElement): BookScene {
 		antialias: true,
 		alpha: true
 	});
-	renderer.setSize(container.clientWidth, container.clientHeight);
+	renderer.setSize(width, height);
 	renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 	renderer.shadowMap.enabled = true;
 	renderer.shadowMap.type = THREE.PCFSoftShadowMap;
