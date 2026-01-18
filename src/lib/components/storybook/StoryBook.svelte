@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import type { StoryChapter } from '$lib/types/story';
 
 	interface Props {
@@ -11,134 +11,89 @@
 	let { chapters, repoName, onPageChange }: Props = $props();
 
 	let container: HTMLDivElement;
-	let animator: Awaited<ReturnType<typeof import('$lib/three/page-animator').createPageAnimator>> | null = null;
+	let book: Awaited<ReturnType<typeof import('$lib/three/book').createBook>> | null = null;
 	let isReady = $state(false);
-	let animationFrameId: number;
-	let cleanupFn: (() => void) | null = null;
-	let resizeObserver: ResizeObserver | null = null;
 
 	onMount(() => {
-		let sceneRef: Awaited<ReturnType<typeof import('$lib/three/book-scene').createBookScene>> | null = null;
+		let animationFrameId: number;
+		let resizeObserver: ResizeObserver | null = null;
 
-		// Wait for container to have valid dimensions before initializing
-		const initScene = async () => {
+		const init = async () => {
 			if (!container || container.clientWidth === 0 || container.clientHeight === 0) {
-				requestAnimationFrame(initScene);
+				requestAnimationFrame(init);
 				return;
 			}
 
-			console.log('Book container dimensions:', container.clientWidth, 'x', container.clientHeight);
+			const { createBook } = await import('$lib/three/book');
+			book = await createBook(container, chapters, repoName);
 
-			// Dynamic import to avoid SSR issues
-			const [{ createBookScene }, { createBook }, { createPageAnimator }] = await Promise.all([
-				import('$lib/three/book-scene'),
-				import('$lib/three/book-geometry'),
-				import('$lib/three/page-animator')
-			]);
-
-			sceneRef = createBookScene(container);
-			const book = await createBook(chapters, repoName);
-			sceneRef.scene.add(book.group);
-
-			animator = createPageAnimator(book);
-
-			// Animation loop
 			const animate = () => {
-				if (!sceneRef) return;
 				animationFrameId = requestAnimationFrame(animate);
-				sceneRef.renderer.render(sceneRef.scene, sceneRef.camera);
+				book?.renderer.render(book.scene, book.camera);
 			};
 			animate();
 
-			// Use ResizeObserver for better container resize handling
 			resizeObserver = new ResizeObserver((entries) => {
-				if (!sceneRef) return;
 				for (const entry of entries) {
 					const { width, height } = entry.contentRect;
-					if (width > 0 && height > 0) {
-						sceneRef.camera.aspect = width / height;
-						sceneRef.camera.updateProjectionMatrix();
-						sceneRef.renderer.setSize(width, height);
+					if (width > 0 && height > 0 && book) {
+						book.camera.aspect = width / height;
+						book.camera.updateProjectionMatrix();
+						book.renderer.setSize(width, height);
 					}
 				}
 			});
 			resizeObserver.observe(container);
 
-			// Open book automatically
 			setTimeout(async () => {
-				if (animator) {
-					await animator.openBook();
-					onPageChange?.(animator.currentPage + 1, animator.totalPages);
+				if (book) {
+					await book.openBook();
+					onPageChange?.(book.currentPage + 1, book.totalPages);
 				}
 			}, 500);
 
 			isReady = true;
-
-			// Keyboard navigation
-			const handleKeydown = (e: KeyboardEvent) => {
-				if (e.key === 'ArrowRight' || e.key === ' ') {
-					e.preventDefault();
-					nextPage();
-				} else if (e.key === 'ArrowLeft') {
-					e.preventDefault();
-					prevPage();
-				}
-			};
-			window.addEventListener('keydown', handleKeydown);
-
-			// Store cleanup function
-			cleanupFn = () => {
-				window.removeEventListener('keydown', handleKeydown);
-				cancelAnimationFrame(animationFrameId);
-				resizeObserver?.disconnect();
-				sceneRef?.dispose();
-			};
 		};
 
-		initScene();
+		const handleKeydown = (e: KeyboardEvent) => {
+			if (e.key === 'ArrowRight' || e.key === ' ') {
+				e.preventDefault();
+				nextPage();
+			} else if (e.key === 'ArrowLeft') {
+				e.preventDefault();
+				prevPage();
+			}
+		};
+		window.addEventListener('keydown', handleKeydown);
 
-		// Return synchronous cleanup
+		init();
+
 		return () => {
-			cleanupFn?.();
-		};
-	});
-
-	onDestroy(() => {
-		if (animationFrameId) {
+			window.removeEventListener('keydown', handleKeydown);
 			cancelAnimationFrame(animationFrameId);
-		}
+			resizeObserver?.disconnect();
+			book?.dispose();
+		};
 	});
 
 	export async function nextPage() {
-		if (!animator || animator.isAnimating) return;
-		await animator.nextPage();
-		onPageChange?.(animator.currentPage + 1, animator.totalPages);
+		if (!book || book.isAnimating) return;
+		await book.nextPage();
+		onPageChange?.(book.currentPage + 1, book.totalPages);
 	}
 
 	export async function prevPage() {
-		if (!animator || animator.isAnimating) return;
-		await animator.prevPage();
-		onPageChange?.(animator.currentPage + 1, animator.totalPages);
+		if (!book || book.isAnimating) return;
+		await book.prevPage();
+		onPageChange?.(book.currentPage + 1, book.totalPages);
 	}
 
 	function handleClick(e: MouseEvent) {
 		if (!container) return;
 		const rect = container.getBoundingClientRect();
 		const x = e.clientX - rect.left;
-		const midpoint = rect.width / 2;
-
-		if (x > midpoint) {
-			nextPage();
-		} else {
-			prevPage();
-		}
-	}
-
-	function handleKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter' || e.key === ' ') {
-			e.preventDefault();
-			nextPage();
-		}
+		if (x > rect.width / 2) nextPage();
+		else prevPage();
 	}
 </script>
 
@@ -151,7 +106,7 @@
 	tabindex="0"
 	class="h-full w-full cursor-pointer outline-none"
 	onclick={handleClick}
-	onkeydown={handleKeydown}
+	onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); nextPage(); } }}
 >
 	{#if !isReady}
 		<div class="flex h-full w-full items-center justify-center">
