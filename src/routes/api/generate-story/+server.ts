@@ -132,13 +132,13 @@ Weave these events into a SHORT fantasy epic (3-4 chapters, 100-150 words each).
 				}
 
 				try {
-					// Generate image using gpt-image-1
+					// Generate image using dall-e-3
 					const imageResponse = await openai.images.generate({
-						model: 'gpt-image-1',
+						model: 'dall-e-3',
 						prompt: chapter.image_prompt,
 						n: 1,
 						size: '1024x1024',
-						quality: 'low'
+						quality: 'standard'
 					});
 
 					const imageData = imageResponse.data?.[0];
