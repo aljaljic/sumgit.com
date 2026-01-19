@@ -5,7 +5,8 @@
 	import logo from '$lib/assets/logo.png';
 	import StoryLoader from '$lib/components/storybook/StoryLoader.svelte';
 	import PageControls from '$lib/components/storybook/PageControls.svelte';
-	import type { StoryChapter } from '$lib/types/story';
+	import type { StoryChapter, NarrativeStyleId } from '$lib/types/story';
+	import { NARRATIVE_STYLES } from '$lib/types/story';
 	import PurchaseCreditsDialog from '$lib/components/PurchaseCreditsDialog.svelte';
 	import { CREDIT_COSTS } from '$lib/credits';
 
@@ -21,6 +22,7 @@
 		prevPage: () => Promise<void>;
 	} | null>(null);
 	let showPurchaseDialog = $state(false);
+	let selectedStyle = $state<NarrativeStyleId>('fantasy');
 
 	async function generateStory() {
 		if (isGenerating) return;
@@ -32,7 +34,10 @@
 			const response = await fetch('/api/generate-story', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ repository_id: data.repository.id })
+				body: JSON.stringify({
+					repository_id: data.repository.id,
+					narrative_style: selectedStyle
+				})
 			});
 
 			if (response.status === 402) {
@@ -172,6 +177,28 @@
 							? ''
 							: 's'} into an engaging narrative about your project's journey
 					</p>
+
+					<!-- Narrative Style Selector -->
+					<div class="mb-6 w-full max-w-2xl">
+						<p class="mb-3 text-sm font-medium text-muted-foreground">Choose your narrative style</p>
+						<div class="flex flex-wrap justify-center gap-2">
+							{#each NARRATIVE_STYLES as style}
+								<button
+									type="button"
+									onclick={() => (selectedStyle = style.id)}
+									class="flex flex-col items-center gap-1 rounded-lg border-2 px-4 py-3 transition-all hover:border-amber-500/50 {selectedStyle ===
+									style.id
+										? 'border-amber-500 bg-amber-500/10'
+										: 'border-border bg-card'}"
+								>
+									<span class="text-xl">{style.icon}</span>
+									<span class="text-sm font-medium">{style.name}</span>
+									<span class="text-xs text-muted-foreground">{style.description}</span>
+								</button>
+							{/each}
+						</div>
+					</div>
+
 					<Button onclick={generateStory} class="gap-2">
 						{#if isGenerating}
 							<Loader2 class="h-4 w-4 animate-spin" />

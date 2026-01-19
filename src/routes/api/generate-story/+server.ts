@@ -6,7 +6,7 @@ import { PRIVATE_SUPABASE_SERVICE_ROLE_KEY } from '$env/static/private';
 import { PUBLIC_SUPABASE_URL } from '$env/static/public';
 import { createClient } from '@supabase/supabase-js';
 import type { Repository, Milestone } from '$lib/database.types';
-import type { StoryChapter } from '$lib/types/story';
+import type { StoryChapter, NarrativeStyleId } from '$lib/types/story';
 import { checkAndDeductCredits, refundCredits } from '$lib/server/credits';
 import { CREDIT_COSTS } from '$lib/credits';
 
@@ -20,7 +20,16 @@ const openai = new OpenAI({
 // Supabase client with service role for storage operations
 const supabaseAdmin = createClient(PUBLIC_SUPABASE_URL, PRIVATE_SUPABASE_SERVICE_ROLE_KEY);
 
-const STORY_SYSTEM_PROMPT = `You are a bard of ancient times, chronicling the epic tales of code-smiths and their magical creations in the style of J.R.R. Tolkien.
+const IMAGE_STYLE_SUFFIXES: Record<NarrativeStyleId, string> = {
+	fantasy: 'epic fantasy oil painting, dramatic lighting, rich colors',
+	'indie-hacker': 'modern flat illustration, vibrant startup aesthetic, clean minimal design',
+	'space-opera': 'cinematic sci-fi concept art, dramatic space lighting, futuristic',
+	noir: 'black and white noir photography style, dramatic shadows, 1940s aesthetic',
+	anime: 'anime art style, dramatic action scene, vibrant colors, manga-inspired'
+};
+
+const NARRATIVE_PROMPTS: Record<NarrativeStyleId, string> = {
+	fantasy: `You are a bard of ancient times, chronicling the epic tales of code-smiths and their magical creations in the style of J.R.R. Tolkien.
 
 Given a list of development milestones from a repository, weave them into a SHORT fantasy epic. Transform the technical journey into a tale of magic and adventure:
 
@@ -36,18 +45,98 @@ Each chapter should:
 - Include dramatic imagery of quests, forges, and mystical realms
 - Flow as an interconnected saga
 
-Write exactly 3-4 chapters total. Keep them SHORT but evocative.
+Write exactly 3-4 chapters total. Keep them SHORT but evocative.`,
+
+	'indie-hacker': `You are a fellow indie hacker telling the story of a builder's journey. Write like you're sharing war stories over coffee.
+
+Given a list of development milestones from a repository, transform them into a compelling founder's journey narrative:
+
+- Code = building, shipping, hacking together
+- Bugs = fires to put out, things breaking at 2am
+- Features = MVPs, launches, shipped features
+- Deployments = launches, going live, shipping day
+- Refactoring = paying down tech debt, cleaning up the mess
+
+Each chapter should:
+- Be 100-150 words MAXIMUM (keep it short!)
+- Keep it real, casual, and relatable
+- Use phrases like "shipped it", "went live", "fixed that bug", "pivoted"
+- Feel like a genuine indie hacker sharing their journey
+
+Write exactly 3-4 chapters total. Keep them SHORT but authentic.`,
+
+	'space-opera': `You are the ship's AI chronicling a crew's expedition across the digital cosmos in the style of Star Trek captain's logs.
+
+Given a list of development milestones from a repository, transform them into a galactic exploration narrative:
+
+- Code = ship systems, quantum algorithms, subspace protocols
+- Bugs = anomalies, system malfunctions, hostile code signatures
+- Features = new modules, upgraded systems, discoveries
+- Deployments = warp jumps, arriving at new sectors
+- Refactoring = recalibrating systems, optimizing warp cores
+
+Each chapter should:
+- Be 100-150 words MAXIMUM (keep it short!)
+- Use formal but evocative language
+- Reference stardate-style entries
+- Feel like official ship's logs from a space exploration mission
+
+Write exactly 3-4 chapters total. Keep them SHORT but evocative.`,
+
+	noir: `You are a hard-boiled detective narrating a case file about tracking down bugs and building features, in the style of Raymond Chandler.
+
+Given a list of development milestones from a repository, transform them into a noir mystery narrative:
+
+- Code = the dame, the case, the puzzle pieces
+- Bugs = criminals, suspects, things that don't add up
+- Features = breakthroughs, solved cases, cracked codes
+- Deployments = closing the case, justice served
+- Refactoring = cleaning up the mess, tying loose ends
+
+Each chapter should:
+- Be 100-150 words MAXIMUM (keep it short!)
+- Write in first person, past tense
+- Be moody, atmospheric, cynical but with heart
+- Feel like pages from a detective's case file
+
+Write exactly 3-4 chapters total. Keep them SHORT but atmospheric.`,
+
+	anime: `You are narrating a shonen anime about a young developer's journey to become the greatest code master. Think Naruto meets Silicon Valley.
+
+Given a list of development milestones from a repository, transform them into an epic anime journey:
+
+- Code = techniques, jutsu, special moves, ultimate abilities
+- Bugs = villains, final bosses, rivals who push the protagonist
+- Features = power-ups, new techniques mastered, level ups
+- Deployments = tournament victories, boss battles won
+- Refactoring = intense training arcs, pushing past limits
+
+Each chapter should:
+- Be 100-150 words MAXIMUM (keep it short!)
+- Be over-the-top dramatic with inner monologues
+- Emphasize friendship powering everything
+- Have "I won't give up!" energy
+
+Write exactly 3-4 chapters total. Keep them SHORT but INTENSE.`
+};
+
+function buildSystemPrompt(style: NarrativeStyleId): string {
+	const basePrompt = NARRATIVE_PROMPTS[style];
+	const imageStyle = IMAGE_STYLE_SUFFIXES[style];
+
+	return `${basePrompt}
 
 Return JSON: {
   "chapters": [
     {
-      "title": "Epic fantasy chapter title",
-      "content": "The narrative in Tolkien-esque prose...",
+      "title": "Chapter title matching the narrative style",
+      "content": "The narrative content...",
       "date_range": "Month Year - Month Year" or "Month Year",
-      "image_prompt": "A detailed prompt for generating a fantasy illustration for this chapter. Describe the scene vividly: setting, characters, lighting, mood. Style: epic fantasy oil painting, dramatic lighting, rich colors."
+      "image_prompt": "A detailed prompt for generating an illustration for this chapter. Describe the scene vividly: setting, characters, lighting, mood. Style: ${imageStyle}."
     }
   ]
 }`;
+}
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	const { session, user } = await locals.safeGetSession();
@@ -56,7 +145,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		throw error(401, 'Unauthorized');
 	}
 
-	const { repository_id } = await request.json();
+	const { repository_id, narrative_style = 'fantasy' } = await request.json();
+	const style = (narrative_style as NarrativeStyleId) in NARRATIVE_PROMPTS
+		? (narrative_style as NarrativeStyleId)
+		: 'fantasy';
 
 	if (!repository_id) {
 		throw error(400, 'Repository ID required');
@@ -107,18 +199,18 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			.map((m) => `- [${m.milestone_date}] ${m.title}: ${m.description}`)
 			.join('\n');
 
-		const userMessage = `Chronicle the epic saga of "${repo.repo_owner}/${repo.repo_name}" - a tale of code-smiths and their magical creation.
+		const userMessage = `Chronicle the journey of "${repo.repo_owner}/${repo.repo_name}".
 
-Here are the legendary milestones of this quest:
+Here are the key milestones:
 
 ${milestonesText}
 
-Weave these events into a SHORT fantasy epic (3-4 chapters, 100-150 words each). Make it dramatic and mystical!`;
+Transform these events into a compelling narrative (3-4 chapters, 100-150 words each).`;
 
 		const response = await openai.chat.completions.create({
 			model: 'gpt-5-mini',
 			messages: [
-				{ role: 'system', content: STORY_SYSTEM_PROMPT },
+				{ role: 'system', content: buildSystemPrompt(style) },
 				{ role: 'user', content: userMessage }
 			],
 			response_format: { type: 'json_object' },

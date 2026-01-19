@@ -473,3 +473,70 @@ export function createEndPageTexture(): THREE.CanvasTexture {
 	texture.needsUpdate = true;
 	return texture;
 }
+
+export function createSpineTexture(repoName: string): THREE.CanvasTexture {
+	const canvas = document.createElement('canvas');
+	canvas.width = 256;
+	canvas.height = 1280;
+	const ctx = canvas.getContext('2d')!;
+
+	// Leather gradient background
+	const gradient = ctx.createLinearGradient(0, 0, 256, 0);
+	gradient.addColorStop(0, '#2d1b0e');
+	gradient.addColorStop(0.5, '#4a2c1a');
+	gradient.addColorStop(1, '#2d1b0e');
+	ctx.fillStyle = gradient;
+	ctx.fillRect(0, 0, 256, 1280);
+
+	// Gold decorative border
+	ctx.strokeStyle = '#b8860b';
+	ctx.lineWidth = 4;
+	ctx.strokeRect(20, 40, 216, 1200);
+
+	// Rotated title
+	ctx.save();
+	ctx.translate(128, 640);
+	ctx.rotate(-Math.PI / 2);
+	ctx.fillStyle = '#d4af37';
+	ctx.font = 'bold 32px Georgia, serif';
+	ctx.textAlign = 'center';
+	ctx.fillText(repoName.substring(0, 30), 0, 0);
+	ctx.restore();
+
+	const texture = new THREE.CanvasTexture(canvas);
+	texture.needsUpdate = true;
+	return texture;
+}
+
+export function createPageEdgeTexture(): THREE.CanvasTexture {
+	const canvas = document.createElement('canvas');
+	canvas.width = 64;
+	canvas.height = 512;
+	const ctx = canvas.getContext('2d')!;
+
+	// Cream base
+	ctx.fillStyle = '#f5f0e6';
+	ctx.fillRect(0, 0, 64, 512);
+
+	// Horizontal lines for page edges
+	ctx.strokeStyle = '#e0d8c8';
+	ctx.lineWidth = 1;
+	for (let y = 0; y < 512; y += 3) {
+		ctx.beginPath();
+		ctx.moveTo(0, y);
+		ctx.lineTo(64, y);
+		ctx.stroke();
+	}
+
+	// Age staining gradient
+	const stainGradient = ctx.createLinearGradient(0, 0, 64, 0);
+	stainGradient.addColorStop(0, 'rgba(139, 90, 43, 0.15)');
+	stainGradient.addColorStop(0.5, 'rgba(139, 90, 43, 0.05)');
+	stainGradient.addColorStop(1, 'rgba(139, 90, 43, 0.15)');
+	ctx.fillStyle = stainGradient;
+	ctx.fillRect(0, 0, 64, 512);
+
+	const texture = new THREE.CanvasTexture(canvas);
+	texture.needsUpdate = true;
+	return texture;
+}

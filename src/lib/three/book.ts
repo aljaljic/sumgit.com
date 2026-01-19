@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import gsap from 'gsap';
 import type { StoryChapter } from '$lib/types/story';
-import { createTextTexture, createCoverTexture, createTitlePageTexture, createBackCoverTexture } from './text-texture';
+import { createTextTexture, createCoverTexture, createTitlePageTexture, createBackCoverTexture, createSpineTexture, createPageEdgeTexture } from './text-texture';
 
 // Book dimensions
 const BOOK_WIDTH = 3.5;
@@ -44,19 +44,37 @@ export async function createBook(
 	renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 	renderer.shadowMap.enabled = true;
 	renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+	renderer.toneMapping = THREE.ACESFilmicToneMapping;
+	renderer.toneMappingExposure = 1.1;
+	renderer.outputColorSpace = THREE.SRGBColorSpace;
 	container.appendChild(renderer.domElement);
 
-	// Lighting
-	scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+	// 3-point studio lighting
+	// Key light (warm, main illumination)
+	const keyLight = new THREE.DirectionalLight(0xfff5e6, 1.2);
+	keyLight.position.set(5, 8, 8);
+	keyLight.castShadow = true;
+	keyLight.shadow.mapSize.width = 4096;
+	keyLight.shadow.mapSize.height = 4096;
+	keyLight.shadow.camera.near = 1;
+	keyLight.shadow.camera.far = 25;
+	keyLight.shadow.bias = -0.0001;
+	keyLight.shadow.normalBias = 0.02;
+	scene.add(keyLight);
 
-	const mainLight = new THREE.DirectionalLight(0xffffff, 1);
-	mainLight.position.set(5, 10, 7);
-	mainLight.castShadow = true;
-	mainLight.shadow.mapSize.width = 2048;
-	mainLight.shadow.mapSize.height = 2048;
-	scene.add(mainLight);
+	// Fill light (cool, softer)
+	const fillLight = new THREE.DirectionalLight(0xe6f0ff, 0.4);
+	fillLight.position.set(-5, 3, 3);
+	scene.add(fillLight);
 
-	scene.add(new THREE.DirectionalLight(0xffffff, 0.3).translateX(-5).translateY(5).translateZ(-5));
+	// Rim/back light (edge separation)
+	const rimLight = new THREE.DirectionalLight(0xffffff, 0.6);
+	rimLight.position.set(0, 2, -5);
+	scene.add(rimLight);
+
+	// Ambient (lower for more contrast)
+	const ambientLight = new THREE.AmbientLight(0xffffff, 0.25);
+	scene.add(ambientLight);
 
 	// Build the book geometry
 	const group = new THREE.Group();
@@ -93,6 +111,36 @@ export async function createBook(
 	backCover.castShadow = true;
 	backCover.visible = false; // Hidden until book closes
 	group.add(backCover);
+
+	// Book spine
+	const spineWidth = 0.08;
+	const spineGeometry = new THREE.BoxGeometry(spineWidth, BOOK_HEIGHT, BOOK_DEPTH + 0.1);
+	const spineTexture = createSpineTexture(repoName);
+	const spine = new THREE.Mesh(
+		spineGeometry,
+		new THREE.MeshStandardMaterial({
+			map: spineTexture,
+			roughness: 0.6,
+			metalness: 0.1
+		})
+	);
+	spine.position.set(BOOK_WIDTH / 2 + spineWidth / 2, 0, 0);
+	spine.castShadow = true;
+	group.add(spine);
+
+	// Page stack edges (visible paper stack)
+	const pageStackGeometry = new THREE.BoxGeometry(0.02, BOOK_HEIGHT - 0.2, BOOK_DEPTH - 0.1);
+	const pageStackTexture = createPageEdgeTexture();
+	const pageStack = new THREE.Mesh(
+		pageStackGeometry,
+		new THREE.MeshStandardMaterial({
+			map: pageStackTexture,
+			roughness: 0.9,
+			metalness: 0
+		})
+	);
+	pageStack.position.set(-0.04, 0, 0);
+	group.add(pageStack);
 
 	// Create page textures: title page + chapters
 	const titleTexture = createTitlePageTexture(repoName);

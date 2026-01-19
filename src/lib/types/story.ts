@@ -18,3 +18,45 @@ export interface GenerateStoryResponse {
 	story?: Story;
 	error?: string;
 }
+
+export type NarrativeStyleId = 'fantasy' | 'indie-hacker' | 'space-opera' | 'noir' | 'anime';
+
+export interface NarrativeStyle {
+	id: NarrativeStyleId;
+	name: string;
+	description: string;
+	icon: string;
+}
+
+export const NARRATIVE_STYLES: NarrativeStyle[] = [
+	{
+		id: 'fantasy',
+		name: 'Fantasy',
+		description: 'Tolkien-esque epic tales',
+		icon: '⚔️'
+	},
+	{
+		id: 'indie-hacker',
+		name: 'Indie Hacker',
+		description: 'Startup founder journey',
+		icon: '🚀'
+	},
+	{
+		id: 'space-opera',
+		name: 'Space Opera',
+		description: "Sci-fi captain's log",
+		icon: '🌌'
+	},
+	{
+		id: 'noir',
+		name: 'Noir Detective',
+		description: 'Hard-boiled mystery',
+		icon: '🔍'
+	},
+	{
+		id: 'anime',
+		name: 'Anime',
+		description: 'Shonen dramatic journey',
+		icon: '⚡'
+	}
+];
