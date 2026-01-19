@@ -22,9 +22,19 @@
 	let purchasing = $state<string | null>(null);
 	let purchaseError = $state<string | null>(null);
 
+	async function signInWithGitHub() {
+		await data.supabase.auth.signInWithOAuth({
+			provider: 'github',
+			options: {
+				redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent('/pricing')}`,
+				scopes: 'read:user'
+			}
+		});
+	}
+
 	async function purchasePackage(packageId: string) {
 		if (!data.isLoggedIn) {
-			window.location.href = '/login?redirect=/pricing';
+			signInWithGitHub();
 			return;
 		}
 
@@ -70,7 +80,7 @@
 						Dashboard
 					</Button>
 				{:else}
-					<Button href="/login" variant="outline" size="sm">
+					<Button onclick={signInWithGitHub} variant="outline" size="sm">
 						Sign in
 					</Button>
 				{/if}
@@ -109,7 +119,7 @@
 						</p>
 					</div>
 					{#if !data.isLoggedIn}
-						<Button href="/login" class="ml-auto">
+						<Button onclick={signInWithGitHub} class="ml-auto">
 							Get started free
 						</Button>
 					{/if}
