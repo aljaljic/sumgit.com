@@ -108,7 +108,6 @@ Weave these events into a SHORT fantasy epic (3-4 chapters, 100-150 words each).
 				{ role: 'user', content: userMessage }
 			],
 			response_format: { type: 'json_object' },
-			temperature: 0.8,
 			max_completion_tokens: 4000
 		});
 
