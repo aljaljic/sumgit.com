@@ -23,11 +23,12 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		throw error(404, 'Repository not found');
 	}
 
-	// Fetch milestones ordered by date
+	// Fetch quick milestones ordered by date
 	const { data: milestones, error: milestonesError } = await locals.supabase
 		.from('milestones')
 		.select('*')
 		.eq('repository_id', id)
+		.eq('source', 'quick')
 		.order('milestone_date', { ascending: false });
 
 	if (milestonesError) {

@@ -287,8 +287,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			throw lastError;
 		}
 
-		// Clear existing milestones for this repo
-		await locals.supabase.from('milestones').delete().eq('repository_id', repository_id);
+		// Clear existing timeline milestones for this repo
+		await locals.supabase.from('milestones').delete().eq('repository_id', repository_id).eq('source', 'timeline');
 
 		// Insert new milestones
 		if (milestones.length > 0) {
@@ -300,7 +300,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					description: m.description,
 					commit_sha: m.commit_sha,
 					milestone_date: (m.milestone_date ?? new Date().toISOString()).split('T')[0],
-					x_post_suggestion: m.x_post_suggestion
+					x_post_suggestion: m.x_post_suggestion,
+					source: 'timeline'
 				}));
 
 			const { error: insertError } = await locals.supabase

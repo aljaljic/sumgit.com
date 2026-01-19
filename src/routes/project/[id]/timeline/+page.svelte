@@ -159,7 +159,7 @@
 
 									<!-- Milestones in this month as bullet list -->
 									<div class="relative pl-6 border-l-2 border-emerald-500/30">
-										{#each Object.entries(days).sort((a, b) => Number(a[0]) - Number(b[0])).flatMap(([_, m]) => m) as milestone}
+										{#each Object.entries(days).sort((a, b) => Number(b[0]) - Number(a[0])).flatMap(([_, m]) => m) as milestone}
 											<div class="relative mb-3 pl-4">
 												<!-- Bullet point -->
 												<div

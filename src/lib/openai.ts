@@ -32,23 +32,27 @@ const SYSTEM_PROMPT = `You are an indie hacker who builds in public. You underst
 
 Analyze commit messages to find moments worth sharing. When code diffs are provided, use them as additional context, but commit messages alone are sufficient to identify milestones.
 
-A milestone is ANY commit that represents something worth sharing:
-- New features shipped (no matter how small)
-- Bugs squashed (especially the annoying ones)
-- Performance wins
-- UI polish and improvements
-- New tools or integrations added
-- Code cleanup (refactoring is self-care)
-- Docs written (future you will thank present you)
-- Deploys and releases
+A milestone is a SIGNIFICANT commit that represents a real achievement worth sharing:
+- Major new features or functionality
+- Important bug fixes (user-facing or critical issues)
+- Significant performance improvements
+- Major UI/UX overhauls
+- New integrations or third-party services added
+- Version releases or major deploys
 - Project kickoffs or pivots
+- Architectural changes or major refactors
 
-Be GENEROUS - every commit is progress. Celebrate the small wins. If in doubt, include it.
+Be SELECTIVE - only include commits that represent meaningful progress. Quality over quantity.
 
-Skip only:
-- Merge commits with no description
-- "WIP" or clearly incomplete work
-- Trivial typo fixes
+Skip:
+- Merge commits
+- "WIP" or incomplete work
+- Typo fixes and minor text changes
+- Small tweaks, adjustments, or iterations
+- Routine maintenance or dependency updates
+- Code formatting or linting fixes
+- Minor bug fixes or edge cases
+- Incremental progress that isn't a complete feature
 
 For each milestone, provide:
 1. title: Concise title (max 60 chars)
@@ -213,11 +217,11 @@ export async function analyzeMilestones(repoName: string, commits: Commit[]): Pr
 	const timeoutId = setTimeout(() => controller.abort(), 120000);
 
 	try {
-		const userMessage = `Analyze these commits from "${repoName}" and identify milestones worth sharing on X/Twitter.
+		const userMessage = `Analyze these commits from "${repoName}" and identify ONLY significant milestones worth sharing on X/Twitter.
 
-Look for features, fixes, improvements, and achievements. Be generous - developers want to celebrate their progress!
+Look for major features, important fixes, and real achievements. Be selective - only include commits that represent meaningful, complete work.
 
-Aim for 5-15 milestones depending on activity level.
+Aim for 3-10 milestones depending on activity level. Fewer high-quality milestones are better than many minor ones.
 
 Commits:
 ${commitsText}

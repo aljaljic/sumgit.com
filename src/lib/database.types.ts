@@ -104,6 +104,7 @@ export interface Database {
 					commit_sha: string | null;
 					milestone_date: string;
 					x_post_suggestion: string | null;
+					source: string | null;
 					created_at: string;
 				};
 				Insert: {
@@ -114,6 +115,7 @@ export interface Database {
 					commit_sha?: string | null;
 					milestone_date: string;
 					x_post_suggestion?: string | null;
+					source?: string | null;
 					created_at?: string;
 				};
 				Update: {
@@ -124,6 +126,7 @@ export interface Database {
 					commit_sha?: string | null;
 					milestone_date?: string;
 					x_post_suggestion?: string | null;
+					source?: string | null;
 					created_at?: string;
 				};
 				Relationships: [
