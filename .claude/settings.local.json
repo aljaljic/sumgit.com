@@ -26,7 +26,11 @@
       "Bash(git commit:*)",
       "Bash(pnpm tsc:*)",
       "Bash(pnpm svelte-check:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(npx shadcn-svelte@latest add dialog:*)",
+      "Bash(xargs cat:*)",
+      "Bash(pnpm ls:*)",
+      "Bash(pnpm list:*)"
     ]
   }
 }

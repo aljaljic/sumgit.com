@@ -138,9 +138,152 @@ export interface Database {
 					}
 				];
 			};
+			credit_balances: {
+				Row: {
+					id: string;
+					user_id: string;
+					balance: number;
+					lifetime_purchased: number;
+					lifetime_used: number;
+					created_at: string;
+					updated_at: string;
+				};
+				Insert: {
+					id?: string;
+					user_id: string;
+					balance?: number;
+					lifetime_purchased?: number;
+					lifetime_used?: number;
+					created_at?: string;
+					updated_at?: string;
+				};
+				Update: {
+					id?: string;
+					user_id?: string;
+					balance?: number;
+					lifetime_purchased?: number;
+					lifetime_used?: number;
+					created_at?: string;
+					updated_at?: string;
+				};
+				Relationships: [];
+			};
+			credit_transactions: {
+				Row: {
+					id: string;
+					user_id: string;
+					amount: number;
+					balance_after: number;
+					transaction_type: 'welcome_bonus' | 'purchase' | 'usage' | 'refund' | 'admin_adjustment';
+					operation_type: string | null;
+					repository_id: string | null;
+					stripe_session_id: string | null;
+					stripe_payment_intent_id: string | null;
+					description: string | null;
+					created_at: string;
+				};
+				Insert: {
+					id?: string;
+					user_id: string;
+					amount: number;
+					balance_after: number;
+					transaction_type: 'welcome_bonus' | 'purchase' | 'usage' | 'refund' | 'admin_adjustment';
+					operation_type?: string | null;
+					repository_id?: string | null;
+					stripe_session_id?: string | null;
+					stripe_payment_intent_id?: string | null;
+					description?: string | null;
+					created_at?: string;
+				};
+				Update: {
+					id?: string;
+					user_id?: string;
+					amount?: number;
+					balance_after?: number;
+					transaction_type?: 'welcome_bonus' | 'purchase' | 'usage' | 'refund' | 'admin_adjustment';
+					operation_type?: string | null;
+					repository_id?: string | null;
+					stripe_session_id?: string | null;
+					stripe_payment_intent_id?: string | null;
+					description?: string | null;
+					created_at?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'credit_transactions_repository_id_fkey';
+						columns: ['repository_id'];
+						referencedRelation: 'repositories';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			stripe_customers: {
+				Row: {
+					id: string;
+					user_id: string;
+					stripe_customer_id: string;
+					created_at: string;
+				};
+				Insert: {
+					id?: string;
+					user_id: string;
+					stripe_customer_id: string;
+					created_at?: string;
+				};
+				Update: {
+					id?: string;
+					user_id?: string;
+					stripe_customer_id?: string;
+					created_at?: string;
+				};
+				Relationships: [];
+			};
 		};
 		Views: Record<string, never>;
-		Functions: Record<string, never>;
+		Functions: {
+			deduct_credits: {
+				Args: {
+					p_user_id: string;
+					p_amount: number;
+					p_operation_type: string;
+					p_repository_id?: string;
+					p_description?: string;
+				};
+				Returns: {
+					success: boolean;
+					new_balance: number;
+					error_message: string | null;
+				}[];
+			};
+			add_credits: {
+				Args: {
+					p_user_id: string;
+					p_amount: number;
+					p_transaction_type: string;
+					p_stripe_session_id?: string;
+					p_stripe_payment_intent_id?: string;
+					p_description?: string;
+				};
+				Returns: {
+					success: boolean;
+					new_balance: number;
+					error_message: string | null;
+				}[];
+			};
+			refund_credits: {
+				Args: {
+					p_user_id: string;
+					p_amount: number;
+					p_operation_type: string;
+					p_description?: string;
+				};
+				Returns: {
+					success: boolean;
+					new_balance: number;
+					error_message: string | null;
+				}[];
+			};
+		};
 		Enums: Record<string, never>;
 		CompositeTypes: Record<string, never>;
 	};
@@ -151,3 +294,6 @@ export type Profile = Database['public']['Tables']['profiles']['Row'];
 export type Repository = Database['public']['Tables']['repositories']['Row'];
 export type Milestone = Database['public']['Tables']['milestones']['Row'];
 export type GitHubInstallation = Database['public']['Tables']['github_installations']['Row'];
+export type CreditBalance = Database['public']['Tables']['credit_balances']['Row'];
+export type CreditTransaction = Database['public']['Tables']['credit_transactions']['Row'];
+export type StripeCustomer = Database['public']['Tables']['stripe_customers']['Row'];

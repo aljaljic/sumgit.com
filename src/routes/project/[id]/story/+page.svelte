@@ -6,6 +6,8 @@
 	import StoryLoader from '$lib/components/storybook/StoryLoader.svelte';
 	import PageControls from '$lib/components/storybook/PageControls.svelte';
 	import type { StoryChapter } from '$lib/types/story';
+	import PurchaseCreditsDialog from '$lib/components/PurchaseCreditsDialog.svelte';
+	import { CREDIT_COSTS } from '$lib/credits';
 
 	let { data } = $props();
 
@@ -18,6 +20,7 @@
 		nextPage: () => Promise<void>;
 		prevPage: () => Promise<void>;
 	} | null>(null);
+	let showPurchaseDialog = $state(false);
 
 	async function generateStory() {
 		if (isGenerating) return;
@@ -31,6 +34,12 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ repository_id: data.repository.id })
 			});
+
+			if (response.status === 402) {
+				// Insufficient credits
+				showPurchaseDialog = true;
+				return;
+			}
 
 			if (!response.ok) {
 				const errorData = await response.json().catch(() => ({}));
@@ -177,3 +186,8 @@
 		</div>
 	</main>
 </div>
+
+<PurchaseCreditsDialog
+	bind:open={showPurchaseDialog}
+	onOpenChange={(open) => (showPurchaseDialog = open)}
+/>

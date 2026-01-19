@@ -1,8 +1,10 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getInstallationOctokit } from '$lib/github-app';
-import { analyzeMilestones, analyzeCommitsInChunks, type Commit } from '$lib/openai';
+import { analyzeMilestones, analyzeCommitsInChunks, type Commit, type MilestoneInput } from '$lib/openai';
 import type { Repository, Milestone, GitHubInstallation } from '$lib/database.types';
+import { checkAndDeductCredits, refundCredits } from '$lib/server/credits';
+import { CREDIT_COSTS } from '$lib/credits';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	const { session, user } = await locals.safeGetSession();
@@ -16,6 +18,18 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	if (!repository_id) {
 		throw error(400, 'Repository ID required');
 	}
+
+	// Check and deduct credits before processing
+	const creditResult = await checkAndDeductCredits(user.id, 'timeline_analyze', repository_id);
+	if (!creditResult.success) {
+		throw error(402, {
+			message: creditResult.error || 'Insufficient credits',
+			credits_required: CREDIT_COSTS.timeline_analyze,
+			credits_available: creditResult.newBalance
+		} as any);
+	}
+
+	let creditsDeducted = true;
 
 	// Get repository details
 	const { data: repoData } = await locals.supabase
@@ -237,7 +251,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		}
 
 		// Analyze commits with OpenAI (always use chunked analysis for timeline)
-		let milestones: Milestone[] = [];
+		let milestones: MilestoneInput[] = [];
 
 		const maxRetries = 3;
 		let retryCount = 0;
@@ -326,10 +340,16 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			milestones_count: milestones.length,
 			commits_analyzed: commitsForAnalysis.length,
 			commits_with_diffs: commitsWithDiffsCount,
-			total_commits: commits.length
+			total_commits: commits.length,
+			credits_remaining: creditResult.newBalance
 		});
 	} catch (err) {
 		console.error('Timeline analysis error:', err);
+
+		// Refund credits on failure
+		if (creditsDeducted) {
+			await refundCredits(user.id, 'timeline_analyze', 'Refund due to timeline analysis failure');
+		}
 
 		if (err instanceof Error) {
 			const errorMsg = err.message.toLowerCase();

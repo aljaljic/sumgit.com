@@ -1,8 +1,10 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getInstallationOctokit } from '$lib/github-app';
-import { analyzeMilestones, type Commit } from '$lib/openai';
+import { analyzeMilestones, type Commit, type MilestoneInput } from '$lib/openai';
 import type { Repository, Milestone, GitHubInstallation } from '$lib/database.types';
+import { checkAndDeductCredits, refundCredits, getUserCredits } from '$lib/server/credits';
+import { CREDIT_COSTS } from '$lib/credits';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	const { session, user } = await locals.safeGetSession();
@@ -16,6 +18,18 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	if (!repository_id) {
 		throw error(400, 'Repository ID required');
 	}
+
+	// Check and deduct credits before processing
+	const creditResult = await checkAndDeductCredits(user.id, 'quick_analyze', repository_id);
+	if (!creditResult.success) {
+		throw error(402, {
+			message: creditResult.error || 'Insufficient credits',
+			credits_required: CREDIT_COSTS.quick_analyze,
+			credits_available: creditResult.newBalance
+		} as any);
+	}
+
+	let creditsDeducted = true;
 
 	// Get repository details
 	const { data: repoData } = await locals.supabase
@@ -322,7 +336,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		// Always use single analysis for regular endpoint (max 100 commits fits in one call)
 		// Chunked analysis is only for timeline endpoint with thousands of commits
 		// This keeps subrequest count low: ~40 diff fetches + 1 OpenAI call + 2 Supabase calls
-		let milestones: Milestone[] = [];
+		let milestones: MilestoneInput[] = [];
 		console.log(`Analysis mode: single (regular endpoint always uses single mode)`);
 
 		const maxRetries = 3;
@@ -412,19 +426,25 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			.eq('id', repository_id);
 
 		const commitsWithDiffsCount = commitsForAnalysis.filter(c => c.diff).length;
-		
+
 		return json({
 			success: true,
 			milestones_count: milestones.length,
 			commits_analyzed: commitsForAnalysis.length,
 			commits_with_diffs: commitsWithDiffsCount,
 			total_commits: commits.length,
-			warning: hitSubrequestLimit 
+			credits_remaining: creditResult.newBalance,
+			warning: hitSubrequestLimit
 				? `Subrequest limit reached. Analyzed ${commitsWithDiffsCount} commits with diffs out of ${commits.length} total.`
 				: undefined
 		});
 	} catch (err) {
 		console.error('Analysis error:', err);
+
+		// Refund credits on failure
+		if (creditsDeducted) {
+			await refundCredits(user.id, 'quick_analyze', 'Refund due to analysis failure');
+		}
 		
 		// Provide more specific error messages
 		if (err instanceof Error) {

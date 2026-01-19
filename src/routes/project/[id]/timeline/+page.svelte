@@ -12,10 +12,13 @@
 	} from '@lucide/svelte';
 	import logo from '$lib/assets/logo.png';
 	import { invalidateAll } from '$app/navigation';
+	import PurchaseCreditsDialog from '$lib/components/PurchaseCreditsDialog.svelte';
+	import { CREDIT_COSTS } from '$lib/credits';
 
 	let { data } = $props();
 
 	let isAnalyzing = $state(false);
+	let showPurchaseDialog = $state(false);
 
 	async function analyzeTimeline() {
 		if (isAnalyzing) return;
@@ -27,6 +30,13 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ repository_id: data.repository.id })
 			});
+
+			if (response.status === 402) {
+				// Insufficient credits
+				const errorData = await response.json().catch(() => ({}));
+				showPurchaseDialog = true;
+				return;
+			}
 
 			if (!response.ok) {
 				const errorData = await response.json().catch(() => ({}));
@@ -67,20 +77,20 @@
 
 <div class="flex min-h-screen flex-col">
 	<!-- Header -->
-	<header class="border-b border-border/40 px-6 py-4">
-		<div class="mx-auto flex max-w-4xl items-center justify-between">
-			<div class="flex items-center gap-4">
-				<Button href="/project/{data.repository.id}" variant="ghost" size="sm" class="gap-2">
+	<header class="border-b border-border/40 px-4 py-3 sm:px-6 sm:py-4">
+		<div class="mx-auto flex max-w-4xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+			<div class="flex items-center gap-2 sm:gap-4">
+				<Button href="/project/{data.repository.id}" variant="ghost" size="sm" class="gap-2 px-2 sm:px-3">
 					<ArrowLeft class="h-4 w-4" />
-					Back
+					<span class="hidden sm:inline">Back</span>
 				</Button>
-				<Separator orientation="vertical" class="h-6" />
-				<div class="flex items-center gap-2">
-					<img src={logo} alt="sumgit" class="h-7 w-7 rounded-md" />
-					<span class="font-semibold">{data.repository.repo_owner}/{data.repository.repo_name}</span>
+				<Separator orientation="vertical" class="hidden h-6 sm:block" />
+				<div class="flex min-w-0 items-center gap-2">
+					<img src={logo} alt="sumgit" class="h-6 w-6 shrink-0 rounded-md sm:h-7 sm:w-7" />
+					<span class="truncate text-sm font-semibold sm:text-base">{data.repository.repo_owner}/{data.repository.repo_name}</span>
 				</div>
 			</div>
-			<div class="flex items-center gap-3">
+			<div class="flex items-center justify-between gap-3 sm:justify-end">
 				<div class="flex items-center gap-2">
 					<Clock class="h-4 w-4 text-emerald-500" />
 					<span class="text-sm font-medium">Timeline</span>
@@ -93,10 +103,12 @@
 				>
 					{#if isAnalyzing}
 						<Loader2 class="h-4 w-4 animate-spin" />
-						Analyzing...
+						<span class="hidden xs:inline">Analyzing...</span>
+						<span class="xs:hidden">...</span>
 					{:else}
 						<History class="h-4 w-4" />
-						Analyze Full History
+						<span class="hidden sm:inline">Analyze Full History</span>
+						<span class="sm:hidden">Analyze</span>
 					{/if}
 				</Button>
 			</div>
@@ -104,12 +116,12 @@
 	</header>
 
 	<!-- Main content -->
-	<main class="flex-1 px-6 py-8">
+	<main class="flex-1 px-4 py-6 sm:px-6 sm:py-8">
 		<div class="mx-auto max-w-4xl">
 			<!-- Repository info -->
-			<div class="mb-8">
+			<div class="mb-6 sm:mb-8">
 				<div class="flex items-center gap-3">
-					<h1 class="text-2xl font-bold">{data.repository.repo_name} Timeline</h1>
+					<h1 class="text-xl font-bold sm:text-2xl">{data.repository.repo_name} Timeline</h1>
 					<a
 						href={data.repository.github_repo_url}
 						target="_blank"
@@ -126,12 +138,12 @@
 
 			<!-- Empty state -->
 			{#if data.milestones.length === 0}
-				<div class="flex flex-col items-center justify-center py-20 text-center">
-					<div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-secondary/50">
-						<Clock class="h-8 w-8 text-muted-foreground" />
+				<div class="flex flex-col items-center justify-center py-12 text-center sm:py-20">
+					<div class="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-secondary/50 sm:h-16 sm:w-16">
+						<Clock class="h-7 w-7 text-muted-foreground sm:h-8 sm:w-8" />
 					</div>
-					<h3 class="mb-2 text-lg font-semibold">No milestones yet</h3>
-					<p class="mb-6 max-w-sm text-muted-foreground">
+					<h3 class="mb-2 text-base font-semibold sm:text-lg">No milestones yet</h3>
+					<p class="mb-6 max-w-sm px-4 text-sm text-muted-foreground sm:px-0 sm:text-base">
 						Analyze your repository first to generate milestones
 					</p>
 					<Button href="/project/{data.repository.id}" variant="outline" class="gap-2">
@@ -141,34 +153,34 @@
 				</div>
 			{:else}
 				<!-- Timeline View: Grouped by Year/Month -->
-				<div class="space-y-8">
+				<div class="space-y-6 sm:space-y-8">
 					{#each Object.entries(data.groupedMilestones).sort((a, b) => Number(b[0]) - Number(a[0])) as [year, months]}
 						<div>
 							<!-- Year Header -->
-							<h2 class="text-xl font-bold mb-4 text-emerald-500">{year}</h2>
+							<h2 class="text-lg font-bold mb-3 text-emerald-500 sm:text-xl sm:mb-4">{year}</h2>
 
 							{#each Object.entries(months).sort((a, b) => monthOrder(b[0]) - monthOrder(a[0])) as [month, days]}
-								<div class="mb-6">
+								<div class="mb-5 sm:mb-6">
 									<!-- Month Header with summary -->
-									<div class="flex items-center gap-3 mb-3">
+									<div class="flex items-center gap-2 mb-3 sm:gap-3">
 										<Badge variant="secondary">{month}</Badge>
-										<span class="text-sm text-muted-foreground">
+										<span class="text-xs text-muted-foreground sm:text-sm">
 											{countMilestones(days)} milestone{countMilestones(days) === 1 ? '' : 's'}
 										</span>
 									</div>
 
 									<!-- Milestones in this month as bullet list -->
-									<div class="relative pl-6 border-l-2 border-emerald-500/30">
+									<div class="relative pl-4 border-l-2 border-emerald-500/30 sm:pl-6">
 										{#each Object.entries(days).sort((a, b) => Number(b[0]) - Number(a[0])).flatMap(([_, m]) => m) as milestone}
-											<div class="relative mb-3 pl-4">
+											<div class="relative mb-4 pl-4 sm:mb-3">
 												<!-- Bullet point -->
 												<div
 													class="absolute left-[-9px] top-1.5 h-3 w-3 rounded-full border-2 border-emerald-500 bg-background"
 												></div>
 
 												<!-- Milestone content -->
-												<div class="flex items-start gap-3">
-													<Badge variant="outline" class="text-xs shrink-0">
+												<div class="flex flex-col gap-1 sm:flex-row sm:items-start sm:gap-3">
+													<Badge variant="outline" class="w-fit text-xs shrink-0">
 														{formatDate(milestone.milestone_date)}
 													</Badge>
 													<div class="flex-1">
@@ -200,3 +212,8 @@
 		</div>
 	</main>
 </div>
+
+<PurchaseCreditsDialog
+	bind:open={showPurchaseDialog}
+	onOpenChange={(open) => (showPurchaseDialog = open)}
+/>

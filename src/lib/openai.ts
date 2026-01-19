@@ -20,7 +20,7 @@ export interface Commit {
 	diff?: string; // Add diff field
 }
 
-export interface Milestone {
+export interface MilestoneInput {
 	title: string;
 	description: string;
 	commit_sha: string;
@@ -104,7 +104,7 @@ function groupCommitsByMonth(commits: Commit[]): Map<string, Commit[]> {
 }
 
 // Analyze commits in time-based chunks (by month)
-export async function analyzeCommitsInChunks(repoName: string, commits: Commit[]): Promise<Milestone[]> {
+export async function analyzeCommitsInChunks(repoName: string, commits: Commit[]): Promise<MilestoneInput[]> {
 	if (commits.length === 0) {
 		return [];
 	}
@@ -115,7 +115,7 @@ export async function analyzeCommitsInChunks(repoName: string, commits: Commit[]
 
 	console.log(`Analyzing ${commits.length} commits across ${sortedMonths.length} months`);
 
-	const allMilestones: Milestone[] = [];
+	const allMilestones: MilestoneInput[] = [];
 
 	// Process each month's commits
 	for (const month of sortedMonths) {
@@ -141,7 +141,7 @@ export async function analyzeCommitsInChunks(repoName: string, commits: Commit[]
 	return allMilestones;
 }
 
-export async function analyzeMilestones(repoName: string, commits: Commit[]): Promise<Milestone[]> {
+export async function analyzeMilestones(repoName: string, commits: Commit[]): Promise<MilestoneInput[]> {
 	if (commits.length === 0) {
 		return [];
 	}
@@ -253,7 +253,7 @@ Return JSON: { "milestones": [...] }`;
 		}
 
 		const parsed = JSON.parse(content);
-		const milestones = (parsed.milestones ?? []) as Milestone[];
+		const milestones = (parsed.milestones ?? []) as MilestoneInput[];
 		console.log(`OpenAI analysis successful: ${milestones.length} milestones identified`);
 		return milestones;
 	} catch (error) {

@@ -25,8 +25,15 @@
 	import logo from '$lib/assets/logo.png';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
+	import CreditBalance from '$lib/components/CreditBalance.svelte';
+	import PurchaseCreditsDialog from '$lib/components/PurchaseCreditsDialog.svelte';
 
 	let { data } = $props();
+	let showPurchaseDialog = $state(false);
+	let showPurchaseSuccess = $state(false);
+	let purchasedCredits = $state(0);
+	let creditBalanceRef = $state<{ refresh: () => void } | null>(null);
 	let isLoadingRepos = $state(false);
 	let availableRepos = $state<
 		Array<{
@@ -50,6 +57,28 @@
 			setTimeout(() => {
 				showInstallationSuccess = false;
 			}, 5000);
+		}
+
+		// Handle purchase success/cancel from Stripe
+		const searchParams = new URLSearchParams(window.location.search);
+		const purchaseStatus = searchParams.get('purchase');
+		const credits = searchParams.get('credits');
+
+		if (purchaseStatus === 'success' && credits) {
+			purchasedCredits = parseInt(credits);
+			showPurchaseSuccess = true;
+			// Refresh credit balance
+			setTimeout(() => {
+				creditBalanceRef?.refresh();
+			}, 500);
+			setTimeout(() => {
+				showPurchaseSuccess = false;
+			}, 5000);
+			// Clean up URL
+			const url = new URL(window.location.href);
+			url.searchParams.delete('purchase');
+			url.searchParams.delete('credits');
+			window.history.replaceState({}, '', url.toString());
 		}
 	});
 
@@ -150,6 +179,7 @@
 						{data.installations.length} installation{data.installations.length > 1 ? 's' : ''}
 					</Badge>
 				{/if}
+				<CreditBalance bind:this={creditBalanceRef} onclick={() => (showPurchaseDialog = true)} />
 				<Button onclick={signOut} variant="ghost" size="sm" class="gap-2">
 					<LogOut class="h-4 w-4" />
 					<span class="hidden sm:inline">Sign out</span>
@@ -164,6 +194,16 @@
 			<div class="mx-auto flex max-w-6xl items-center gap-2 text-sm text-green-400">
 				<Check class="h-4 w-4" />
 				GitHub App installed successfully! You can now add repositories.
+			</div>
+		</div>
+	{/if}
+
+	<!-- Purchase success banner -->
+	{#if showPurchaseSuccess}
+		<div class="border-b border-amber-500/20 bg-amber-500/10 px-6 py-3">
+			<div class="mx-auto flex max-w-6xl items-center gap-2 text-sm text-amber-400">
+				<Check class="h-4 w-4" />
+				Successfully purchased {purchasedCredits} credits! Your balance has been updated.
 			</div>
 		</div>
 	{/if}
@@ -359,3 +399,13 @@
 		</div>
 	</main>
 </div>
+
+<PurchaseCreditsDialog
+	bind:open={showPurchaseDialog}
+	onOpenChange={(open) => {
+		showPurchaseDialog = open;
+		if (!open) {
+			creditBalanceRef?.refresh();
+		}
+	}}
+/>

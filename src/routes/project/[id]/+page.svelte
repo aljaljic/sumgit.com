@@ -18,14 +18,19 @@
 	} from '@lucide/svelte';
 	import { invalidateAll, goto } from '$app/navigation';
 	import logo from '$lib/assets/logo.png';
+	import PurchaseCreditsDialog from '$lib/components/PurchaseCreditsDialog.svelte';
+	import { CREDIT_COSTS } from '$lib/credits';
 
 	let { data } = $props();
 	let isAnalyzing = $state(false);
 	let copiedId = $state<string | null>(null);
 	let isDeleting = $state(false);
+	let showPurchaseDialog = $state(false);
+	let insufficientCreditsMessage = $state<string | null>(null);
 
 	async function analyzeRepository() {
 		isAnalyzing = true;
+		insufficientCreditsMessage = null;
 		try {
 			const response = await fetch('/api/analyze', {
 				method: 'POST',
@@ -35,6 +40,11 @@
 
 			if (response.ok) {
 				await invalidateAll();
+			} else if (response.status === 402) {
+				// Insufficient credits
+				const errorData = await response.json();
+				insufficientCreditsMessage = `You need ${CREDIT_COSTS.quick_analyze} credit(s) to run Quick Analysis. You have ${errorData.credits_available || 0} credits.`;
+				showPurchaseDialog = true;
 			} else {
 				const error = await response.json();
 				alert(error.message || 'Analysis failed');
@@ -271,3 +281,8 @@
 		</div>
 	</main>
 </div>
+
+<PurchaseCreditsDialog
+	bind:open={showPurchaseDialog}
+	onOpenChange={(open) => (showPurchaseDialog = open)}
+/>

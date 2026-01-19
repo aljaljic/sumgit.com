@@ -7,6 +7,8 @@ import { PUBLIC_SUPABASE_URL } from '$env/static/public';
 import { createClient } from '@supabase/supabase-js';
 import type { Repository, Milestone } from '$lib/database.types';
 import type { StoryChapter } from '$lib/types/story';
+import { checkAndDeductCredits, refundCredits } from '$lib/server/credits';
+import { CREDIT_COSTS } from '$lib/credits';
 
 const openai = new OpenAI({
 	apiKey: PRIVATE_OPENAI_API_KEY,
@@ -59,6 +61,18 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	if (!repository_id) {
 		throw error(400, 'Repository ID required');
 	}
+
+	// Check and deduct credits before processing
+	const creditResult = await checkAndDeductCredits(user.id, 'generate_story', repository_id);
+	if (!creditResult.success) {
+		throw error(402, {
+			message: creditResult.error || 'Insufficient credits',
+			credits_required: CREDIT_COSTS.generate_story,
+			credits_available: creditResult.newBalance
+		} as any);
+	}
+
+	let creditsDeducted = true;
 
 	// Get repository
 	const { data: repoData } = await locals.supabase
@@ -200,10 +214,16 @@ Weave these events into a SHORT fantasy epic (3-4 chapters, 100-150 words each).
 			story: {
 				repository_id,
 				chapters: chaptersWithImages
-			}
+			},
+			credits_remaining: creditResult.newBalance
 		});
 	} catch (err) {
 		console.error('Story generation error:', err);
+
+		// Refund credits on failure
+		if (creditsDeducted) {
+			await refundCredits(user.id, 'generate_story', 'Refund due to story generation failure');
+		}
 
 		if (err instanceof Error) {
 			const errorMsg = err.message.toLowerCase();
