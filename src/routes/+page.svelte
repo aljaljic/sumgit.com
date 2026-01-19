@@ -2,7 +2,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '$lib/components/ui/card';
-	import { Github, Sparkles, Clock, Loader2, BookOpen, Coins, Gift, Zap, Check } from '@lucide/svelte';
+	import { Github, Sparkles, Clock, Loader2, BookOpen, Coins, Gift, Zap, Check, FileText } from '@lucide/svelte';
 	import { FAQ, FAQItem } from '$lib/components/ui/faq';
 	import logo from '$lib/assets/logo.png';
 	import MilestoneMarquee from '$lib/components/MilestoneMarquee.svelte';
@@ -101,7 +101,7 @@
 		<MilestoneMarquee />
 
 		<!-- Features grid -->
-		<div class="mt-20 grid max-w-4xl gap-6 md:grid-cols-2 lg:grid-cols-4">
+		<div class="mt-20 grid max-w-5xl gap-6 md:grid-cols-2 lg:grid-cols-5">
 			<div class="rounded-lg border border-border/40 bg-card/50 p-6">
 				<div class="mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-primary/10">
 					<Github class="h-5 w-5 text-primary" />
@@ -139,6 +139,16 @@
 				<h3 class="mb-2 font-semibold">Storybook</h3>
 				<p class="text-sm text-muted-foreground">
 					Transform your milestones into an interactive 3D storybook with AI-generated chapters.
+				</p>
+			</div>
+
+			<div class="rounded-lg border border-border/40 bg-card/50 p-6">
+				<div class="mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-primary/10">
+					<FileText class="h-5 w-5 text-primary" />
+				</div>
+				<h3 class="mb-2 font-semibold">Recap</h3>
+				<p class="text-sm text-muted-foreground">
+					Generate an all-time summary with stats, languages, and shareable highlights.
 				</p>
 			</div>
 		</div>
@@ -206,7 +216,7 @@
 			</div>
 
 			<!-- Credit costs -->
-			<div class="mb-8 grid gap-4 md:grid-cols-3">
+			<div class="mb-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 				<div class="flex items-center gap-3 rounded-lg border border-border/40 bg-card/50 p-4">
 					<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-500/10">
 						<Zap class="h-5 w-5 text-blue-500" />
@@ -232,6 +242,15 @@
 					<div>
 						<p class="font-medium">Story Generation</p>
 						<p class="text-sm text-muted-foreground">{CREDIT_COSTS.generate_story} credits</p>
+					</div>
+				</div>
+				<div class="flex items-center gap-3 rounded-lg border border-border/40 bg-card/50 p-4">
+					<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-purple-500/10">
+						<FileText class="h-5 w-5 text-purple-500" />
+					</div>
+					<div>
+						<p class="font-medium">Recap</p>
+						<p class="text-sm text-muted-foreground">{CREDIT_COSTS.generate_recap} credits</p>
 					</div>
 				</div>
 			</div>
@@ -268,6 +287,10 @@
 								<li class="flex items-center gap-2">
 									<Check class="h-4 w-4 text-emerald-500" />
 									{Math.floor(pkg.credits / CREDIT_COSTS.generate_story)} Story Generations
+								</li>
+								<li class="flex items-center gap-2">
+									<Check class="h-4 w-4 text-emerald-500" />
+									{Math.floor(pkg.credits / CREDIT_COSTS.generate_recap)} Recaps
 								</li>
 							</ul>
 						</CardContent>

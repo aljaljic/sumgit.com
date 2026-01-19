@@ -12,7 +12,8 @@
 		Check,
 		Gift,
 		ArrowLeft,
-		Loader2
+		Loader2,
+		FileText
 	} from '@lucide/svelte';
 	import logo from '$lib/assets/logo.png';
 	import { CREDIT_PACKAGES, CREDIT_COSTS } from '$lib/credits';
@@ -129,7 +130,7 @@
 			<!-- Credit costs -->
 			<div class="mb-12">
 				<h2 class="mb-6 text-2xl font-semibold text-center">How credits work</h2>
-				<div class="grid gap-6 md:grid-cols-3">
+				<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
 					<Card class="border-border/40">
 						<CardHeader class="pb-3">
 							<div class="flex items-center gap-3">
@@ -186,6 +187,25 @@
 							</p>
 						</CardContent>
 					</Card>
+
+					<Card class="border-border/40">
+						<CardHeader class="pb-3">
+							<div class="flex items-center gap-3">
+								<div class="flex h-10 w-10 items-center justify-center rounded-full bg-purple-500/10">
+									<FileText class="h-5 w-5 text-purple-500" />
+								</div>
+								<div>
+									<CardTitle class="text-base">Recap</CardTitle>
+									<CardDescription>{CREDIT_COSTS.generate_recap} credits</CardDescription>
+								</div>
+							</div>
+						</CardHeader>
+						<CardContent>
+							<p class="text-sm text-muted-foreground">
+								Generate an all-time summary with stats, languages, and shareable highlights.
+							</p>
+						</CardContent>
+					</Card>
 				</div>
 			</div>
 
@@ -235,6 +255,10 @@
 									<li class="flex items-center gap-2">
 										<Check class="h-4 w-4 text-emerald-500" />
 										<span>{Math.floor(pkg.credits / CREDIT_COSTS.generate_story)} Story Generations</span>
+									</li>
+									<li class="flex items-center gap-2">
+										<Check class="h-4 w-4 text-emerald-500" />
+										<span>{Math.floor(pkg.credits / CREDIT_COSTS.generate_recap)} Recaps</span>
 									</li>
 								</ul>
 								<Button

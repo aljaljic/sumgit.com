@@ -14,7 +14,8 @@
 		Trash2,
 		Share2,
 		Clock,
-		BookOpen
+		BookOpen,
+		FileText
 	} from '@lucide/svelte';
 	import { invalidateAll, goto } from '$app/navigation';
 	import logo from '$lib/assets/logo.png';
@@ -143,6 +144,15 @@
 					>
 						<BookOpen class="h-4 w-4" />
 						<span class="hidden sm:inline">Story</span>
+					</Button>
+					<Button
+						href="/project/{data.repository.id}/recap"
+						variant="outline"
+						size="sm"
+						class="gap-2"
+					>
+						<FileText class="h-4 w-4" />
+						<span class="hidden sm:inline">Recap</span>
 					</Button>
 				{/if}
 				<Button

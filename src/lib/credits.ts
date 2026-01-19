@@ -1,7 +1,8 @@
 export const CREDIT_COSTS = {
 	quick_analyze: 1,
 	timeline_analyze: 5,
-	generate_story: 10
+	generate_story: 10,
+	generate_recap: 3
 } as const;
 
 export type OperationType = keyof typeof CREDIT_COSTS;
