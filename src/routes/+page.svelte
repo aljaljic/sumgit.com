@@ -1,10 +1,13 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
-	import { Github, Sparkles, Clock, Loader2 } from '@lucide/svelte';
+	import { Badge } from '$lib/components/ui/badge';
+	import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '$lib/components/ui/card';
+	import { Github, Sparkles, Clock, Loader2, BookOpen, Coins, Gift, Zap, Check } from '@lucide/svelte';
 	import { FAQ, FAQItem } from '$lib/components/ui/faq';
 	import logo from '$lib/assets/logo.png';
 	import MilestoneMarquee from '$lib/components/MilestoneMarquee.svelte';
 	import Footer from '$lib/components/Footer.svelte';
+	import { CREDIT_COSTS, CREDIT_PACKAGES } from '$lib/credits';
 
 	let { data } = $props();
 	let isConnecting = $state(false);
@@ -98,7 +101,7 @@
 		<MilestoneMarquee />
 
 		<!-- Features grid -->
-		<div class="mt-20 grid max-w-4xl gap-6 md:grid-cols-3">
+		<div class="mt-20 grid max-w-4xl gap-6 md:grid-cols-2 lg:grid-cols-4">
 			<div class="rounded-lg border border-border/40 bg-card/50 p-6">
 				<div class="mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-primary/10">
 					<Github class="h-5 w-5 text-primary" />
@@ -126,6 +129,16 @@
 				<h3 class="mb-2 font-semibold">Timeline View</h3>
 				<p class="text-sm text-muted-foreground">
 					See your project's journey organized by date with ready-to-post summaries.
+				</p>
+			</div>
+
+			<div class="rounded-lg border border-border/40 bg-card/50 p-6">
+				<div class="mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-primary/10">
+					<BookOpen class="h-5 w-5 text-primary" />
+				</div>
+				<h3 class="mb-2 font-semibold">Storybook</h3>
+				<p class="text-sm text-muted-foreground">
+					Transform your milestones into an interactive 3D storybook with AI-generated chapters.
 				</p>
 			</div>
 		</div>
@@ -164,6 +177,107 @@
 					</div>
 				</div>
 			</div>
+		</div>
+
+		<!-- Pricing Section -->
+		<div class="mt-20 w-full max-w-4xl" id="pricing">
+			<div class="mb-10 text-center">
+				<Badge variant="secondary" class="mb-4 gap-1">
+					<Coins class="h-3 w-3" />
+					Simple pricing
+				</Badge>
+				<h2 class="mb-3 text-3xl font-bold">Pay only for what you use</h2>
+				<p class="text-muted-foreground">
+					No subscriptions. Buy credits and use them whenever you want.
+				</p>
+			</div>
+
+			<!-- Free credits banner -->
+			<div class="mb-8 flex items-center gap-4 rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-4">
+				<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/10">
+					<Gift class="h-5 w-5 text-emerald-500" />
+				</div>
+				<div>
+					<p class="font-semibold">10 free credits for new users</p>
+					<p class="text-sm text-muted-foreground">
+						Sign up and start analyzing immediately. No credit card required.
+					</p>
+				</div>
+			</div>
+
+			<!-- Credit costs -->
+			<div class="mb-8 grid gap-4 md:grid-cols-3">
+				<div class="flex items-center gap-3 rounded-lg border border-border/40 bg-card/50 p-4">
+					<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-500/10">
+						<Zap class="h-5 w-5 text-blue-500" />
+					</div>
+					<div>
+						<p class="font-medium">Quick Analysis</p>
+						<p class="text-sm text-muted-foreground">{CREDIT_COSTS.quick_analyze} credit</p>
+					</div>
+				</div>
+				<div class="flex items-center gap-3 rounded-lg border border-border/40 bg-card/50 p-4">
+					<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/10">
+						<Clock class="h-5 w-5 text-emerald-500" />
+					</div>
+					<div>
+						<p class="font-medium">Timeline Analysis</p>
+						<p class="text-sm text-muted-foreground">{CREDIT_COSTS.timeline_analyze} credits</p>
+					</div>
+				</div>
+				<div class="flex items-center gap-3 rounded-lg border border-border/40 bg-card/50 p-4">
+					<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-500/10">
+						<BookOpen class="h-5 w-5 text-amber-500" />
+					</div>
+					<div>
+						<p class="font-medium">Story Generation</p>
+						<p class="text-sm text-muted-foreground">{CREDIT_COSTS.generate_story} credits</p>
+					</div>
+				</div>
+			</div>
+
+			<!-- Credit packages -->
+			<div class="grid gap-4 md:grid-cols-3">
+				{#each CREDIT_PACKAGES as pkg, index}
+					<Card class="relative border-border/40 {index === 1 ? 'border-primary/50 ring-2 ring-primary/20' : ''}">
+						{#if index === 1}
+							<div class="absolute -top-3 left-1/2 -translate-x-1/2">
+								<Badge class="gap-1">
+									<Sparkles class="h-3 w-3" />
+									Popular
+								</Badge>
+							</div>
+						{/if}
+						<CardHeader class="pb-2 text-center">
+							<CardTitle class="text-xl">{pkg.credits} Credits</CardTitle>
+							<div class="text-2xl font-bold">{pkg.priceDisplay}</div>
+							<CardDescription>
+								${(pkg.price / 100 / pkg.credits).toFixed(2)} per credit
+							</CardDescription>
+						</CardHeader>
+						<CardContent class="pt-2">
+							<ul class="space-y-2 text-sm text-muted-foreground">
+								<li class="flex items-center gap-2">
+									<Check class="h-4 w-4 text-emerald-500" />
+									{pkg.credits} Quick Analyses
+								</li>
+								<li class="flex items-center gap-2">
+									<Check class="h-4 w-4 text-emerald-500" />
+									{Math.floor(pkg.credits / CREDIT_COSTS.timeline_analyze)} Timeline Analyses
+								</li>
+								<li class="flex items-center gap-2">
+									<Check class="h-4 w-4 text-emerald-500" />
+									{Math.floor(pkg.credits / CREDIT_COSTS.generate_story)} Story Generations
+								</li>
+							</ul>
+						</CardContent>
+					</Card>
+				{/each}
+			</div>
+
+			<p class="mt-6 text-center text-sm text-muted-foreground">
+				<a href="/pricing" class="underline hover:text-foreground">View full pricing details</a>
+			</p>
 		</div>
 
 		<!-- FAQ Section -->

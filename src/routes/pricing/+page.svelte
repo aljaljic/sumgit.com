@@ -248,7 +248,7 @@
 
 			<!-- FAQ -->
 			<div class="text-center text-sm text-muted-foreground">
-				<p>Credits never expire. Payments processed securely via Stripe.</p>
+				<p>Payments processed securely via Stripe.</p>
 				<p class="mt-2">
 					Questions? <a href="mailto:support@sumgit.com" class="underline hover:text-foreground">Contact us</a>
 				</p>

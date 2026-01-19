@@ -30,7 +30,8 @@
       "Bash(npx shadcn-svelte@latest add dialog:*)",
       "Bash(xargs cat:*)",
       "Bash(pnpm ls:*)",
-      "Bash(pnpm list:*)"
+      "Bash(pnpm list:*)",
+      "Bash(pnpm dev:*)"
     ]
   }
 }
