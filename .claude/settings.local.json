@@ -32,7 +32,8 @@
       "Bash(pnpm ls:*)",
       "Bash(pnpm list:*)",
       "Bash(pnpm dev:*)",
-      "Bash(git -C /Users/adel/projects/sumgit.com log --oneline -15)"
+      "Bash(git -C /Users/adel/projects/sumgit.com log --oneline -15)",
+      "Bash(npm install:*)"
     ]
   }
 }

@@ -14,9 +14,11 @@
 		Trophy,
 		Clock,
 		Code,
-		Users
+		Users,
+		Download
 	} from '@lucide/svelte';
 	import logo from '$lib/assets/logo.png';
+	import html2canvas from 'html2canvas';
 	import PurchaseCreditsDialog from '$lib/components/PurchaseCreditsDialog.svelte';
 	import type { RepoRecap } from '$lib/types/recap';
 
@@ -27,6 +29,8 @@
 	let errorMessage = $state<string | null>(null);
 	let showPurchaseDialog = $state(false);
 	let copied = $state(false);
+	let recapContentRef = $state<HTMLDivElement | null>(null);
+	let isDownloading = $state(false);
 
 	async function generateRecap() {
 		if (isGenerating) return;
@@ -110,6 +114,35 @@ Built with sumgit.com`;
 		const encodedText = encodeURIComponent(text);
 		const url = `https://twitter.com/intent/tweet?text=${encodedText}`;
 		window.open(url, '_blank', 'noopener,noreferrer');
+	}
+
+	async function downloadAsImage() {
+		if (!recapContentRef || !recap || isDownloading) return;
+
+		isDownloading = true;
+		try {
+			const canvas = await html2canvas(recapContentRef, {
+				scale: 2,
+				backgroundColor: '#0a0a0a',
+				useCORS: true
+			});
+
+			canvas.toBlob((blob) => {
+				if (!blob) return;
+				const url = URL.createObjectURL(blob);
+				const link = document.createElement('a');
+				link.href = url;
+				link.download = `${data.repository.repo_owner}-${data.repository.repo_name}-recap.png`;
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+				URL.revokeObjectURL(url);
+			}, 'image/png');
+		} catch (err) {
+			console.error('Failed to download image:', err);
+		} finally {
+			isDownloading = false;
+		}
 	}
 
 	function formatDate(dateString: string): string {
@@ -200,10 +233,12 @@ Built with sumgit.com`;
 			{:else if recap}
 				<!-- Recap view -->
 				<div class="space-y-6">
-					<!-- Headline -->
-					<div class="text-center">
-						<h1 class="text-2xl font-bold sm:text-3xl">{recap.summary.headline}</h1>
-					</div>
+					<!-- Recap content for image capture -->
+					<div bind:this={recapContentRef} class="space-y-6 rounded-lg bg-background p-4">
+						<!-- Headline -->
+						<div class="text-center">
+							<h1 class="text-2xl font-bold sm:text-3xl">{recap.summary.headline}</h1>
+						</div>
 
 					<!-- Stats cards row -->
 					<div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-6">
@@ -323,11 +358,12 @@ Built with sumgit.com`;
 					</div>
 
 					<!-- Vibe Check -->
-					<Card class="border-purple-500/30 bg-purple-500/5">
-						<CardContent class="p-6 text-center">
-							<p class="text-lg font-medium italic text-foreground">"{recap.summary.vibe_check}"</p>
-						</CardContent>
-					</Card>
+						<Card class="border-purple-500/30 bg-purple-500/5">
+							<CardContent class="p-6 text-center">
+								<p class="text-lg font-medium italic text-foreground">"{recap.summary.vibe_check}"</p>
+							</CardContent>
+						</Card>
+					</div>
 
 					<!-- Action buttons -->
 					<div class="flex flex-col gap-3 sm:flex-row sm:justify-center">
@@ -343,6 +379,15 @@ Built with sumgit.com`;
 						<Button onclick={shareToX} variant="outline" class="gap-2">
 							<Share2 class="h-4 w-4" />
 							Share on X
+						</Button>
+						<Button onclick={downloadAsImage} variant="outline" class="gap-2" disabled={isDownloading}>
+							{#if isDownloading}
+								<Loader2 class="h-4 w-4 animate-spin" />
+								Downloading...
+							{:else}
+								<Download class="h-4 w-4" />
+								Download Image
+							{/if}
 						</Button>
 					</div>
 				</div>
