@@ -45,15 +45,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 				getAll: () => event.cookies.getAll(),
 				setAll: (cookiesToSet) => {
 					cookiesToSet.forEach(({ name, value, options }) => {
-						event.cookies.set(name, value, {
-							...options,
-							path: '/',
-							// Secure cookie settings
-							secure: import.meta.env.PROD,
-							sameSite: 'lax',
-							// Auth cookies should be httpOnly
-							httpOnly: name.includes('auth') || name.includes('supabase')
-						});
+						event.cookies.set(name, value, { ...options, path: '/' });
 					});
 				}
 			}
