@@ -24,6 +24,26 @@ const SECURITY_HEADERS: Record<string, string> = {
 	].join('; ')
 };
 
+// Security headers for embed routes (allow framing from any origin)
+const EMBED_SECURITY_HEADERS: Record<string, string> = {
+	'X-Content-Type-Options': 'nosniff',
+	'X-XSS-Protection': '1; mode=block',
+	'Referrer-Policy': 'strict-origin-when-cross-origin',
+	'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+	'Content-Security-Policy': [
+		"default-src 'self'",
+		"script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+		"style-src 'self' 'unsafe-inline'",
+		"img-src 'self' data: blob: https://*.supabase.co https://avatars.githubusercontent.com",
+		"font-src 'self'",
+		"connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+		"frame-ancestors *",
+		"object-src 'none'",
+		"base-uri 'self'",
+		"form-action 'self'"
+	].join('; ')
+};
+
 // Add HSTS header only in production
 const HSTS_HEADER = 'max-age=31536000; includeSubDomains';
 
@@ -80,12 +100,16 @@ export const handle: Handle = async ({ event, resolve }) => {
 		}
 	});
 
-	// Add security headers to response
-	for (const [header, value] of Object.entries(SECURITY_HEADERS)) {
+	// Check if this is an embed route
+	const isEmbedRoute = event.url.pathname.startsWith('/embed/');
+
+	// Use embed-specific headers for embed routes, otherwise use default security headers
+	const headersToApply = isEmbedRoute ? EMBED_SECURITY_HEADERS : SECURITY_HEADERS;
+	for (const [header, value] of Object.entries(headersToApply)) {
 		response.headers.set(header, value);
 	}
 
-	// Add HSTS only in production
+	// Add HSTS only in production (for all routes)
 	if (import.meta.env.PROD) {
 		response.headers.set('Strict-Transport-Security', HSTS_HEADER);
 	}

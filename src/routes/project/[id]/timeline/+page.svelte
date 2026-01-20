@@ -8,17 +8,20 @@
 		GitCommit,
 		Clock,
 		Loader2,
-		History
+		History,
+		Code
 	} from '@lucide/svelte';
 	import logo from '$lib/assets/logo.png';
 	import { invalidateAll } from '$app/navigation';
 	import PurchaseCreditsDialog from '$lib/components/PurchaseCreditsDialog.svelte';
+	import ShareEmbedDialog from '$lib/components/ShareEmbedDialog.svelte';
 	import { CREDIT_COSTS } from '$lib/credits';
 
 	let { data } = $props();
 
 	let isAnalyzing = $state(false);
 	let showPurchaseDialog = $state(false);
+	let showEmbedDialog = $state(false);
 
 	async function analyzeTimeline() {
 		if (isAnalyzing) return;
@@ -95,6 +98,17 @@
 					<Clock class="h-4 w-4 text-emerald-500" />
 					<span class="text-sm font-medium">Timeline</span>
 				</div>
+				{#if data.milestones.length > 0}
+					<Button
+						onclick={() => (showEmbedDialog = true)}
+						variant="outline"
+						size="sm"
+						class="gap-2"
+					>
+						<Code class="h-4 w-4" />
+						<span class="hidden sm:inline">Embed</span>
+					</Button>
+				{/if}
 				<Button
 					onclick={analyzeTimeline}
 					disabled={isAnalyzing}
@@ -216,4 +230,11 @@
 <PurchaseCreditsDialog
 	bind:open={showPurchaseDialog}
 	onOpenChange={(open) => (showPurchaseDialog = open)}
+/>
+
+<ShareEmbedDialog
+	bind:open={showEmbedDialog}
+	onOpenChange={(open) => (showEmbedDialog = open)}
+	repositoryId={data.repository.id}
+	contentType="timeline"
 />

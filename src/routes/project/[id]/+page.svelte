@@ -15,11 +15,13 @@
 		Share2,
 		Clock,
 		BookOpen,
-		FileText
+		FileText,
+		Code
 	} from '@lucide/svelte';
 	import { invalidateAll, goto } from '$app/navigation';
 	import logo from '$lib/assets/logo.png';
 	import PurchaseCreditsDialog from '$lib/components/PurchaseCreditsDialog.svelte';
+	import ShareEmbedDialog from '$lib/components/ShareEmbedDialog.svelte';
 	import { CREDIT_COSTS } from '$lib/credits';
 
 	let { data } = $props();
@@ -27,6 +29,7 @@
 	let copiedId = $state<string | null>(null);
 	let isDeleting = $state(false);
 	let showPurchaseDialog = $state(false);
+	let showEmbedDialog = $state(false);
 	let insufficientCreditsMessage = $state<string | null>(null);
 
 	async function analyzeRepository() {
@@ -153,6 +156,15 @@
 					>
 						<FileText class="h-4 w-4" />
 						<span class="hidden sm:inline">Recap</span>
+					</Button>
+					<Button
+						onclick={() => (showEmbedDialog = true)}
+						variant="outline"
+						size="sm"
+						class="gap-2"
+					>
+						<Code class="h-4 w-4" />
+						<span class="hidden sm:inline">Embed</span>
 					</Button>
 				{/if}
 				<Button
@@ -295,4 +307,11 @@
 <PurchaseCreditsDialog
 	bind:open={showPurchaseDialog}
 	onOpenChange={(open) => (showPurchaseDialog = open)}
+/>
+
+<ShareEmbedDialog
+	bind:open={showEmbedDialog}
+	onOpenChange={(open) => (showEmbedDialog = open)}
+	repositoryId={data.repository.id}
+	contentType="milestones"
 />

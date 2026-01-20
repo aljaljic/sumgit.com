@@ -1,13 +1,14 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
-	import { ArrowLeft, BookOpen, Loader2, Share2, Link, Check, X } from '@lucide/svelte';
+	import { ArrowLeft, BookOpen, Loader2, Share2, Link, Check, X, Code } from '@lucide/svelte';
 	import logo from '$lib/assets/logo.png';
 	import StoryLoader from '$lib/components/storybook/StoryLoader.svelte';
 	import PageControls from '$lib/components/storybook/PageControls.svelte';
 	import type { StoryChapter, NarrativeStyleId, Story } from '$lib/types/story';
 	import { NARRATIVE_STYLES } from '$lib/types/story';
 	import PurchaseCreditsDialog from '$lib/components/PurchaseCreditsDialog.svelte';
+	import ShareEmbedDialog from '$lib/components/ShareEmbedDialog.svelte';
 	import { CREDIT_COSTS } from '$lib/credits';
 	import { page } from '$app/stores';
 
@@ -23,6 +24,7 @@
 		prevPage: () => Promise<void>;
 	} | null>(null);
 	let showPurchaseDialog = $state(false);
+	let showEmbedDialog = $state(false);
 	let selectedStyle = $state<NarrativeStyleId>(data.existingStory?.narrative_style ?? 'fantasy');
 
 	// Share state
@@ -173,6 +175,17 @@
 				</div>
 			</div>
 			<div class="flex items-center gap-2">
+				{#if data.milestones.length > 0}
+					<Button
+						onclick={() => (showEmbedDialog = true)}
+						variant="outline"
+						size="sm"
+						class="gap-2"
+					>
+						<Code class="h-4 w-4" />
+						<span class="hidden sm:inline">Embed</span>
+					</Button>
+				{/if}
 				<BookOpen class="h-4 w-4 text-amber-500" />
 				<span class="text-sm font-medium">Story</span>
 			</div>
@@ -358,4 +371,11 @@
 <PurchaseCreditsDialog
 	bind:open={showPurchaseDialog}
 	onOpenChange={(open) => (showPurchaseDialog = open)}
+/>
+
+<ShareEmbedDialog
+	bind:open={showEmbedDialog}
+	onOpenChange={(open) => (showEmbedDialog = open)}
+	repositoryId={data.repository.id}
+	contentType="story"
 />

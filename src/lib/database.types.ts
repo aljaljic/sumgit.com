@@ -278,6 +278,58 @@ export interface Database {
 					}
 				];
 			};
+			share_tokens: {
+				Row: {
+					id: string;
+					token: string;
+					user_id: string;
+					repository_id: string;
+					content_type: 'milestones' | 'timeline' | 'recap' | 'story';
+					config: Json;
+					is_active: boolean;
+					view_count: number;
+					created_at: string;
+					updated_at: string;
+				};
+				Insert: {
+					id?: string;
+					token: string;
+					user_id: string;
+					repository_id: string;
+					content_type: 'milestones' | 'timeline' | 'recap' | 'story';
+					config?: Json;
+					is_active?: boolean;
+					view_count?: number;
+					created_at?: string;
+					updated_at?: string;
+				};
+				Update: {
+					id?: string;
+					token?: string;
+					user_id?: string;
+					repository_id?: string;
+					content_type?: 'milestones' | 'timeline' | 'recap' | 'story';
+					config?: Json;
+					is_active?: boolean;
+					view_count?: number;
+					created_at?: string;
+					updated_at?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'share_tokens_user_id_fkey';
+						columns: ['user_id'];
+						referencedRelation: 'profiles';
+						referencedColumns: ['id'];
+					},
+					{
+						foreignKeyName: 'share_tokens_repository_id_fkey';
+						columns: ['repository_id'];
+						referencedRelation: 'repositories';
+						referencedColumns: ['id'];
+					}
+				];
+			};
 		};
 		Views: Record<string, never>;
 		Functions: {
@@ -338,3 +390,4 @@ export type CreditBalance = Database['public']['Tables']['credit_balances']['Row
 export type CreditTransaction = Database['public']['Tables']['credit_transactions']['Row'];
 export type StripeCustomer = Database['public']['Tables']['stripe_customers']['Row'];
 export type DbStory = Database['public']['Tables']['stories']['Row'];
+export type DbShareToken = Database['public']['Tables']['share_tokens']['Row'];
