@@ -298,6 +298,26 @@
 				{/each}
 			</div>
 
+			<!-- CTA Button -->
+			<div class="mt-8 text-center">
+				{#if data.user}
+					<Button href="/dashboard" size="lg" class="gap-2 px-8">
+						Go to Dashboard
+						<span class="text-lg">→</span>
+					</Button>
+				{:else}
+					<Button onclick={signInWithGitHub} size="lg" class="gap-2 px-8" disabled={isConnecting}>
+						{#if isConnecting}
+							<Loader2 class="h-5 w-5 animate-spin" />
+							Connecting...
+						{:else}
+							<Github class="h-5 w-5" />
+							Get Started Free
+						{/if}
+					</Button>
+				{/if}
+			</div>
+
 			<p class="mt-6 text-center text-sm text-muted-foreground">
 				<a href="/pricing" class="underline hover:text-foreground">View full pricing details</a>
 			</p>
