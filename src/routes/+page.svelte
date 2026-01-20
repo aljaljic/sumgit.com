@@ -323,6 +323,30 @@
 					question="Is my code stored or shared?"
 					answer="No. We only analyze your commit metadata (messages, dates, authors). Your actual source code is never stored on our servers or shared with any third parties."
 				/>
+				<FAQItem
+					question="How do credits work?"
+					answer="sumgit uses a simple credit system. You get 10 free credits when you sign up. Quick analysis costs 1 credit, timeline analysis costs 5 credits, and story generation costs 10 credits. You can purchase more credits anytime - no subscriptions required."
+				/>
+				<FAQItem
+					question="Do credits expire?"
+					answer="No, your credits never expire. Purchase once and use them whenever you're ready. There are no monthly fees or subscription commitments."
+				/>
+				<FAQItem
+					question="What is the story feature?"
+					answer="The story feature transforms your development milestones into an illustrated fantasy epic. Our AI generates a narrative based on your project's journey, complete with custom AI-generated artwork for each chapter. It's a unique way to celebrate and share your coding achievements."
+				/>
+				<FAQItem
+					question="Can I share my generated story?"
+					answer="Yes! Each story gets a unique shareable link that you can post on social media, include in your portfolio, or share with your team. Stories are designed to be visually appealing and easy to share."
+				/>
+				<FAQItem
+					question="How many commits can sumgit analyze?"
+					answer="Quick analysis covers your last 100 commits - perfect for recent activity. Timeline analysis goes deeper, analyzing up to 5,000 commits to create a comprehensive history of your project's evolution."
+				/>
+				<FAQItem
+					question="Does sumgit work with private repositories?"
+					answer="Yes! sumgit works with both public and private repositories. We only request read-only access, and your code is never stored - we only analyze commit metadata."
+				/>
 			</FAQ>
 		</div>
 	</main>

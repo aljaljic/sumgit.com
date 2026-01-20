@@ -33,7 +33,9 @@
       "Bash(pnpm list:*)",
       "Bash(pnpm dev:*)",
       "Bash(git -C /Users/adel/projects/sumgit.com log --oneline -15)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(npm uninstall:*)",
+      "WebFetch(domain:www.gitmore.io)"
     ]
   }
 }
