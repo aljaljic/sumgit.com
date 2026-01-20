@@ -7,10 +7,14 @@ export interface StoryChapter {
 }
 
 export interface Story {
-	id?: string;
+	id: string;
 	repository_id: string;
+	user_id: string;
+	narrative_style: NarrativeStyleId;
 	chapters: StoryChapter[];
-	created_at?: string;
+	share_token?: string | null;
+	is_public: boolean;
+	created_at: string;
 }
 
 export interface GenerateStoryResponse {

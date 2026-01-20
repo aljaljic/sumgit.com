@@ -36,7 +36,8 @@
       "Bash(npm install:*)",
       "Bash(npm uninstall:*)",
       "WebFetch(domain:www.gitmore.io)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(xargs:*)"
     ]
   }
 }

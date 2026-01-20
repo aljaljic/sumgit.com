@@ -301,11 +301,34 @@ Transform these events into a compelling narrative (3-4 chapters, 100-150 words 
 			})
 		);
 
+		// Persist story to database
+		const { data: insertedStory, error: insertError } = await supabaseAdmin
+			.from('stories')
+			.insert({
+				repository_id,
+				user_id: user.id,
+				narrative_style: style,
+				chapters: chaptersWithImages,
+				is_public: false
+			})
+			.select()
+			.single();
+
+		if (insertError) {
+			console.error('Failed to persist story:', insertError);
+			// Still return the story even if persistence fails
+		}
+
 		return json({
 			success: true,
 			story: {
+				id: insertedStory?.id,
 				repository_id,
-				chapters: chaptersWithImages
+				user_id: user.id,
+				narrative_style: style,
+				chapters: chaptersWithImages,
+				is_public: false,
+				created_at: insertedStory?.created_at
 			},
 			credits_remaining: creditResult.newBalance
 		});

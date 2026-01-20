@@ -238,6 +238,46 @@ export interface Database {
 				};
 				Relationships: [];
 			};
+			stories: {
+				Row: {
+					id: string;
+					repository_id: string;
+					user_id: string;
+					narrative_style: string;
+					chapters: Json;
+					share_token: string | null;
+					is_public: boolean;
+					created_at: string;
+				};
+				Insert: {
+					id?: string;
+					repository_id: string;
+					user_id: string;
+					narrative_style: string;
+					chapters: Json;
+					share_token?: string | null;
+					is_public?: boolean;
+					created_at?: string;
+				};
+				Update: {
+					id?: string;
+					repository_id?: string;
+					user_id?: string;
+					narrative_style?: string;
+					chapters?: Json;
+					share_token?: string | null;
+					is_public?: boolean;
+					created_at?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'stories_repository_id_fkey';
+						columns: ['repository_id'];
+						referencedRelation: 'repositories';
+						referencedColumns: ['id'];
+					}
+				];
+			};
 		};
 		Views: Record<string, never>;
 		Functions: {
@@ -297,3 +337,4 @@ export type GitHubInstallation = Database['public']['Tables']['github_installati
 export type CreditBalance = Database['public']['Tables']['credit_balances']['Row'];
 export type CreditTransaction = Database['public']['Tables']['credit_transactions']['Row'];
 export type StripeCustomer = Database['public']['Tables']['stripe_customers']['Row'];
+export type DbStory = Database['public']['Tables']['stories']['Row'];

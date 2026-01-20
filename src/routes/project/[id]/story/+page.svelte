@@ -1,28 +1,38 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
-	import { ArrowLeft, BookOpen, Loader2 } from '@lucide/svelte';
+	import { ArrowLeft, BookOpen, Loader2, Share2, Link, Check, X } from '@lucide/svelte';
 	import logo from '$lib/assets/logo.png';
 	import StoryLoader from '$lib/components/storybook/StoryLoader.svelte';
 	import PageControls from '$lib/components/storybook/PageControls.svelte';
-	import type { StoryChapter, NarrativeStyleId } from '$lib/types/story';
+	import type { StoryChapter, NarrativeStyleId, Story } from '$lib/types/story';
 	import { NARRATIVE_STYLES } from '$lib/types/story';
 	import PurchaseCreditsDialog from '$lib/components/PurchaseCreditsDialog.svelte';
 	import { CREDIT_COSTS } from '$lib/credits';
+	import { page } from '$app/stores';
 
 	let { data } = $props();
 
 	let isGenerating = $state(false);
-	let story = $state<{ chapters: StoryChapter[] } | null>(null);
+	let story = $state<Story | null>(data.existingStory);
 	let errorMessage = $state<string | null>(null);
 	let currentPage = $state(1);
-	let totalPages = $state(0);
+	let totalPages = $state(data.existingStory?.chapters.length ?? 0);
 	let storyBookRef = $state<{
 		nextPage: () => Promise<void>;
 		prevPage: () => Promise<void>;
 	} | null>(null);
 	let showPurchaseDialog = $state(false);
-	let selectedStyle = $state<NarrativeStyleId>('fantasy');
+	let selectedStyle = $state<NarrativeStyleId>(data.existingStory?.narrative_style ?? 'fantasy');
+
+	// Share state
+	let isSharing = $state(false);
+	let shareUrl = $state<string | null>(
+		data.existingStory?.is_public && data.existingStory?.share_token
+			? `${$page.url.origin}/story/${data.existingStory.share_token}`
+			: null
+	);
+	let copied = $state(false);
 
 	async function generateStory() {
 		if (isGenerating) return;
@@ -54,11 +64,88 @@
 			const result = await response.json();
 			story = result.story;
 			totalPages = result.story.chapters.length;
+			// Reset share state for new story
+			shareUrl = null;
 		} catch (err) {
 			console.error('Story generation error:', err);
 			errorMessage = err instanceof Error ? err.message : 'Failed to generate story';
 		} finally {
 			isGenerating = false;
+		}
+	}
+
+	async function enableSharing() {
+		if (!story?.id || isSharing) return;
+
+		isSharing = true;
+		try {
+			const response = await fetch('/api/share-story', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ story_id: story.id })
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to enable sharing');
+			}
+
+			const result = await response.json();
+			shareUrl = result.share_url;
+			if (story) {
+				story.is_public = true;
+				story.share_token = result.share_token;
+			}
+		} catch (err) {
+			console.error('Share error:', err);
+			errorMessage = err instanceof Error ? err.message : 'Failed to enable sharing';
+		} finally {
+			isSharing = false;
+		}
+	}
+
+	async function disableSharing() {
+		if (!story?.id || isSharing) return;
+
+		isSharing = true;
+		try {
+			const response = await fetch('/api/share-story', {
+				method: 'DELETE',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ story_id: story.id })
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to disable sharing');
+			}
+
+			shareUrl = null;
+			if (story) {
+				story.is_public = false;
+			}
+		} catch (err) {
+			console.error('Unshare error:', err);
+			errorMessage = err instanceof Error ? err.message : 'Failed to disable sharing';
+		} finally {
+			isSharing = false;
+		}
+	}
+
+	async function copyShareUrl() {
+		if (!shareUrl) return;
+		try {
+			await navigator.clipboard.writeText(shareUrl);
+			copied = true;
+			setTimeout(() => (copied = false), 2000);
+		} catch {
+			// Fallback for older browsers
+			const input = document.createElement('input');
+			input.value = shareUrl;
+			document.body.appendChild(input);
+			input.select();
+			document.execCommand('copy');
+			document.body.removeChild(input);
+			copied = true;
+			setTimeout(() => (copied = false), 2000);
 		}
 	}
 
@@ -136,6 +223,60 @@
 			{:else if story}
 				<!-- Story view -->
 				<div class="flex flex-1 flex-col">
+					<!-- Share controls -->
+					<div class="mb-4 flex flex-wrap items-center justify-center gap-2">
+						{#if shareUrl}
+							<!-- Share URL display -->
+							<div
+								class="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2"
+							>
+								<Link class="h-4 w-4 text-muted-foreground" />
+								<span class="max-w-[200px] truncate text-sm sm:max-w-[300px]">{shareUrl}</span>
+								<Button variant="ghost" size="sm" class="h-7 px-2" onclick={copyShareUrl}>
+									{#if copied}
+										<Check class="h-4 w-4 text-green-500" />
+									{:else}
+										<span class="text-xs">Copy</span>
+									{/if}
+								</Button>
+							</div>
+							<Button
+								variant="outline"
+								size="sm"
+								onclick={disableSharing}
+								disabled={isSharing}
+								class="gap-1"
+							>
+								{#if isSharing}
+									<Loader2 class="h-4 w-4 animate-spin" />
+								{:else}
+									<X class="h-4 w-4" />
+								{/if}
+								Disable Link
+							</Button>
+						{:else if story.id}
+							<Button
+								variant="outline"
+								size="sm"
+								onclick={enableSharing}
+								disabled={isSharing}
+								class="gap-2"
+							>
+								{#if isSharing}
+									<Loader2 class="h-4 w-4 animate-spin" />
+									Creating link...
+								{:else}
+									<Share2 class="h-4 w-4" />
+									Share Story
+								{/if}
+							</Button>
+						{/if}
+						<Button variant="outline" size="sm" onclick={generateStory} class="gap-2">
+							<BookOpen class="h-4 w-4" />
+							Regenerate
+						</Button>
+					</div>
+
 					<!-- 3D Book -->
 					<div class="relative" style="height: 70vh;">
 						{#await import('$lib/components/storybook/StoryBook.svelte') then StoryBook}
