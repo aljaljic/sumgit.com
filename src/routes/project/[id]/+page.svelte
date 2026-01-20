@@ -123,7 +123,7 @@
 				</Button>
 				<Separator orientation="vertical" class="h-6 hidden sm:block" />
 				<div class="flex items-center gap-2 min-w-0">
-					<img src={logo} alt="sumgit" class="h-6 w-6 sm:h-7 sm:w-7 rounded-md shrink-0" />
+					<img src={logo} alt="SumGit" class="h-6 w-6 sm:h-7 sm:w-7 rounded-md shrink-0" />
 					<span class="font-semibold truncate text-sm sm:text-base">{data.repository.repo_owner}/{data.repository.repo_name}</span>
 				</div>
 			</div>

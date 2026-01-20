@@ -8,8 +8,8 @@
 			<!-- Logo & Tagline -->
 			<div class="md:col-span-2">
 				<div class="flex items-center gap-2">
-					<img src={logo} alt="sumgit" class="h-8 w-8 rounded-md" />
-					<span class="text-xl font-bold tracking-tight">sumgit</span>
+					<img src={logo} alt="SumGit" class="h-8 w-8 rounded-md" />
+					<span class="text-xl font-bold tracking-tight">SumGit</span>
 				</div>
 				<p class="mt-3 text-sm text-muted-foreground">
 					Turn your commits into stories worth sharing.
