@@ -18,7 +18,6 @@
 		Download
 	} from '@lucide/svelte';
 	import logo from '$lib/assets/logo.png';
-	import html2canvas from 'html2canvas';
 	import PurchaseCreditsDialog from '$lib/components/PurchaseCreditsDialog.svelte';
 	import type { RepoRecap } from '$lib/types/recap';
 
@@ -29,8 +28,6 @@
 	let errorMessage = $state<string | null>(null);
 	let showPurchaseDialog = $state(false);
 	let copied = $state(false);
-	let recapContentRef = $state<HTMLDivElement | null>(null);
-	let isDownloading = $state(false);
 
 	async function generateRecap() {
 		if (isGenerating) return;
@@ -116,33 +113,122 @@ Built with sumgit.com`;
 		window.open(url, '_blank', 'noopener,noreferrer');
 	}
 
-	async function downloadAsImage() {
-		if (!recapContentRef || !recap || isDownloading) return;
+	function downloadAsPdf() {
+		if (!recap) return;
 
-		isDownloading = true;
-		try {
-			const canvas = await html2canvas(recapContentRef, {
-				scale: 2,
-				backgroundColor: '#0a0a0a',
-				useCORS: true
-			});
+		const languagesHtml = recap.stats.languages.length > 0
+			? `
+				<div style="margin-bottom: 24px;">
+					<div style="font-size: 14px; color: #666; margin-bottom: 12px;">Languages</div>
+					<div style="display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 12px; border: 1px solid #ddd;">
+						${recap.stats.languages.map(lang => `<div style="width: ${lang.percentage}%; background-color: ${lang.color};"></div>`).join('')}
+					</div>
+					<div style="display: flex; flex-wrap: wrap; gap: 12px;">
+						${recap.stats.languages.map(lang => `
+							<div style="display: flex; align-items: center; gap: 6px; font-size: 14px;">
+								<span style="width: 10px; height: 10px; border-radius: 50%; background-color: ${lang.color}; display: inline-block;"></span>
+								<span style="color: #333;">${lang.name}</span>
+								<span style="color: #666;">${lang.percentage}%</span>
+							</div>
+						`).join('')}
+					</div>
+				</div>`
+			: '';
 
-			canvas.toBlob((blob) => {
-				if (!blob) return;
-				const url = URL.createObjectURL(blob);
-				const link = document.createElement('a');
-				link.href = url;
-				link.download = `${data.repository.repo_owner}-${data.repository.repo_name}-recap.png`;
-				document.body.appendChild(link);
-				link.click();
-				document.body.removeChild(link);
-				URL.revokeObjectURL(url);
-			}, 'image/png');
-		} catch (err) {
-			console.error('Failed to download image:', err);
-		} finally {
-			isDownloading = false;
-		}
+		const milestonesHtml = recap.summary.top_milestones.map((milestone, index) => `
+			<div style="border: 1px solid #e5e5e5; border-radius: 8px; padding: 16px; display: flex; gap: 16px; align-items: flex-start; margin-bottom: 12px; page-break-inside: avoid;">
+				<div style="width: 32px; height: 32px; border-radius: 50%; background: #f3e8ff; color: #9333ea; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">
+					${index + 1}
+				</div>
+				<div>
+					<div style="font-weight: 500; color: #111;">${milestone.title}</div>
+					<div style="font-size: 12px; color: #666; margin-top: 4px;">${formatDate(milestone.date)}</div>
+					${milestone.description ? `<div style="font-size: 14px; color: #666; margin-top: 8px;">${milestone.description}</div>` : ''}
+				</div>
+			</div>
+		`).join('');
+
+		const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>${data.repository.repo_owner}/${data.repository.repo_name} - Recap</title>
+	<style>
+		@page { size: A4; margin: 20mm; }
+		* { margin: 0; padding: 0; box-sizing: border-box; }
+		body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #111; padding: 0; line-height: 1.5; }
+		.container { max-width: 100%; }
+		.stats-grid { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; justify-content: center; }
+		.stat-card { border: 1px solid #e5e5e5; border-radius: 8px; padding: 12px 16px; text-align: center; min-width: 100px; }
+		.stat-value { font-size: 20px; font-weight: bold; }
+		.stat-label { font-size: 12px; color: #666; }
+		.card { border: 1px solid #e5e5e5; border-radius: 8px; padding: 24px; margin-bottom: 24px; }
+		.vibe-card { background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 8px; padding: 24px; text-align: center; }
+		.footer { text-align: center; color: #666; font-size: 14px; margin-top: 32px; }
+		.footer a { color: #9333ea; text-decoration: none; }
+		h1 { text-align: center; font-size: 24px; margin-bottom: 24px; color: #111; }
+		h2 { font-size: 18px; margin-bottom: 16px; color: #111; }
+	</style>
+</head>
+<body>
+	<div class="container">
+		<h1>${recap.summary.headline}</h1>
+
+		<div class="stats-grid">
+			<div class="stat-card">
+				<div class="stat-value" style="color: #9333ea;">${formatNumber(recap.stats.total_commits)}</div>
+				<div class="stat-label">commits</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-value" style="color: #16a34a;">${formatNumber(recap.stats.total_lines_of_code)}</div>
+				<div class="stat-label">lines of code</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-value" style="color: #d97706;">${recap.stats.total_milestones}</div>
+				<div class="stat-label">milestones</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-value" style="color: #2563eb;">${recap.stats.active_months}</div>
+				<div class="stat-label">months</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-value" style="color: #ea580c;">${recap.stats.contributors}</div>
+				<div class="stat-label">contributor${recap.stats.contributors === 1 ? '' : 's'}</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-value" style="color: #0891b2;">${recap.stats.languages.length}</div>
+				<div class="stat-label">language${recap.stats.languages.length === 1 ? '' : 's'}</div>
+			</div>
+		</div>
+
+		${languagesHtml}
+
+		<div class="card">
+			<p style="line-height: 1.7; white-space: pre-line;">${recap.summary.narrative}</p>
+		</div>
+
+		<h2>Top Milestones</h2>
+		${milestonesHtml}
+
+		<div class="vibe-card">
+			<p style="font-size: 18px; font-style: italic; color: #7c3aed;">"${recap.summary.vibe_check}"</p>
+		</div>
+
+		<div class="footer">
+			Generated by <a href="https://sumgit.com">sumgit.com</a>
+		</div>
+	</div>
+</body>
+</html>`;
+
+		const printWindow = window.open('', '_blank');
+		if (!printWindow) return;
+
+		printWindow.document.write(html);
+		printWindow.document.close();
+		printWindow.onload = () => {
+			printWindow.print();
+		};
 	}
 
 	function formatDate(dateString: string): string {
@@ -233,12 +319,10 @@ Built with sumgit.com`;
 			{:else if recap}
 				<!-- Recap view -->
 				<div class="space-y-6">
-					<!-- Recap content for image capture -->
-					<div bind:this={recapContentRef} class="space-y-6 rounded-lg bg-background p-4">
-						<!-- Headline -->
-						<div class="text-center">
-							<h1 class="text-2xl font-bold sm:text-3xl">{recap.summary.headline}</h1>
-						</div>
+					<!-- Headline -->
+					<div class="text-center">
+						<h1 class="text-2xl font-bold sm:text-3xl">{recap.summary.headline}</h1>
+					</div>
 
 					<!-- Stats cards row -->
 					<div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-6">
@@ -358,12 +442,11 @@ Built with sumgit.com`;
 					</div>
 
 					<!-- Vibe Check -->
-						<Card class="border-purple-500/30 bg-purple-500/5">
-							<CardContent class="p-6 text-center">
-								<p class="text-lg font-medium italic text-foreground">"{recap.summary.vibe_check}"</p>
-							</CardContent>
-						</Card>
-					</div>
+					<Card class="border-purple-500/30 bg-purple-500/5">
+						<CardContent class="p-6 text-center">
+							<p class="text-lg font-medium italic text-foreground">"{recap.summary.vibe_check}"</p>
+						</CardContent>
+					</Card>
 
 					<!-- Action buttons -->
 					<div class="flex flex-col gap-3 sm:flex-row sm:justify-center">
@@ -380,14 +463,9 @@ Built with sumgit.com`;
 							<Share2 class="h-4 w-4" />
 							Share on X
 						</Button>
-						<Button onclick={downloadAsImage} variant="outline" class="gap-2" disabled={isDownloading}>
-							{#if isDownloading}
-								<Loader2 class="h-4 w-4 animate-spin" />
-								Downloading...
-							{:else}
-								<Download class="h-4 w-4" />
-								Download Image
-							{/if}
+						<Button onclick={downloadAsPdf} variant="outline" class="gap-2">
+							<Download class="h-4 w-4" />
+							Download PDF
 						</Button>
 					</div>
 				</div>
