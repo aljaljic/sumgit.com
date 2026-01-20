@@ -112,7 +112,7 @@ export async function createBook(
 	backCover.visible = false; // Hidden until book closes
 	group.add(backCover);
 
-	// Book spine
+	// Book spine - must be child of frontCover to rotate with it
 	const spineWidth = 0.08;
 	const spineGeometry = new THREE.BoxGeometry(spineWidth, BOOK_HEIGHT, BOOK_DEPTH + 0.1);
 	const spineTexture = createSpineTexture(repoName);
@@ -124,9 +124,11 @@ export async function createBook(
 			metalness: 0.1
 		})
 	);
-	spine.position.set(BOOK_WIDTH / 2 + spineWidth / 2, 0, 0);
+	// Position relative to frontCover's local coordinates (geometry is translated by -BOOK_WIDTH/2)
+	// So x=0 is the right edge (hinge), and we want spine just to the right of that
+	spine.position.set(spineWidth / 2, 0, -0.025 - BOOK_DEPTH / 2);
 	spine.castShadow = true;
-	group.add(spine);
+	frontCover.add(spine);
 
 	// Page stack edges (visible paper stack)
 	const pageStackGeometry = new THREE.BoxGeometry(0.02, BOOK_HEIGHT - 0.2, BOOK_DEPTH - 0.1);
@@ -139,7 +141,8 @@ export async function createBook(
 			metalness: 0
 		})
 	);
-	pageStack.position.set(-0.04, 0, 0);
+	// Page stack edges - at left edge of open pages
+	pageStack.position.set(-(BOOK_WIDTH / 2) + 0.01, 0, 0);
 	group.add(pageStack);
 
 	// Create page textures: title page + chapters
