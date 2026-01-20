@@ -21,7 +21,7 @@
 </script>
 
 <svelte:head>
-	<title>{data.repository.repo_owner}/{data.repository.repo_name} Story | sumgit</title>
+	<title>{data.repository.repo_owner}/{data.repository.repo_name} Story | SumGit</title>
 	<meta
 		name="description"
 		content="The story of {data.repository.repo_owner}/{data.repository.repo_name} - a developer journey told through milestones"
@@ -45,8 +45,8 @@
 	<header class="border-b border-border/40 px-4 py-3 sm:px-6 sm:py-4">
 		<div class="mx-auto flex max-w-4xl items-center justify-between">
 			<a href="/" class="flex items-center gap-2 transition-opacity hover:opacity-80">
-				<img src={logo} alt="sumgit" class="h-6 w-6 rounded-md sm:h-7 sm:w-7" />
-				<span class="text-sm font-semibold sm:text-base">sumgit</span>
+				<img src={logo} alt="SumGit" class="h-6 w-6 rounded-md sm:h-7 sm:w-7" />
+				<span class="text-sm font-semibold sm:text-base">SumGit</span>
 			</a>
 			<div class="flex items-center gap-2">
 				<BookOpen class="h-4 w-4 text-amber-500" />

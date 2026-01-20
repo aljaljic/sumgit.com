@@ -169,8 +169,8 @@
 	<header class="border-b border-border/40 px-4 py-3 sm:px-6 sm:py-4">
 		<div class="mx-auto flex max-w-6xl items-center justify-between">
 			<a href="/" class="flex items-center gap-2">
-				<img src={logo} alt="sumgit" class="h-7 w-7 sm:h-8 sm:w-8 rounded-md" />
-				<span class="text-lg sm:text-xl font-bold tracking-tight">sumgit</span>
+				<img src={logo} alt="SumGit" class="h-7 w-7 sm:h-8 sm:w-8 rounded-md" />
+				<span class="text-lg sm:text-xl font-bold tracking-tight">SumGit</span>
 			</a>
 			<div class="flex items-center gap-2 sm:gap-4">
 				{#if data.installations.length > 0}
@@ -217,7 +217,7 @@
 					<CardHeader>
 						<CardTitle class="flex items-center gap-2 text-lg">
 							<Github class="h-5 w-5" />
-							Install the sumgit GitHub App
+							Install the SumGit GitHub App
 						</CardTitle>
 						<CardDescription>
 							Install our GitHub App to grant read-only access to your repositories. This is
@@ -239,7 +239,7 @@
 						</div>
 						<div class="mb-4 rounded-lg border border-blue-500/30 bg-blue-500/5 p-4">
 							<p class="text-sm text-blue-400">
-								<strong>After installing:</strong> GitHub will automatically redirect you back to sumgit.
+								<strong>After installing:</strong> GitHub will automatically redirect you back to SumGit.
 								If you don't see the redirect, you can manually return to this page.
 							</p>
 						</div>
@@ -290,7 +290,7 @@
 								Select a Repository
 							</CardTitle>
 							<CardDescription>
-								Choose from repositories where the sumgit app is installed
+								Choose from repositories where the SumGit app is installed
 							</CardDescription>
 						</CardHeader>
 						<CardContent>

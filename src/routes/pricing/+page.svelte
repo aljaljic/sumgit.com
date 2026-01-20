@@ -71,8 +71,8 @@
 	<header class="border-b border-border/40 px-6 py-4">
 		<div class="mx-auto flex max-w-6xl items-center justify-between">
 			<a href="/" class="flex items-center gap-2">
-				<img src={logo} alt="sumgit" class="h-8 w-8 rounded-md" />
-				<span class="text-xl font-bold tracking-tight">sumgit</span>
+				<img src={logo} alt="SumGit" class="h-8 w-8 rounded-md" />
+				<span class="text-xl font-bold tracking-tight">SumGit</span>
 			</a>
 			<div class="flex items-center gap-4">
 				{#if data.isLoggedIn}

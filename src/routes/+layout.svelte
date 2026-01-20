@@ -21,7 +21,7 @@
 
 <svelte:head>
 	<link rel="icon" href={logo} />
-	<title>sumgit - Git Milestone Summarizer</title>
+	<title>SumGit - Git Milestone Summarizer</title>
 	<meta name="description" content="Summarize milestones in your codebase for X posts" />
 </svelte:head>
 

@@ -9,7 +9,7 @@
 {#if show}
 	<div class="widget-branding">
 		<a href="https://sumgit.com" target="_blank" rel="noopener noreferrer">
-			Powered by <strong>Sumgit</strong>
+			Powered by <strong>SumGit</strong>
 		</a>
 	</div>
 {/if}

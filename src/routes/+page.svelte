@@ -33,8 +33,8 @@
 	<header class="border-b border-border/40 px-6 py-4">
 		<div class="mx-auto flex max-w-6xl items-center justify-between">
 			<div class="flex items-center gap-2">
-				<img src={logo} alt="sumgit" class="h-8 w-8 rounded-md" />
-				<span class="text-xl font-bold tracking-tight">sumgit</span>
+				<img src={logo} alt="SumGit" class="h-8 w-8 rounded-md" />
+				<span class="text-xl font-bold tracking-tight">SumGit</span>
 			</div>
 			{#if data.user}
 				<Button href="/dashboard" variant="outline" class="gap-2">
@@ -75,7 +75,7 @@
 			</h1>
 
 			<p class="mb-10 text-lg text-muted-foreground md:text-xl">
-				sumgit analyzes your git history and extracts significant milestones worth sharing. Perfect
+				SumGit analyzes your git history and extracts significant milestones worth sharing. Perfect
 				for building in public.
 			</p>
 
@@ -328,8 +328,8 @@
 			<h2 class="mb-8 text-center text-2xl font-bold">Frequently Asked Questions</h2>
 			<FAQ class="rounded-lg border border-border/40 bg-card/50 px-6">
 				<FAQItem
-					question="What permissions does sumgit need?"
-					answer="sumgit only requests read-only permissions for your GitHub repositories. We can view your commit history and repository metadata, but we cannot modify your code, push commits, or make any changes to your repositories. Your code stays completely safe."
+					question="What permissions does SumGit need?"
+					answer="SumGit only requests read-only permissions for your GitHub repositories. We can view your commit history and repository metadata, but we cannot modify your code, push commits, or make any changes to your repositories. Your code stays completely safe."
 				/>
 				<FAQItem
 					question="How does the AI analysis work?"
@@ -337,7 +337,7 @@
 				/>
 				<FAQItem
 					question="Can I choose which repositories to analyze?"
-					answer="Yes! After connecting your GitHub account, you can select specific repositories to analyze. You have full control over which projects sumgit can access."
+					answer="Yes! After connecting your GitHub account, you can select specific repositories to analyze. You have full control over which projects SumGit can access."
 				/>
 				<FAQItem
 					question="Is my code stored or shared?"
@@ -345,7 +345,7 @@
 				/>
 				<FAQItem
 					question="How do credits work?"
-					answer="sumgit uses a simple credit system. You get 10 free credits when you sign up. Quick analysis costs 2 credits, timeline analysis costs 5 credits, recap costs 3 credits, and story generation costs 10 credits. You can purchase more credits anytime - no subscriptions required."
+					answer="SumGit uses a simple credit system. You get 10 free credits when you sign up. Quick analysis costs 2 credits, timeline analysis costs 5 credits, recap costs 3 credits, and story generation costs 10 credits. You can purchase more credits anytime - no subscriptions required."
 				/>
 				<FAQItem
 					question="Do credits expire?"
@@ -360,12 +360,12 @@
 					answer="Yes! Each story gets a unique shareable link that you can post on social media, include in your portfolio, or share with your team. Stories are designed to be visually appealing and easy to share."
 				/>
 				<FAQItem
-					question="How many commits can sumgit analyze?"
+					question="How many commits can SumGit analyze?"
 					answer="Quick analysis covers your last 100 commits - perfect for recent activity. Timeline analysis goes deeper, analyzing up to 5,000 commits to create a comprehensive history of your project's evolution."
 				/>
 				<FAQItem
-					question="Does sumgit work with private repositories?"
-					answer="Yes! sumgit works with both public and private repositories. We only request read-only access, and your code is never stored - we only analyze commit metadata."
+					question="Does SumGit work with private repositories?"
+					answer="Yes! SumGit works with both public and private repositories. We only request read-only access, and your code is never stored - we only analyze commit metadata."
 				/>
 			</FAQ>
 		</div>

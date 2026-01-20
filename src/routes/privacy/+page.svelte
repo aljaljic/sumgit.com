@@ -10,8 +10,8 @@
 	<header class="border-b border-border/40 px-6 py-4">
 		<div class="mx-auto flex max-w-6xl items-center justify-between">
 			<a href="/" class="flex items-center gap-2">
-				<img src={logo} alt="sumgit" class="h-8 w-8 rounded-md" />
-				<span class="text-xl font-bold tracking-tight">sumgit</span>
+				<img src={logo} alt="SumGit" class="h-8 w-8 rounded-md" />
+				<span class="text-xl font-bold tracking-tight">SumGit</span>
 			</a>
 			<Button href="/" variant="ghost" class="gap-2">
 				<ArrowLeft class="h-4 w-4" />
@@ -30,7 +30,7 @@
 				<section>
 					<h2 class="mb-3 text-xl font-semibold text-foreground">1. Introduction</h2>
 					<p>
-						sumgit ("we", "our", or "us") is committed to protecting your privacy. This Privacy
+						SumGit ("we", "our", or "us") is committed to protecting your privacy. This Privacy
 						Policy explains how we collect, use, and safeguard your information when you use our
 						service.
 					</p>

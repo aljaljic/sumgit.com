@@ -26,7 +26,7 @@
 	</div>
 	<p class="error-message">{message}</p>
 	<a href="https://sumgit.com" target="_blank" rel="noopener noreferrer" class="error-link">
-		Learn more about Sumgit
+		Learn more about SumGit
 	</a>
 </div>
 

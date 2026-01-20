@@ -10,7 +10,7 @@
 </script>
 
 <svelte:head>
-	<title>{data.repository.repo_owner}/{data.repository.repo_name} - Sumgit Widget</title>
+	<title>{data.repository.repo_owner}/{data.repository.repo_name} - SumGit Widget</title>
 	<meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 

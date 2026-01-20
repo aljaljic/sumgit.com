@@ -28,7 +28,6 @@
 
 	// Config
 	let selectedTheme = $state<WidgetTheme>('light');
-	let showBranding = $state(true);
 
 	const CONTENT_TYPE_LABELS: Record<WidgetContentType, string> = {
 		milestones: 'Milestones',
@@ -65,7 +64,6 @@
 					embedUrl = `${window.location.origin}/embed/${token.token}`;
 					iframeCode = `<iframe src="${embedUrl}" width="100%" height="400" frameborder="0" style="border-radius: 8px;"></iframe>`;
 					selectedTheme = (token.config as { theme: WidgetTheme })?.theme || 'light';
-					showBranding = (token.config as { showBranding: boolean })?.showBranding ?? true;
 				}
 			}
 		} catch (err) {
@@ -88,7 +86,7 @@
 					content_type: contentType,
 					config: {
 						theme: selectedTheme,
-						showBranding
+						showBranding: true
 					}
 				})
 			});
@@ -202,25 +200,6 @@
 							</button>
 						{/each}
 					</div>
-				</div>
-
-				<!-- Branding Toggle -->
-				<div class="flex items-center justify-between">
-					<label class="text-sm font-medium">Show "Powered by Sumgit" branding</label>
-					<button
-						type="button"
-						onclick={() => (showBranding = !showBranding)}
-						aria-label="Toggle branding"
-						class="relative h-6 w-11 rounded-full transition-colors {showBranding
-							? 'bg-purple-500'
-							: 'bg-muted'}"
-					>
-						<span
-							class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white transition-transform shadow-sm {showBranding
-								? 'translate-x-5'
-								: ''}"
-						></span>
-					</button>
 				</div>
 
 				{#if error}
