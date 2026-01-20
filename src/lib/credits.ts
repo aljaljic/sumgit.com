@@ -1,5 +1,5 @@
 export const CREDIT_COSTS = {
-	quick_analyze: 1,
+	quick_analyze: 2,
 	timeline_analyze: 5,
 	generate_story: 10,
 	generate_recap: 3
@@ -8,7 +8,7 @@ export const CREDIT_COSTS = {
 export type OperationType = keyof typeof CREDIT_COSTS;
 
 export const CREDIT_PACKAGES = [
-	{ id: 'pack_10', credits: 10, price: 500, priceDisplay: '$5' },
+	{ id: 'pack_20', credits: 20, price: 900, priceDisplay: '$9' },
 	{ id: 'pack_50', credits: 50, price: 2000, priceDisplay: '$20' },
 	{ id: 'pack_100', credits: 100, price: 3500, priceDisplay: '$35' }
 ] as const;

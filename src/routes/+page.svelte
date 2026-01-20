@@ -325,7 +325,7 @@
 				/>
 				<FAQItem
 					question="How do credits work?"
-					answer="sumgit uses a simple credit system. You get 10 free credits when you sign up. Quick analysis costs 1 credit, timeline analysis costs 5 credits, and story generation costs 10 credits. You can purchase more credits anytime - no subscriptions required."
+					answer="sumgit uses a simple credit system. You get 10 free credits when you sign up. Quick analysis costs 2 credits, timeline analysis costs 5 credits, recap costs 3 credits, and story generation costs 10 credits. You can purchase more credits anytime - no subscriptions required."
 				/>
 				<FAQItem
 					question="Do credits expire?"
