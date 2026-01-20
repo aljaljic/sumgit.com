@@ -249,7 +249,7 @@
 								click "Verify Installation" to connect it to your account.
 							</p>
 						</div>
-						<div class="flex gap-2">
+						<div class="flex flex-col gap-2 sm:flex-row">
 							<Button onclick={installGitHubApp} class="gap-2">
 								<Github class="h-4 w-4" />
 								Install GitHub App
