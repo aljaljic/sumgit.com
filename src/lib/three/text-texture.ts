@@ -29,18 +29,9 @@ export async function createTextTexture(
 	canvas.height = TEXTURE_HEIGHT;
 	const ctx = canvas.getContext('2d')!;
 
-	// Page background (cream paper color)
-	ctx.fillStyle = '#f5f0e6';
+	// Page background (white)
+	ctx.fillStyle = '#ffffff';
 	ctx.fillRect(0, 0, TEXTURE_WIDTH, TEXTURE_HEIGHT);
-
-	// Add subtle paper texture
-	ctx.fillStyle = 'rgba(0, 0, 0, 0.02)';
-	for (let i = 0; i < 100; i++) {
-		const x = Math.random() * TEXTURE_WIDTH;
-		const y = Math.random() * TEXTURE_HEIGHT;
-		const size = Math.random() * 2;
-		ctx.fillRect(x, y, size, size);
-	}
 
 	const padding = 80;
 	const contentWidth = TEXTURE_WIDTH - padding * 2;
@@ -86,7 +77,7 @@ export async function createTextTexture(
 
 	// Date range
 	ctx.font = 'italic 24px Georgia, serif';
-	ctx.fillStyle = '#666';
+	ctx.fillStyle = '#444';
 	ctx.fillText(chapter.date_range, padding, contentStartY + 40);
 
 	// Decorative line
@@ -99,7 +90,7 @@ export async function createTextTexture(
 
 	// Chapter content
 	ctx.font = '28px Georgia, serif';
-	ctx.fillStyle = '#333';
+	ctx.fillStyle = '#1a1a1a';
 	ctx.textAlign = 'left';
 
 	const lineHeight = 40;
@@ -137,7 +128,7 @@ export async function createTextTexture(
 
 	// Page number
 	ctx.font = '24px Georgia, serif';
-	ctx.fillStyle = '#888';
+	ctx.fillStyle = '#666';
 	ctx.textAlign = 'center';
 	ctx.fillText(`${pageNum} / ${totalPages}`, TEXTURE_WIDTH / 2, TEXTURE_HEIGHT - 40);
 
@@ -321,18 +312,9 @@ export function createTitlePageTexture(repoName: string): THREE.CanvasTexture {
 	canvas.height = TEXTURE_HEIGHT;
 	const ctx = canvas.getContext('2d')!;
 
-	// Page background (cream paper color)
-	ctx.fillStyle = '#f5f0e6';
+	// Page background (white)
+	ctx.fillStyle = '#ffffff';
 	ctx.fillRect(0, 0, TEXTURE_WIDTH, TEXTURE_HEIGHT);
-
-	// Add subtle paper texture
-	ctx.fillStyle = 'rgba(0, 0, 0, 0.02)';
-	for (let i = 0; i < 100; i++) {
-		const x = Math.random() * TEXTURE_WIDTH;
-		const y = Math.random() * TEXTURE_HEIGHT;
-		const size = Math.random() * 2;
-		ctx.fillRect(x, y, size, size);
-	}
 
 	// Decorative border
 	const borderPadding = 60;
@@ -426,18 +408,9 @@ export function createEndPageTexture(): THREE.CanvasTexture {
 	canvas.height = TEXTURE_HEIGHT;
 	const ctx = canvas.getContext('2d')!;
 
-	// Page background (cream paper color)
-	ctx.fillStyle = '#f5f0e6';
+	// Page background (white)
+	ctx.fillStyle = '#ffffff';
 	ctx.fillRect(0, 0, TEXTURE_WIDTH, TEXTURE_HEIGHT);
-
-	// Add subtle paper texture
-	ctx.fillStyle = 'rgba(0, 0, 0, 0.02)';
-	for (let i = 0; i < 100; i++) {
-		const x = Math.random() * TEXTURE_WIDTH;
-		const y = Math.random() * TEXTURE_HEIGHT;
-		const size = Math.random() * 2;
-		ctx.fillRect(x, y, size, size);
-	}
 
 	// "The End" text
 	ctx.fillStyle = '#2d1b0e';
@@ -514,8 +487,8 @@ export function createPageEdgeTexture(): THREE.CanvasTexture {
 	canvas.height = 512;
 	const ctx = canvas.getContext('2d')!;
 
-	// Cream base
-	ctx.fillStyle = '#f5f0e6';
+	// White base
+	ctx.fillStyle = '#ffffff';
 	ctx.fillRect(0, 0, 64, 512);
 
 	// Horizontal lines for page edges
