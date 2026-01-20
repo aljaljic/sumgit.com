@@ -5,6 +5,8 @@ import { analyzeMilestones, analyzeCommitsInChunks, type Commit, type MilestoneI
 import type { Repository, Milestone, GitHubInstallation } from '$lib/database.types';
 import { checkAndDeductCredits, refundCredits } from '$lib/server/credits';
 import { CREDIT_COSTS } from '$lib/credits';
+import { handleError } from '$lib/server/errors';
+import { secureLog } from '$lib/server/logger';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	const { session, user } = await locals.safeGetSession();
@@ -129,7 +131,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			}
 		}
 
-		console.log(`Timeline analysis: Fetched ${commits.length} commits`);
+		secureLog.info(`Timeline analysis: Fetched ${commits.length} commits`);
 
 		if (commits.length === 0) {
 			throw error(400, 'No commits found in repository');
@@ -187,25 +189,25 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					throw subrequestError;
 				}
 
-				console.error(`Error fetching commit ${commit.sha}:`, {
+				secureLog.error(`Error fetching commit ${commit.sha}:`, {
 					status: errorStatus,
 					message: errorMessage
 				});
 
 				// For 500/403/404 errors, continue without diff
 				if (errorStatus === 500 || errorStatus === 403 || errorStatus === 404) {
-					console.warn(`Skipping diff for commit ${commit.sha} (status: ${errorStatus})`);
+					secureLog.warn(`Skipping diff for commit ${commit.sha} (status: ${errorStatus})`);
 					return;
 				}
 
 				// Rate limit - stop processing
 				if (errorStatus === 429 || errorMsg.includes('rate limit')) {
-					console.warn(`GitHub API rate limit hit, stopping diff fetches`);
+					secureLog.warn(`GitHub API rate limit hit, stopping diff fetches`);
 					throw err;
 				}
 
 				// For other errors, continue without diff
-				console.warn(`Failed to fetch diff for commit ${commit.sha}, continuing without diff`);
+				secureLog.warn(`Failed to fetch diff for commit ${commit.sha}, continuing without diff`);
 			}
 		};
 
@@ -224,7 +226,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					(err as any).isSubrequestLimit
 				)) {
 					hitSubrequestLimit = true;
-					console.warn(`Hit subrequest limit at commit ${i + 1}`);
+					secureLog.warn(`Hit subrequest limit at commit ${i + 1}`);
 					break;
 				}
 				// Continue for other errors
@@ -243,7 +245,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		// Log summary
 		const commitsWithDiffs = commitsForAnalysis.filter(c => c.diff).length;
-		console.log(`Timeline analysis: Analyzing ${commitsForAnalysis.length} commits (${commitsWithDiffs} with diffs)`);
+		secureLog.info(`Timeline analysis: Analyzing ${commitsForAnalysis.length} commits (${commitsWithDiffs} with diffs)`);
 
 		// Ensure we have commits to analyze
 		if (commitsForAnalysis.length === 0) {
@@ -261,7 +263,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			try {
 				// Always use chunked analysis for timeline (large repositories)
 				milestones = await analyzeCommitsInChunks(`${repo.repo_owner}/${repo.repo_name}`, commitsForAnalysis);
-				console.log(`Timeline OpenAI analysis successful: ${milestones.length} milestones found`);
+				secureLog.info(`Timeline OpenAI analysis successful: ${milestones.length} milestones found`);
 				break;
 			} catch (err) {
 				lastError = err instanceof Error ? err : new Error(String(err));
@@ -277,15 +279,15 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				if (isRetryableError) {
 					retryCount++;
 					if (retryCount <= maxRetries) {
-						console.warn(`OpenAI connection error, retrying (${retryCount}/${maxRetries})...`);
+						secureLog.warn(`OpenAI connection error, retrying (${retryCount}/${maxRetries})...`);
 						const backoffDelay = 1000 * retryCount + Math.random() * 1000;
 						await new Promise((resolve) => setTimeout(resolve, backoffDelay));
 						continue;
 					} else {
-						console.warn('Max retries reached for OpenAI, attempting final request...');
+						secureLog.warn('Max retries reached for OpenAI, attempting final request...');
 						try {
 							milestones = await analyzeCommitsInChunks(`${repo.repo_owner}/${repo.repo_name}`, commitsForAnalysis);
-							console.log(`Timeline OpenAI analysis successful on final attempt: ${milestones.length} milestones found`);
+							secureLog.info(`Timeline OpenAI analysis successful on final attempt: ${milestones.length} milestones found`);
 							break;
 						} catch (finalErr) {
 							const finalErrorMsg = finalErr instanceof Error ? finalErr.message : String(finalErr);
@@ -323,7 +325,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				.insert(milestonesToInsert as Milestone[]);
 
 			if (insertError) {
-				console.error('Insert milestones error:', insertError);
+				secureLog.error('Insert milestones error:', insertError);
 			}
 		}
 
@@ -344,31 +346,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			credits_remaining: creditResult.newBalance
 		});
 	} catch (err) {
-		console.error('Timeline analysis error:', err);
-
 		// Refund credits on failure
 		if (creditsDeducted) {
 			await refundCredits(user.id, 'timeline_analyze', 'Refund due to timeline analysis failure');
 		}
 
-		if (err instanceof Error) {
-			const errorMsg = err.message.toLowerCase();
-
-			if (errorMsg.includes('openai') || errorMsg.includes('connection error') || errorMsg.includes('timeout')) {
-				throw error(503, 'AI analysis service temporarily unavailable. Please try again.');
-			}
-
-			if (errorMsg.includes('github') || errorMsg.includes('api rate limit')) {
-				throw error(429, 'GitHub API rate limit reached. Please try again later.');
-			}
-
-			if (errorMsg.includes('403') || errorMsg.includes('forbidden') || errorMsg.includes('permission')) {
-				throw error(403, 'Access denied. Please ensure the GitHub App has access to this repository.');
-			}
-
-			throw error(500, `Timeline analysis failed: ${err.message}`);
-		}
-
-		throw error(500, 'Failed to analyze repository timeline. Please check the logs for details.');
+		// Use sanitized error handling
+		handleError(err, 'Timeline analysis');
 	}
 };

@@ -7,6 +7,8 @@ import type { Repository, Milestone, GitHubInstallation } from '$lib/database.ty
 import type { RecapStats, RecapSummary, RepoRecap, LanguageStat } from '$lib/types/recap';
 import { checkAndDeductCredits, refundCredits } from '$lib/server/credits';
 import { CREDIT_COSTS } from '$lib/credits';
+import { handleError } from '$lib/server/errors';
+import { secureLog } from '$lib/server/logger';
 
 const openai = new OpenAI({
 	apiKey: PRIVATE_OPENAI_API_KEY,
@@ -229,7 +231,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 				break; // Successfully got stats
 			} catch (err) {
-				console.error('Error fetching GitHub stats:', err);
+				secureLog.error('Error fetching GitHub stats:', err);
 				continue;
 			}
 		}
@@ -328,21 +330,12 @@ Create an engaging recap that celebrates this journey. Reference the tech stack 
 			credits_remaining: creditResult.newBalance
 		});
 	} catch (err) {
-		console.error('Recap generation error:', err);
-
 		// Refund credits on failure
 		if (creditsDeducted) {
 			await refundCredits(user.id, 'generate_recap', 'Refund due to recap generation failure');
 		}
 
-		if (err instanceof Error) {
-			const errorMsg = err.message.toLowerCase();
-
-			if (errorMsg.includes('timeout') || errorMsg.includes('connection')) {
-				throw error(503, 'AI service temporarily unavailable. Please try again.');
-			}
-		}
-
-		throw error(500, 'Failed to generate recap. Please try again.');
+		// Use sanitized error handling
+		handleError(err, 'Recap generation');
 	}
 };

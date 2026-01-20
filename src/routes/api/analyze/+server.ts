@@ -5,6 +5,8 @@ import { analyzeMilestones, type Commit, type MilestoneInput } from '$lib/openai
 import type { Repository, Milestone, GitHubInstallation } from '$lib/database.types';
 import { checkAndDeductCredits, refundCredits, getUserCredits } from '$lib/server/credits';
 import { CREDIT_COSTS } from '$lib/credits';
+import { handleError } from '$lib/server/errors';
+import { secureLog } from '$lib/server/logger';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	const { session, user } = await locals.safeGetSession();
@@ -119,7 +121,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			commits.push(commitData);
 		}
 
-		console.log(`Fetched ${commits.length} commits`);
+		secureLog.info(`Fetched ${commits.length} commits`);
 
 		if (commits.length === 0) {
 			throw error(400, 'No commits found in repository');
@@ -184,10 +186,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					throw subrequestError;
 				}
 				
-				console.error(`Error fetching commit ${commit.sha}:`, {
+				secureLog.error(`Error fetching commit ${commit.sha}:`, {
 					status: errorStatus,
-					message: errorMessage,
-					details: errorDetails
+					message: errorMessage
 				});
 				
 				// Check for specific error types
@@ -195,7 +196,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					
 					// GitHub API 500 errors - this might indicate permission issues for private repos
 					if (errorStatus === 500 || errorMsg.includes('500') || errorMsg.includes('internal server error')) {
-						console.warn(`GitHub API 500 error for commit ${commit.sha} - this may indicate a permission issue for private repos`);
+						secureLog.warn(`GitHub API 500 error for commit - may indicate permission issue for private repos`);
 						// For private repos, 500 might mean we don't have permission to access commit details
 						// Continue without diff rather than failing completely
 						return;
@@ -203,25 +204,25 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					
 					// 403 - Permission denied (common for private repos without proper permissions)
 					if (errorStatus === 403 || errorMsg.includes('403') || errorMsg.includes('forbidden')) {
-						console.warn(`Permission denied for commit ${commit.sha} - GitHub App may need additional permissions for private repos`);
+						secureLog.warn('Permission denied for commit - GitHub App may need additional permissions for private repos');
 						throw new Error('GitHub App permission denied. Please ensure the app has "Contents" read permission for private repositories.');
 					}
 					
 					// Rate limit - stop processing
 					if (errorStatus === 429 || errorMsg.includes('rate limit')) {
-						console.warn(`GitHub API rate limit hit, stopping diff fetches`);
+						secureLog.warn('GitHub API rate limit hit, stopping diff fetches');
 						throw err;
 					}
 					
 					// 404 - commit not found
 					if (errorStatus === 404 || errorMsg.includes('404') || errorMsg.includes('not found')) {
-						console.warn(`Commit ${commit.sha} not found, skipping diff`);
+						secureLog.warn('Commit not found, skipping diff');
 						return;
 					}
 				}
 				
 				// For other errors, continue without diff
-				console.warn(`Failed to fetch diff for commit ${commit.sha}, continuing without diff`);
+				secureLog.warn('Failed to fetch diff for commit, continuing without diff');
 			}
 		};
 
@@ -270,7 +271,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				consecutiveFailures++;
 				// If we're getting consistent failures, it might be a permissions issue
 				if (consecutiveFailures >= maxConsecutiveFailures) {
-					console.warn(`Stopping diff fetches after ${consecutiveFailures} consecutive failures - likely a permissions issue for private repos`);
+					secureLog.warn(`Stopping diff fetches after ${consecutiveFailures} consecutive failures - likely a permissions issue for private repos`);
 					break;
 				}
 			}
@@ -294,7 +295,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				hitSubrequestLimit = true;
 				lastSuccessfulIndex = i;
 				const commitsWithDiffs = commits.filter(c => c.diff).length;
-				console.warn(`Hit subrequest limit, stopping diff fetches at commit ${i + batch.length}. Successfully fetched ${commitsWithDiffs} commits with diffs.`);
+				secureLog.warn(`Hit subrequest limit at commit batch. Successfully fetched ${commitsWithDiffs} commits with diffs.`);
 				break;
 			}
 
@@ -314,7 +315,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		// Log summary of what we're analyzing
 		const commitsWithDiffs = commitsForAnalysis.filter(c => c.diff).length;
 		const commitsWithoutDiffs = commitsForAnalysis.length - commitsWithDiffs;
-		console.log(`Analyzing ${commitsForAnalysis.length} commits (${commitsWithDiffs} with diffs, ${commitsWithoutDiffs} without diffs)`);
+		secureLog.info(`Analyzing ${commitsForAnalysis.length} commits (${commitsWithDiffs} with diffs, ${commitsWithoutDiffs} without diffs)`);
 
 		// Estimate payload size before sending (rough estimate)
 		const estimatedPayloadSize = commitsForAnalysis.reduce((size, commit) => {
@@ -325,7 +326,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			return size + commitSize;
 		}, 0);
 		
-		console.log(`Estimated payload size: ${(estimatedPayloadSize / 1024).toFixed(2)} KB`);
+		secureLog.info(`Estimated payload size: ${(estimatedPayloadSize / 1024).toFixed(2)} KB`);
 
 		// Ensure we have commits to analyze
 		if (commitsForAnalysis.length === 0) {
@@ -337,7 +338,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		// Chunked analysis is only for timeline endpoint with thousands of commits
 		// This keeps subrequest count low: ~40 diff fetches + 1 OpenAI call + 2 Supabase calls
 		let milestones: MilestoneInput[] = [];
-		console.log(`Analysis mode: single (regular endpoint always uses single mode)`);
+		secureLog.info('Analysis mode: single (regular endpoint always uses single mode)');
 
 		const maxRetries = 3;
 		let retryCount = 0;
@@ -347,7 +348,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			try {
 				// Always use single analysis for regular endpoint
 				milestones = await analyzeMilestones(`${repo.repo_owner}/${repo.repo_name}`, commitsForAnalysis);
-				console.log(`OpenAI analysis successful: ${milestones.length} milestones found`);
+				secureLog.info(`OpenAI analysis successful: ${milestones.length} milestones found`);
 				break; // Success, exit retry loop
 			} catch (err) {
 				lastError = err instanceof Error ? err : new Error(String(err));
@@ -364,17 +365,17 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				if (isRetryableError) {
 					retryCount++;
 					if (retryCount <= maxRetries) {
-						console.warn(`OpenAI connection error, retrying (${retryCount}/${maxRetries})...`);
+						secureLog.warn(`OpenAI connection error, retrying (${retryCount}/${maxRetries})...`);
 						// Wait before retrying (exponential backoff with jitter)
 						const backoffDelay = 1000 * retryCount + Math.random() * 1000;
 						await new Promise((resolve) => setTimeout(resolve, backoffDelay));
 						continue;
 					} else {
 						// Max retries reached, but try one more time
-						console.warn('Max retries reached for OpenAI, attempting final request...');
+						secureLog.warn('Max retries reached for OpenAI, attempting final request...');
 						try {
 							milestones = await analyzeMilestones(`${repo.repo_owner}/${repo.repo_name}`, commitsForAnalysis);
-							console.log(`OpenAI analysis successful on final attempt: ${milestones.length} milestones found`);
+							secureLog.info(`OpenAI analysis successful on final attempt: ${milestones.length} milestones found`);
 							break; // Success on final attempt
 						} catch (finalErr) {
 							// If final attempt fails, throw with helpful message
@@ -415,7 +416,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				.insert(milestonesToInsert as Milestone[]);
 
 			if (insertError) {
-				console.error('Insert milestones error:', insertError);
+				secureLog.error('Insert milestones error:', insertError);
 			}
 		}
 
@@ -439,44 +440,20 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				: undefined
 		});
 	} catch (err) {
-		console.error('Analysis error:', err);
-
 		// Refund credits on failure
 		if (creditsDeducted) {
 			await refundCredits(user.id, 'quick_analyze', 'Refund due to analysis failure');
 		}
-		
-		// Provide more specific error messages
+
+		// Check for subrequest limit - this is expected and handled gracefully
 		if (err instanceof Error) {
 			const errorMsg = err.message.toLowerCase();
-			
-			// Subrequest limit error - this is expected when processing many commits
-			// The analysis will continue with whatever commits were successfully fetched
 			if (errorMsg.includes('too many subrequests') || errorMsg.includes('subrequest')) {
-				// Don't throw an error - we've already handled this gracefully above
-				// Just log and continue with partial results
-				console.warn('Subrequest limit reached, but continuing with available commits');
+				secureLog.warn('Subrequest limit reached, but continuing with available commits');
 			}
-			
-			// OpenAI/OpenAI-related errors
-			if (errorMsg.includes('openai') || errorMsg.includes('connection error') || errorMsg.includes('timeout')) {
-				throw error(503, 'AI analysis service temporarily unavailable. Please try again.');
-			}
-			
-			// GitHub API errors
-			if (errorMsg.includes('github') || errorMsg.includes('api rate limit')) {
-				throw error(429, 'GitHub API rate limit reached. Please try again later.');
-			}
-			
-			// Permission errors
-			if (errorMsg.includes('403') || errorMsg.includes('forbidden') || errorMsg.includes('permission')) {
-				throw error(403, 'Access denied. Please ensure the GitHub App has access to this repository.');
-			}
-			
-			// Return the actual error message for debugging
-			throw error(500, `Analysis failed: ${err.message}`);
 		}
-		
-		throw error(500, 'Failed to analyze repository. Please check the logs for details.');
+
+		// Use sanitized error handling
+		handleError(err, 'Analysis');
 	}
 };

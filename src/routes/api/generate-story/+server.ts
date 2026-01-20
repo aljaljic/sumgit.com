@@ -9,6 +9,8 @@ import type { Repository, Milestone } from '$lib/database.types';
 import type { StoryChapter, NarrativeStyleId } from '$lib/types/story';
 import { checkAndDeductCredits, refundCredits } from '$lib/server/credits';
 import { CREDIT_COSTS } from '$lib/credits';
+import { handleError } from '$lib/server/errors';
+import { secureLog } from '$lib/server/logger';
 
 const openai = new OpenAI({
 	apiKey: PRIVATE_OPENAI_API_KEY,
@@ -248,7 +250,7 @@ Transform these events into a compelling narrative (3-4 chapters, 100-150 words 
 
 					const imageData = imageResponse.data?.[0];
 					if (!imageData) {
-						console.error(`No image data for chapter ${index}`);
+						secureLog.error(`No image data for chapter ${index}`);
 						return chapter;
 					}
 
@@ -267,7 +269,7 @@ Transform these events into a compelling narrative (3-4 chapters, 100-150 words 
 						const arrayBuffer = await imgResponse.arrayBuffer();
 						imageData8 = new Uint8Array(arrayBuffer);
 					} else {
-						console.error(`No image data format for chapter ${index}`);
+						secureLog.error(`No image data format for chapter ${index}`);
 						return chapter;
 					}
 
@@ -281,7 +283,7 @@ Transform these events into a compelling narrative (3-4 chapters, 100-150 words 
 						});
 
 					if (uploadError) {
-						console.error(`Upload error for chapter ${index}:`, uploadError);
+						secureLog.error(`Upload error for chapter ${index}:`, uploadError);
 						return chapter;
 					}
 
@@ -295,7 +297,7 @@ Transform these events into a compelling narrative (3-4 chapters, 100-150 words 
 						image_url: urlData.publicUrl
 					};
 				} catch (imgError) {
-					console.error(`Image generation error for chapter ${index}:`, imgError);
+					secureLog.error(`Image generation error for chapter ${index}:`, imgError);
 					return chapter;
 				}
 			})
@@ -310,21 +312,12 @@ Transform these events into a compelling narrative (3-4 chapters, 100-150 words 
 			credits_remaining: creditResult.newBalance
 		});
 	} catch (err) {
-		console.error('Story generation error:', err);
-
 		// Refund credits on failure
 		if (creditsDeducted) {
 			await refundCredits(user.id, 'generate_story', 'Refund due to story generation failure');
 		}
 
-		if (err instanceof Error) {
-			const errorMsg = err.message.toLowerCase();
-
-			if (errorMsg.includes('timeout') || errorMsg.includes('connection')) {
-				throw error(503, 'AI service temporarily unavailable. Please try again.');
-			}
-		}
-
-		throw error(500, 'Failed to generate story. Please try again.');
+		// Use sanitized error handling
+		handleError(err, 'Story generation');
 	}
 };
