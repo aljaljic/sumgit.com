@@ -57,7 +57,7 @@
 				Purchase Credits
 			</Dialog.Title>
 			<Dialog.Description>
-				Credits are used to analyze repositories and generate stories.
+				Credits are used to analyze repositories, generate stories, and create recaps.
 			</Dialog.Description>
 		</Dialog.Header>
 
@@ -65,7 +65,7 @@
 			<!-- Credit costs info -->
 			<div class="rounded-lg border border-border/40 bg-secondary/30 p-3">
 				<p class="text-sm font-medium mb-2">Credit costs per operation:</p>
-				<div class="grid grid-cols-3 gap-2 text-sm text-muted-foreground">
+				<div class="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
 					<div class="flex items-center gap-1">
 						<Badge variant="outline" class="text-xs">{CREDIT_COSTS.quick_analyze}</Badge>
 						Quick Analysis
@@ -77,6 +77,10 @@
 					<div class="flex items-center gap-1">
 						<Badge variant="outline" class="text-xs">{CREDIT_COSTS.generate_story}</Badge>
 						Story
+					</div>
+					<div class="flex items-center gap-1">
+						<Badge variant="outline" class="text-xs">{CREDIT_COSTS.generate_recap}</Badge>
+						Recap
 					</div>
 				</div>
 			</div>
