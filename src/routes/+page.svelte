@@ -196,7 +196,7 @@
 					<BookOpen class="h-3 w-3" />
 					See it in action
 				</Badge>
-				<h2 class="mb-3 text-3xl font-bold">Your commits, transformed into stories</h2>
+				<h2 class="mb-3 text-3xl font-bold">Your app, transformed into a shareable narrative</h2>
 				<p class="text-muted-foreground">
 					Choose from 5 unique narrative styles to bring your project's journey to life
 				</p>
