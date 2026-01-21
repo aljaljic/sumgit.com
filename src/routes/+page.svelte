@@ -2,7 +2,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '$lib/components/ui/card';
-	import { Github, Sparkles, Clock, Loader2, BookOpen, Coins, Gift, Zap, Check, FileText } from '@lucide/svelte';
+	import { Github, Sparkles, Clock, Loader2, BookOpen, Coins, Gift, Zap, Check, FileText, Share2, ExternalLink } from '@lucide/svelte';
 	import { FAQ, FAQItem } from '$lib/components/ui/faq';
 	import logo from '$lib/assets/logo.png';
 	import MilestoneMarquee from '$lib/components/MilestoneMarquee.svelte';
@@ -186,6 +186,90 @@
 						</p>
 					</div>
 				</div>
+			</div>
+		</div>
+
+		<!-- Storybook Demo Section -->
+		<div class="mt-20 w-full max-w-4xl">
+			<div class="mb-10 text-center">
+				<Badge variant="secondary" class="mb-4 gap-1">
+					<BookOpen class="h-3 w-3" />
+					See it in action
+				</Badge>
+				<h2 class="mb-3 text-3xl font-bold">Your commits, transformed into stories</h2>
+				<p class="text-muted-foreground">
+					Choose from 5 unique narrative styles to bring your project's journey to life
+				</p>
+			</div>
+
+			<!-- Narrative Styles Grid -->
+			<div class="mb-8 grid gap-3 grid-cols-2 md:grid-cols-5">
+				<div class="rounded-lg border border-border/40 bg-card/50 p-4 text-center">
+					<div class="mb-2 text-2xl">⚔️</div>
+					<p class="text-sm font-medium">Fantasy</p>
+				</div>
+				<div class="rounded-lg border border-border/40 bg-card/50 p-4 text-center">
+					<div class="mb-2 text-2xl">🚀</div>
+					<p class="text-sm font-medium">Indie Hacker</p>
+				</div>
+				<div class="rounded-lg border border-border/40 bg-card/50 p-4 text-center">
+					<div class="mb-2 text-2xl">🌌</div>
+					<p class="text-sm font-medium">Space Opera</p>
+				</div>
+				<div class="rounded-lg border border-border/40 bg-card/50 p-4 text-center">
+					<div class="mb-2 text-2xl">🔍</div>
+					<p class="text-sm font-medium">Noir Detective</p>
+				</div>
+				<div class="rounded-lg border border-border/40 bg-card/50 p-4 text-center col-span-2 md:col-span-1">
+					<div class="mb-2 text-2xl">⚡</div>
+					<p class="text-sm font-medium">Anime</p>
+				</div>
+			</div>
+
+			<!-- Demo Link -->
+			<div class="text-center">
+				<Button
+					href="https://sumgit.com/project/2d3c1bf8-1f5e-4c20-94a4-f1b229fc927a/story"
+					target="_blank"
+					variant="outline"
+					class="gap-2"
+				>
+					<BookOpen class="h-4 w-4" />
+					View Demo Storybook
+					<ExternalLink class="h-4 w-4" />
+				</Button>
+			</div>
+		</div>
+
+		<!-- Embeddable Widgets Section -->
+		<div class="mt-20 w-full max-w-4xl">
+			<div class="mb-10 text-center">
+				<Badge variant="secondary" class="mb-4 gap-1">
+					<Share2 class="h-3 w-3" />
+					Shareable
+				</Badge>
+				<h2 class="mb-3 text-3xl font-bold">Embed Anywhere</h2>
+				<p class="text-muted-foreground">
+					Generate embeddable widgets to showcase your project's journey on your website, portfolio, or README
+				</p>
+			</div>
+
+			<!-- Embed Example -->
+			<div class="rounded-lg border border-border/40 bg-card/50 p-6">
+				<p class="mb-4 text-sm text-muted-foreground text-center">
+					Live example: PostChad project embed
+				</p>
+				<div class="rounded-lg overflow-hidden border border-border/40">
+					<iframe
+						src="https://sumgit.com/embed/A60Z0890sc6hMnMbLNf8x"
+						title="PostChad Project Embed"
+						class="w-full h-[400px] bg-background"
+						loading="lazy"
+					></iframe>
+				</div>
+				<p class="mt-4 text-sm text-muted-foreground text-center">
+					Create embeds for timelines, stories, and recaps to share your development journey
+				</p>
 			</div>
 		</div>
 
