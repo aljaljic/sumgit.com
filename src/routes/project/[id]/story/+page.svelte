@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
+	import * as Dialog from '$lib/components/ui/dialog';
 	import { ArrowLeft, BookOpen, Loader2, Share2, Link, Check, X, Code } from '@lucide/svelte';
 	import logo from '$lib/assets/logo.png';
 	import StoryLoader from '$lib/components/storybook/StoryLoader.svelte';
@@ -25,6 +26,7 @@
 	} | null>(null);
 	let showPurchaseDialog = $state(false);
 	let showEmbedDialog = $state(false);
+	let showRegenerateDialog = $state(false);
 	let selectedStyle = $state<NarrativeStyleId>(data.existingStory?.narrative_style ?? 'fantasy');
 
 	// Share state
@@ -284,7 +286,7 @@
 								{/if}
 							</Button>
 						{/if}
-						<Button variant="outline" size="sm" onclick={generateStory} class="gap-2">
+						<Button variant="outline" size="sm" onclick={() => (showRegenerateDialog = true)} class="gap-2">
 							<BookOpen class="h-4 w-4" />
 							Regenerate
 						</Button>
@@ -379,3 +381,54 @@
 	repositoryId={data.repository.id}
 	contentType="story"
 />
+
+<!-- Regenerate Dialog -->
+<Dialog.Root bind:open={showRegenerateDialog}>
+	<Dialog.Content class="max-w-2xl">
+		<Dialog.Header>
+			<Dialog.Title class="flex items-center gap-2">
+				<BookOpen class="h-5 w-5 text-amber-500" />
+				Regenerate Story
+			</Dialog.Title>
+			<Dialog.Description>
+				Choose a narrative style for your regenerated story.
+			</Dialog.Description>
+		</Dialog.Header>
+
+		<div class="py-4">
+			<p class="mb-3 text-sm font-medium text-muted-foreground">Choose your narrative style</p>
+			<div class="flex flex-wrap justify-center gap-2">
+				{#each NARRATIVE_STYLES as style}
+					<button
+						type="button"
+						onclick={() => (selectedStyle = style.id)}
+						class="flex flex-col items-center gap-1 rounded-lg border-2 px-4 py-3 transition-all hover:border-amber-500/50 {selectedStyle ===
+						style.id
+							? 'border-amber-500 bg-amber-500/10'
+							: 'border-border bg-card'}"
+					>
+						<span class="text-xl">{style.icon}</span>
+						<span class="text-sm font-medium">{style.name}</span>
+						<span class="text-xs text-muted-foreground">{style.description}</span>
+					</button>
+				{/each}
+			</div>
+		</div>
+
+		<Dialog.Footer class="gap-2 sm:gap-0">
+			<Button variant="outline" onclick={() => (showRegenerateDialog = false)}>
+				Cancel
+			</Button>
+			<Button
+				onclick={() => {
+					showRegenerateDialog = false;
+					generateStory();
+				}}
+				class="gap-2"
+			>
+				<BookOpen class="h-4 w-4" />
+				Regenerate
+			</Button>
+		</Dialog.Footer>
+	</Dialog.Content>
+</Dialog.Root>
