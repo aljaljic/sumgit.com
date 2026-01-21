@@ -155,7 +155,7 @@ export async function createBook(
 	const pageSpacing = BOOK_DEPTH / (pageTextures.length + 1);
 	pageTextures.forEach((texture, index) => {
 		const pageGeometry = new THREE.PlaneGeometry(BOOK_WIDTH - 0.1, BOOK_HEIGHT - 0.1);
-		pageGeometry.translate(-(BOOK_WIDTH - 0.1) / 2, 0, 0);
+		pageGeometry.translate((BOOK_WIDTH - 0.1) / 2, 0, 0);
 
 		const page = new THREE.Mesh(
 			pageGeometry,
@@ -163,12 +163,12 @@ export async function createBook(
 				map: texture,
 				roughness: 0.9,
 				metalness: 0,
-				side: THREE.FrontSide
+				side: THREE.DoubleSide
 			})
 		);
 
 		const zPos = BOOK_DEPTH / 2 - pageSpacing * (index + 1);
-		page.position.set(BOOK_WIDTH / 2 - 0.05, 0, zPos);
+		page.position.set(-(BOOK_WIDTH / 2) + 0.05, 0, zPos);
 		page.userData.originalZ = zPos;
 		page.castShadow = true;
 		page.visible = false;
@@ -225,9 +225,35 @@ export async function createBook(
 			return;
 		}
 		isAnimating = true;
+
+		// Show next page BEFORE animation (it's behind the current page)
+		if (currentPage + 1 < totalPages) {
+			pages[currentPage + 1].visible = true;
+		}
+
 		await turnPage(pages[currentPage], 'forward');
+
+		// Hide the turned page, keep next page visible
+		pages[currentPage].visible = false;
 		currentPage++;
-		updatePageVisibility();
+		isAnimating = false;
+	};
+
+	const closeToFrontCover = async () => {
+		if (isAnimating || currentPage < 0) return;
+		isAnimating = true;
+
+		// Hide current page
+		pages[currentPage].visible = false;
+
+		// Show front cover and close it
+		frontCover.visible = true;
+		await Promise.all([
+			gsap.to(frontCover.rotation, { y: 0, duration: 0.8, ease: 'power2.inOut' }),
+			gsap.to(camera.position, { z: 5, duration: 0.8, ease: 'power2.inOut' })
+		]);
+
+		currentPage = -1; // Reset to closed state (before first page)
 		isAnimating = false;
 	};
 
@@ -238,7 +264,10 @@ export async function createBook(
 			await reopenBook();
 			return;
 		}
-		if (currentPage <= 0) return;
+		if (currentPage <= 0) {
+			await closeToFrontCover();
+			return;
+		}
 		isAnimating = true;
 		currentPage--;
 		updatePageVisibility();

@@ -453,6 +453,33 @@
 				/>
 			</FAQ>
 		</div>
+
+		<!-- Final CTA Section -->
+		<div class="mt-20 w-full max-w-2xl text-center">
+			<h2 class="mb-6 text-3xl font-bold md:text-4xl">
+				You're not afraid to commit.
+				<br />
+				<span class="bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 bg-clip-text text-transparent">
+					Don't be afraid to share.
+				</span>
+			</h2>
+			{#if data.user}
+				<Button href="/dashboard" size="lg" class="gap-2 px-8 text-base">
+					Go to Dashboard
+					<span class="text-lg">→</span>
+				</Button>
+			{:else}
+				<Button onclick={signInWithGitHub} size="lg" class="gap-2 px-8 text-base" disabled={isConnecting}>
+					{#if isConnecting}
+						<Loader2 class="h-5 w-5 animate-spin" />
+						Connecting...
+					{:else}
+						<Github class="h-5 w-5" />
+						Get Started Free
+					{/if}
+				</Button>
+			{/if}
+		</div>
 	</main>
 
 	<Footer />
