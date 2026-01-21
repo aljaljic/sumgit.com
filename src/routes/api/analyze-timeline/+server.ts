@@ -92,7 +92,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		const commits: Commit[] = [];
 		const maxPages = 50; // 50 pages × 100 per page = 5000 commits max
 		const perPage = 100;
-		const maxCommitsWithDiff = 40; // Cloudflare subrequest limit
+		// Cloudflare Workers subrequest limit is 50 (free) or 1000 (paid)
+		// We need to budget subrequests across: GitHub pagination, diff fetches, OpenAI calls, Supabase
+		// Conservative budget: ~10 for pagination, ~15-20 for diffs, ~2 for OpenAI, rest for Supabase
+		const maxCommitsWithDiff = 20;
 
 		// Paginate through commit history
 		for (let page = 1; page <= maxPages; page++) {

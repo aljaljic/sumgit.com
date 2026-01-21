@@ -103,42 +103,69 @@ function groupCommitsByMonth(commits: Commit[]): Map<string, Commit[]> {
 	return groups;
 }
 
-// Analyze commits in time-based chunks (by month)
+// Analyze commits in optimized batches to minimize subrequests
+// Cloudflare Workers have subrequest limits, so we batch into 1-2 API calls max
 export async function analyzeCommitsInChunks(repoName: string, commits: Commit[]): Promise<MilestoneInput[]> {
 	if (commits.length === 0) {
 		return [];
 	}
 
-	// Group commits by month
-	const monthlyGroups = groupCommitsByMonth(commits);
-	const sortedMonths = Array.from(monthlyGroups.keys()).sort();
+	// Sort commits chronologically for better context
+	const sortedCommits = [...commits].sort((a, b) =>
+		new Date(a.date).getTime() - new Date(b.date).getTime()
+	);
 
-	console.log(`Analyzing ${commits.length} commits across ${sortedMonths.length} months`);
+	// Calculate date range for logging
+	const monthlyGroups = groupCommitsByMonth(sortedCommits);
+	const months = Array.from(monthlyGroups.keys()).sort();
+	console.log(`Analyzing ${commits.length} commits across ${months.length} months (${months[0]} to ${months[months.length - 1]})`);
 
-	const allMilestones: MilestoneInput[] = [];
+	// Try to analyze all commits in a single batch first
+	// The analyzeMilestones function handles payload size limits internally
+	console.log(`Attempting single-batch analysis for ${sortedCommits.length} commits`);
 
-	// Process each month's commits
-	for (const month of sortedMonths) {
-		const monthCommits = monthlyGroups.get(month)!;
-		console.log(`Analyzing ${month}: ${monthCommits.length} commits`);
+	try {
+		const milestones = await analyzeMilestones(repoName, sortedCommits);
+		console.log(`Single-batch analysis successful: ${milestones.length} milestones found`);
+		return milestones;
+	} catch (err) {
+		const errorMsg = err instanceof Error ? err.message.toLowerCase() : String(err).toLowerCase();
 
-		try {
-			const milestones = await analyzeMilestones(repoName, monthCommits);
-			allMilestones.push(...milestones);
-			console.log(`Found ${milestones.length} milestones for ${month}`);
-		} catch (err) {
-			console.error(`Error analyzing ${month}:`, err);
-			// Continue with other months even if one fails
+		// If it's a payload size error, try splitting into 2 batches
+		if (errorMsg.includes('payload') || errorMsg.includes('too large') || errorMsg.includes('413')) {
+			console.log('Payload too large, splitting into 2 batches');
+
+			const midpoint = Math.floor(sortedCommits.length / 2);
+			const firstHalf = sortedCommits.slice(0, midpoint);
+			const secondHalf = sortedCommits.slice(midpoint);
+
+			const allMilestones: MilestoneInput[] = [];
+
+			try {
+				console.log(`Processing batch 1: ${firstHalf.length} commits`);
+				const batch1Milestones = await analyzeMilestones(repoName, firstHalf);
+				allMilestones.push(...batch1Milestones);
+				console.log(`Batch 1 complete: ${batch1Milestones.length} milestones`);
+			} catch (batch1Err) {
+				console.error('Batch 1 error:', batch1Err);
+			}
+
+			try {
+				console.log(`Processing batch 2: ${secondHalf.length} commits`);
+				const batch2Milestones = await analyzeMilestones(repoName, secondHalf);
+				allMilestones.push(...batch2Milestones);
+				console.log(`Batch 2 complete: ${batch2Milestones.length} milestones`);
+			} catch (batch2Err) {
+				console.error('Batch 2 error:', batch2Err);
+			}
+
+			console.log(`Total milestones found: ${allMilestones.length}`);
+			return allMilestones;
 		}
 
-		// Small delay between chunks to avoid rate limits
-		if (sortedMonths.indexOf(month) < sortedMonths.length - 1) {
-			await new Promise(resolve => setTimeout(resolve, 500));
-		}
+		// Re-throw other errors
+		throw err;
 	}
-
-	console.log(`Total milestones found: ${allMilestones.length}`);
-	return allMilestones;
 }
 
 export async function analyzeMilestones(repoName: string, commits: Commit[]): Promise<MilestoneInput[]> {
