@@ -199,7 +199,7 @@ export async function createBook(
 			gsap.to(frontCover.rotation, { y: -Math.PI * 0.9, duration: 0.8, ease: 'power2.inOut' }),
 			gsap.to(camera.position, { z: 9, duration: 0.8, ease: 'power2.inOut' })
 		]);
-		spine.visible = false; // Hide spine when book is open
+		frontCover.visible = false; // Hide cover and spine when book is open
 		currentPage = 0;
 		updatePageVisibility();
 		isAnimating = false;
@@ -253,8 +253,8 @@ export async function createBook(
 		// Hide current page
 		updatePageVisibility();
 
-		// Show spine before closing animation
-		spine.visible = true;
+		// Show front cover before closing animation
+		frontCover.visible = true;
 
 		// Animate front cover closing
 		await Promise.all([
@@ -284,7 +284,7 @@ export async function createBook(
 			gsap.to(camera.position, { z: 9, duration: 0.8, ease: 'power2.inOut' })
 		]);
 
-		spine.visible = false; // Hide spine when book is open
+		frontCover.visible = false; // Hide cover and spine when book is open
 		isClosed = false;
 		updatePageVisibility();
 		isAnimating = false;

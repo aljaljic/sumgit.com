@@ -49,7 +49,7 @@ export const POST: RequestHandler = async ({ request, locals, url }) => {
 						currency: 'usd',
 						product_data: {
 							name: `${creditPackage.credits} Credits`,
-							description: `Purchase ${creditPackage.credits} credits for sumgit`
+							description: `Purchase ${creditPackage.credits} credits for SumGit`
 						},
 						unit_amount: creditPackage.price
 					},
