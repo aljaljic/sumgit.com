@@ -229,7 +229,7 @@
 			<!-- Demo Link -->
 			<div class="text-center">
 				<Button
-					href="https://sumgit.com/project/2d3c1bf8-1f5e-4c20-94a4-f1b229fc927a/story"
+					href="https://sumgit.com/story/SE41ePuoKanh"
 					target="_blank"
 					variant="outline"
 					class="gap-2"
