@@ -40,7 +40,8 @@
       "Bash(xargs:*)",
       "Bash(git show:*)",
       "Bash(git diff:*)",
-      "WebFetch(domain:datafa.st)"
+      "WebFetch(domain:datafa.st)",
+      "Bash(git -C /Users/adel/projects/sumgit.com log --oneline)"
     ]
   }
 }

@@ -118,7 +118,7 @@
 				</div>
 				<h3 class="mb-2 font-semibold">AI Analysis</h3>
 				<p class="text-sm text-muted-foreground">
-					OpenAI agents scan your commits and identify meaningful milestones automatically.
+					AI agents scan your commits and identify meaningful milestones automatically.
 				</p>
 			</div>
 
@@ -258,7 +258,7 @@
 					<BookOpen class="h-3 w-3" />
 					See it in action
 				</Badge>
-				<h2 class="mb-3 text-3xl font-bold">Your app, transformed into a shareable narrative</h2>
+				<h2 class="mb-3 text-3xl font-bold">Transform your startup updates into a shareable narrative</h2>
 				<p class="text-lg text-muted-foreground">
 					Choose from 5 unique narrative styles to bring your startup's journey to life
 				</p>
@@ -337,7 +337,7 @@
 					<FileText class="h-3 w-3" />
 					Sample Recap
 				</Badge>
-				<h2 class="mb-3 text-3xl font-bold">Your project's all-time summary</h2>
+				<h2 class="mb-3 text-3xl font-bold">View your startup's all-time summary</h2>
 				<p class="text-lg text-muted-foreground">
 					Generate a comprehensive PDF recap with stats, languages, milestones, and shareable highlights
 				</p>
@@ -365,9 +365,9 @@
 					<Share2 class="h-3 w-3" />
 					Shareable
 				</Badge>
-				<h2 class="mb-3 text-3xl font-bold">Embed Anywhere</h2>
+				<h2 class="mb-3 text-3xl font-bold">Showcase Your Progress</h2>
 				<p class="text-lg text-muted-foreground">
-					Generate embeddable widgets to showcase your startup's journey on your website, portfolio, or README
+					Generate embeddable widgets to showcase your startup's journey on your site
 				</p>
 			</div>
 
@@ -562,7 +562,7 @@
 				/>
 				<FAQItem
 					question="How many commits can SumGit analyze?"
-					answer="Quick analysis covers your last 100 commits - perfect for recent activity. Timeline analysis goes deeper, analyzing up to 5,000 commits to create a comprehensive history of your project's evolution."
+					answer="Quick analysis covers your last 100 commits - perfect for recent activity. Timeline analysis goes deeper, analyzing up to 5,000 commits to create a comprehensive history of your startup's evolution."
 				/>
 				<FAQItem
 					question="Does SumGit work with private repositories?"
