@@ -68,7 +68,7 @@
 			<h1 class="mb-6 text-4xl leading-tight font-bold tracking-tight md:text-6xl">
 				Turn your commits into
 				<span
-					class="bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 bg-clip-text text-transparent"
+					class="animate-shimmer bg-[length:200%_100%] bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 bg-clip-text text-transparent"
 				>
 					stories
 				</span>
@@ -102,7 +102,7 @@
 
 		<!-- Features grid -->
 		<div class="mt-20 grid max-w-5xl gap-6 md:grid-cols-2 lg:grid-cols-5">
-			<div class="rounded-lg border border-border/40 bg-card/50 p-6">
+			<div class="rounded-lg border border-border/40 bg-card/50 p-6 transition-all duration-200 hover:border-primary/30 hover:shadow-md hover:-translate-y-1">
 				<div class="mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-primary/10">
 					<Github class="h-5 w-5 text-primary" />
 				</div>
@@ -112,7 +112,7 @@
 				</p>
 			</div>
 
-			<div class="rounded-lg border border-border/40 bg-card/50 p-6">
+			<div class="rounded-lg border border-border/40 bg-card/50 p-6 transition-all duration-200 hover:border-primary/30 hover:shadow-md hover:-translate-y-1">
 				<div class="mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-primary/10">
 					<Sparkles class="h-5 w-5 text-primary" />
 				</div>
@@ -122,7 +122,7 @@
 				</p>
 			</div>
 
-			<div class="rounded-lg border border-border/40 bg-card/50 p-6">
+			<div class="rounded-lg border border-border/40 bg-card/50 p-6 transition-all duration-200 hover:border-primary/30 hover:shadow-md hover:-translate-y-1">
 				<div class="mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-primary/10">
 					<Clock class="h-5 w-5 text-primary" />
 				</div>
@@ -132,7 +132,7 @@
 				</p>
 			</div>
 
-			<div class="rounded-lg border border-border/40 bg-card/50 p-6">
+			<div class="rounded-lg border border-border/40 bg-card/50 p-6 transition-all duration-200 hover:border-primary/30 hover:shadow-md hover:-translate-y-1">
 				<div class="mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-primary/10">
 					<BookOpen class="h-5 w-5 text-primary" />
 				</div>
@@ -142,7 +142,7 @@
 				</p>
 			</div>
 
-			<div class="rounded-lg border border-border/40 bg-card/50 p-6">
+			<div class="rounded-lg border border-border/40 bg-card/50 p-6 transition-all duration-200 hover:border-primary/30 hover:shadow-md hover:-translate-y-1">
 				<div class="mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-primary/10">
 					<FileText class="h-5 w-5 text-primary" />
 				</div>
@@ -160,8 +160,8 @@
 					<Zap class="h-3 w-3" />
 					Simple setup
 				</Badge>
-				<h2 class="mb-3 text-3xl font-bold">How it Works</h2>
-				<p class="text-muted-foreground">
+				<h2 class="mb-3 text-3xl font-bold">How It Works</h2>
+				<p class="text-lg text-muted-foreground">
 					Get started in under a minute
 				</p>
 			</div>
@@ -259,7 +259,7 @@
 					See it in action
 				</Badge>
 				<h2 class="mb-3 text-3xl font-bold">Your app, transformed into a shareable narrative</h2>
-				<p class="text-muted-foreground">
+				<p class="text-lg text-muted-foreground">
 					Choose from 5 unique narrative styles to bring your project's journey to life
 				</p>
 			</div>
@@ -311,7 +311,7 @@
 					Sample Timeline
 				</Badge>
 				<h2 class="mb-3 text-3xl font-bold">Your project's journey, visualized</h2>
-				<p class="text-muted-foreground">
+				<p class="text-lg text-muted-foreground">
 					See milestones with AI-generated images and summaries across your entire commit history
 				</p>
 			</div>
@@ -338,7 +338,7 @@
 					Sample Recap
 				</Badge>
 				<h2 class="mb-3 text-3xl font-bold">Your project's all-time summary</h2>
-				<p class="text-muted-foreground">
+				<p class="text-lg text-muted-foreground">
 					Generate a comprehensive PDF recap with stats, languages, milestones, and shareable highlights
 				</p>
 			</div>
@@ -366,7 +366,7 @@
 					Shareable
 				</Badge>
 				<h2 class="mb-3 text-3xl font-bold">Embed Anywhere</h2>
-				<p class="text-muted-foreground">
+				<p class="text-lg text-muted-foreground">
 					Generate embeddable widgets to showcase your project's journey on your website, portfolio, or README
 				</p>
 			</div>
@@ -398,7 +398,7 @@
 					Simple pricing
 				</Badge>
 				<h2 class="mb-3 text-3xl font-bold">Pay only for what you use</h2>
-				<p class="text-muted-foreground">
+				<p class="text-lg text-muted-foreground">
 					No subscriptions. Buy credits and use them whenever you want.
 				</p>
 			</div>
@@ -601,3 +601,14 @@
 
 	<Footer />
 </div>
+
+<style>
+	@keyframes shimmer {
+		0% { background-position: 100% 0; }
+		100% { background-position: -100% 0; }
+	}
+
+	.animate-shimmer {
+		animation: shimmer 3s ease-in-out infinite;
+	}
+</style>
