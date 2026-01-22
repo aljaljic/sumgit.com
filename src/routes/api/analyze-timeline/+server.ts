@@ -92,11 +92,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		const commits: Commit[] = [];
 		const maxPages = 50; // 50 pages × 100 per page = 5000 commits max
 		const perPage = 100;
-		// Cloudflare Workers subrequest limit is 50 (free) or 1000 (paid)
-		// We need to budget subrequests across: GitHub pagination, diff fetches, OpenAI calls, Supabase
-		// Conservative budget: ~10 for pagination, ~15-20 for diffs, ~2 for OpenAI, rest for Supabase
-		const maxCommitsWithDiff = 20;
-
 		// Paginate through commit history
 		for (let page = 1; page <= maxPages; page++) {
 			const { data } = await octokit.repos.listCommits({
@@ -140,115 +135,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			throw error(400, 'No commits found in repository');
 		}
 
-		// Helper function to fetch and process a single commit diff
-		const fetchCommitDiff = async (commit: Commit): Promise<void> => {
-			try {
-				const { data: commitDetail } = await octokit.repos.getCommit({
-					owner: repo.repo_owner,
-					repo: repo.repo_name,
-					ref: commit.sha
-				});
-
-				// Extract stats
-				commit.files_changed = commitDetail.files?.length ?? 0;
-				commit.additions = commitDetail.stats?.additions ?? 0;
-				commit.deletions = commitDetail.stats?.deletions ?? 0;
-
-				// Build a truncated diff summary (max 2000 chars per commit)
-				if (commitDetail.files && commitDetail.files.length > 0) {
-					const diffParts: string[] = [];
-					let totalDiffLength = 0;
-					const maxDiffLength = 2000;
-
-					for (const file of commitDetail.files) {
-						if (totalDiffLength >= maxDiffLength) break;
-
-						const fileHeader = `\n--- ${file.filename} (${file.status})\n`;
-						const patch = file.patch || '';
-
-						// Truncate patch if needed
-						const remaining = maxDiffLength - totalDiffLength - fileHeader.length;
-						const truncatedPatch = patch.length > remaining
-							? patch.substring(0, remaining) + '\n... (truncated)'
-							: patch;
-
-						diffParts.push(fileHeader + truncatedPatch);
-						totalDiffLength += fileHeader.length + truncatedPatch.length;
-					}
-
-					commit.diff = diffParts.join('\n');
-				}
-			} catch (err: any) {
-				const errorStatus = err?.status || err?.response?.status;
-				const errorMessage = err?.message || String(err);
-
-				// Check for Cloudflare subrequest limit error
-				const errorMsg = (errorMessage || '').toLowerCase();
-				const isSubrequestLimit = errorMsg.includes('too many subrequests');
-
-				if (isSubrequestLimit) {
-					const subrequestError = new Error('Too many subrequests');
-					(subrequestError as any).isSubrequestLimit = true;
-					throw subrequestError;
-				}
-
-				secureLog.error(`Error fetching commit ${commit.sha}:`, {
-					status: errorStatus,
-					message: errorMessage
-				});
-
-				// For 500/403/404 errors, continue without diff
-				if (errorStatus === 500 || errorStatus === 403 || errorStatus === 404) {
-					secureLog.warn(`Skipping diff for commit ${commit.sha} (status: ${errorStatus})`);
-					return;
-				}
-
-				// Rate limit - stop processing
-				if (errorStatus === 429 || errorMsg.includes('rate limit')) {
-					secureLog.warn(`GitHub API rate limit hit, stopping diff fetches`);
-					throw err;
-				}
-
-				// For other errors, continue without diff
-				secureLog.warn(`Failed to fetch diff for commit ${commit.sha}, continuing without diff`);
-			}
-		};
-
-		// Fetch diffs for only the most recent commits (limited by Cloudflare subrequest limit)
-		const commitsToFetchDiffs = commits.slice(0, maxCommitsWithDiff);
-		let hitSubrequestLimit = false;
-
-		for (let i = 0; i < commitsToFetchDiffs.length; i++) {
-			if (hitSubrequestLimit) break;
-
-			try {
-				await fetchCommitDiff(commitsToFetchDiffs[i]);
-			} catch (err) {
-				if (err instanceof Error && (
-					err.message.includes('Too many subrequests') ||
-					(err as any).isSubrequestLimit
-				)) {
-					hitSubrequestLimit = true;
-					secureLog.warn(`Hit subrequest limit at commit ${i + 1}`);
-					break;
-				}
-				// Continue for other errors
-			}
-
-			// Small delay between requests
-			if (i < commitsToFetchDiffs.length - 1) {
-				await new Promise((resolve) => setTimeout(resolve, 100));
-			}
-		}
-
 		// Sort commits by date for chronological analysis
 		const commitsForAnalysis = commits.sort((a, b) => {
 			return new Date(a.date).getTime() - new Date(b.date).getTime();
 		});
 
-		// Log summary
-		const commitsWithDiffs = commitsForAnalysis.filter(c => c.diff).length;
-		secureLog.info(`Timeline analysis: Analyzing ${commitsForAnalysis.length} commits (${commitsWithDiffs} with diffs)`);
+		secureLog.info(`Timeline analysis: Analyzing ${commitsForAnalysis.length} commits`);
 
 		// Ensure we have commits to analyze
 		if (commitsForAnalysis.length === 0) {
@@ -338,13 +230,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			.update({ last_analyzed_at: new Date().toISOString() } as Partial<Repository>)
 			.eq('id', repository_id);
 
-		const commitsWithDiffsCount = commitsForAnalysis.filter(c => c.diff).length;
-
 		return json({
 			success: true,
 			milestones_count: milestones.length,
 			commits_analyzed: commitsForAnalysis.length,
-			commits_with_diffs: commitsWithDiffsCount,
 			total_commits: commits.length,
 			credits_remaining: creditResult.newBalance
 		});

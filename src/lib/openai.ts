@@ -30,7 +30,7 @@ export interface MilestoneInput {
 
 const SYSTEM_PROMPT = `You are an indie hacker who builds in public. You understand the grind of solo development - the late nights, the "just one more feature" mentality, shipping fast and iterating faster.
 
-Analyze commit messages to find moments worth sharing. When code diffs are provided, use them as additional context, but commit messages alone are sufficient to identify milestones.
+Analyze commit messages to find moments worth sharing. Commit messages alone are sufficient to identify milestones.
 
 A milestone is a SIGNIFICANT commit that represents a real achievement worth sharing:
 - Major new features or functionality
@@ -173,61 +173,16 @@ export async function analyzeMilestones(repoName: string, commits: Commit[]): Pr
 		return [];
 	}
 
-	// Prepare commits for analysis (limit context size)
-	// Prioritize commits with diffs, then by impact (files changed, additions/deletions)
-	const sortedCommits = commits
-		.sort((a, b) => {
-			// Commits with diffs first
-			if (a.diff && !b.diff) return -1;
-			if (!a.diff && b.diff) return 1;
-			// Then by impact (files changed + lines changed)
-			const aImpact = (a.files_changed ?? 0) + (a.additions ?? 0) + (a.deletions ?? 0);
-			const bImpact = (b.files_changed ?? 0) + (b.additions ?? 0) + (b.deletions ?? 0);
-			return bImpact - aImpact;
-		})
-		.slice(0, 100); // Limit to top 100 most promising commits
+	// Keep commits in chronological order for analysis
+	// Limit to 100 commits per batch to stay within payload limits
+	const sortedCommits = commits.slice(0, 100);
 
-	// Constants for payload size management
-	const MAX_DIFF_SIZE = 1000; // Max characters per commit diff
-	const MAX_PAYLOAD_SIZE = 80 * 1024; // 80KB limit for commits text (leaving room for system prompt)
-
-	// Build commits text with size limits
-	let commitsText = '';
-	let totalSize = 0;
+	// Build commits text - analyze based on commit messages only
+	const commitsText = sortedCommits
+		.map(c => `[${c.date}] ${c.sha.slice(0, 7)}: ${c.message}`)
+		.join('\n');
 	
-	for (const c of sortedCommits) {
-			let commitLine = `[${c.date}] ${c.sha.slice(0, 7)}: ${c.message}`;
-			
-			if (c.files_changed) {
-				commitLine += ` (${c.files_changed} files, +${c.additions ?? 0}/-${c.deletions ?? 0})`;
-			}
-			
-		// Include diff if available, but truncate to MAX_DIFF_SIZE
-			if (c.diff) {
-			const truncatedDiff = c.diff.length > MAX_DIFF_SIZE 
-				? c.diff.substring(0, MAX_DIFF_SIZE) + '\n... (truncated)'
-				: c.diff;
-			commitLine += `\nCode changes:\n${truncatedDiff}`;
-		}
-		
-		// Add separator for all but the first commit
-		const separator = commitsText ? '\n\n---\n\n' : '';
-		const commitWithSeparator = separator + commitLine;
-		const commitSize = new TextEncoder().encode(commitWithSeparator).length;
-		
-		// Check if adding this commit would exceed the limit
-		if (totalSize + commitSize > MAX_PAYLOAD_SIZE) {
-			console.warn(`Payload size limit reached. Including ${commitsText.split('\n\n---\n\n').length} commits out of ${sortedCommits.length} total.`);
-			break;
-		}
-		
-		commitsText += commitWithSeparator;
-		totalSize += commitSize;
-	}
-	
-	// Log payload size for monitoring
-	const finalPayloadSize = new TextEncoder().encode(commitsText).length;
-	console.log(`OpenAI payload: ${finalPayloadSize} bytes (${(finalPayloadSize / 1024).toFixed(2)} KB) for ${commitsText.split('\n\n---\n\n').length} commits`);
+	console.log(`OpenAI payload: ${sortedCommits.length} commits`);
 
 	// Request validation
 	if (!PRIVATE_OPENAI_API_KEY) {
@@ -255,9 +210,7 @@ ${commitsText}
 
 Return JSON: { "milestones": [...] }`;
 
-		// Log request details
-		const requestPayloadSize = new TextEncoder().encode(userMessage).length;
-		console.log(`Sending OpenAI request: ${requestPayloadSize} bytes, ${commitsText.split('\n\n---\n\n').length} commits`);
+		console.log(`Sending OpenAI request for ${sortedCommits.length} commits`);
 
 		const response = await openai.chat.completions.create({
 			model: 'gpt-5-mini',
@@ -307,7 +260,7 @@ Return JSON: { "milestones": [...] }`;
 			message: error instanceof Error ? error.message : String(error),
 			name: error instanceof Error ? error.name : 'Unknown',
 			repoName,
-			commitsCount: commitsText.split('\n\n---\n\n').length,
+			commitsCount: sortedCommits.length,
 			payloadSize: new TextEncoder().encode(commitsText).length
 		};
 
