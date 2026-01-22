@@ -67,6 +67,8 @@ export interface Database {
 					repo_owner: string;
 					last_analyzed_at: string | null;
 					created_at: string;
+					site_url: string | null;
+					site_url_source: string | null;
 				};
 				Insert: {
 					id?: string;
@@ -76,6 +78,8 @@ export interface Database {
 					repo_owner: string;
 					last_analyzed_at?: string | null;
 					created_at?: string;
+					site_url?: string | null;
+					site_url_source?: string | null;
 				};
 				Update: {
 					id?: string;
@@ -85,6 +89,8 @@ export interface Database {
 					repo_owner?: string;
 					last_analyzed_at?: string | null;
 					created_at?: string;
+					site_url?: string | null;
+					site_url_source?: string | null;
 				};
 				Relationships: [
 					{
@@ -106,6 +112,9 @@ export interface Database {
 					x_post_suggestion: string | null;
 					source: string | null;
 					created_at: string;
+					milestone_type: string | null;
+					screenshot_url: string | null;
+					screenshot_target: Json | null;
 				};
 				Insert: {
 					id?: string;
@@ -117,6 +126,9 @@ export interface Database {
 					x_post_suggestion?: string | null;
 					source?: string | null;
 					created_at?: string;
+					milestone_type?: string | null;
+					screenshot_url?: string | null;
+					screenshot_target?: Json | null;
 				};
 				Update: {
 					id?: string;
@@ -128,6 +140,9 @@ export interface Database {
 					x_post_suggestion?: string | null;
 					source?: string | null;
 					created_at?: string;
+					milestone_type?: string | null;
+					screenshot_url?: string | null;
+					screenshot_target?: Json | null;
 				};
 				Relationships: [
 					{

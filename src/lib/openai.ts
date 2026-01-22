@@ -26,6 +26,7 @@ export interface MilestoneInput {
 	commit_sha: string;
 	milestone_date: string;
 	x_post_suggestion: string;
+	milestone_type: 'feature' | 'bugfix' | 'refactor' | 'docs' | 'config' | 'other';
 }
 
 const SYSTEM_PROMPT = `You are an indie hacker who builds in public. You understand the grind of solo development - the late nights, the "just one more feature" mentality, shipping fast and iterating faster.
@@ -60,6 +61,17 @@ For each milestone, provide:
 3. commit_sha: The 7-char commit SHA
 4. milestone_date: The commit date (ISO format)
 5. x_post_suggestion: A casual, indie-hacker style tweet (max 280 chars) in first person.
+6. milestone_type: Classify as one of: "feature", "bugfix", "refactor", "docs", "config", "other"
+
+   MILESTONE TYPE CLASSIFICATION:
+   - "feature": NEW user-facing functionality that users can see or interact with
+     Examples: new UI components, new pages, new user features, new integrations users can use
+     NOT a feature: API changes, backend refactors, performance improvements, infrastructure
+   - "bugfix": Fixes to broken functionality, error corrections
+   - "refactor": Code improvements without changing functionality, performance optimizations
+   - "docs": Documentation updates, README changes, comments
+   - "config": Configuration changes, CI/CD updates, dependency updates, tooling
+   - "other": Everything else that doesn't fit above categories
 
    VOICE:
    - You're a solo dev or small team shipping stuff

@@ -7,6 +7,7 @@ import { checkAndDeductCredits, refundCredits, getUserCredits } from '$lib/serve
 import { CREDIT_COSTS } from '$lib/credits';
 import { handleError } from '$lib/server/errors';
 import { secureLog } from '$lib/server/logger';
+import { processFeatureScreenshots, updateMilestonesWithScreenshots } from '$lib/server/screenshot-service';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	const { session, user } = await locals.safeGetSession();
@@ -398,6 +399,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		await locals.supabase.from('milestones').delete().eq('repository_id', repository_id).eq('source', 'quick');
 
 		// Insert new milestones
+		let insertedMilestoneIds: string[] = [];
 		if (milestones.length > 0) {
 			const milestonesToInsert = milestones
 				.filter((m) => m.milestone_date) // Filter out milestones without dates
@@ -408,16 +410,41 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					commit_sha: m.commit_sha,
 					milestone_date: (m.milestone_date ?? new Date().toISOString()).split('T')[0], // Just the date part
 					x_post_suggestion: m.x_post_suggestion,
+					milestone_type: m.milestone_type || 'other',
 					source: 'quick'
 				}));
 
-			const { error: insertError } = await locals.supabase
+			const { data: insertedData, error: insertError } = await locals.supabase
 				.from('milestones')
-				.insert(milestonesToInsert as Milestone[]);
+				.insert(milestonesToInsert as Milestone[])
+				.select('id');
 
 			if (insertError) {
 				secureLog.error('Insert milestones error:', insertError);
+			} else if (insertedData) {
+				insertedMilestoneIds = insertedData.map((m: { id: string }) => m.id);
 			}
+		}
+
+		// Process screenshots for feature milestones (non-blocking, don't fail entire analysis)
+		let screenshotCount = 0;
+		try {
+			if (insertedMilestoneIds.length > 0 && octokit) {
+				const processedScreenshots = await processFeatureScreenshots(
+					octokit,
+					repo,
+					milestones.filter((m) => m.milestone_date) // Same filter as milestonesToInsert
+				);
+
+				if (processedScreenshots.length > 0) {
+					await updateMilestonesWithScreenshots(insertedMilestoneIds, processedScreenshots);
+					screenshotCount = processedScreenshots.filter((p) => p.screenshotUrl).length;
+					secureLog.info(`Captured ${screenshotCount} screenshots for feature milestones`);
+				}
+			}
+		} catch (screenshotErr) {
+			// Log but don't fail the analysis for screenshot errors
+			secureLog.warn('Screenshot capture failed (non-fatal):', screenshotErr);
 		}
 
 		// Update last_analyzed_at
@@ -434,6 +461,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			commits_analyzed: commitsForAnalysis.length,
 			commits_with_diffs: commitsWithDiffsCount,
 			total_commits: commits.length,
+			screenshots_captured: screenshotCount,
 			credits_remaining: creditResult.newBalance,
 			warning: hitSubrequestLimit
 				? `Subrequest limit reached. Analyzed ${commitsWithDiffsCount} commits with diffs out of ${commits.length} total.`

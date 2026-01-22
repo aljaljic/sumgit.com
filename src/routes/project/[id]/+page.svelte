@@ -247,10 +247,35 @@
 							<CardContent class="p-4">
 								<!-- Post Content -->
 								<div class="mb-3">
+									<div class="flex items-center gap-2 mb-2">
+										{#if milestone.milestone_type === 'feature'}
+											<span class="text-xs bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded font-medium">Feature</span>
+										{:else if milestone.milestone_type === 'bugfix'}
+											<span class="text-xs bg-red-500/10 text-red-500 px-2 py-0.5 rounded font-medium">Bugfix</span>
+										{:else if milestone.milestone_type === 'refactor'}
+											<span class="text-xs bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded font-medium">Refactor</span>
+										{:else if milestone.milestone_type === 'docs'}
+											<span class="text-xs bg-purple-500/10 text-purple-500 px-2 py-0.5 rounded font-medium">Docs</span>
+										{:else if milestone.milestone_type === 'config'}
+											<span class="text-xs bg-orange-500/10 text-orange-500 px-2 py-0.5 rounded font-medium">Config</span>
+										{/if}
+									</div>
 									<p class="whitespace-pre-wrap text-[15px] leading-relaxed">
 										{milestone.x_post_suggestion || milestone.title}
 									</p>
 								</div>
+
+								<!-- Screenshot -->
+								{#if milestone.screenshot_url}
+									<div class="mt-3 mb-3 overflow-hidden rounded-lg border border-border/40">
+										<img
+											src={milestone.screenshot_url}
+											alt="Feature screenshot for {milestone.title}"
+											class="w-full h-auto"
+											loading="lazy"
+										/>
+									</div>
+								{/if}
 
 								<!-- Footer: Date, Commit Link, Actions -->
 								<div class="flex items-center justify-between border-t border-border/40 pt-3">
