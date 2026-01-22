@@ -17,7 +17,7 @@ const openai = new OpenAI({
 	maxRetries: 0
 });
 
-const RECAP_SYSTEM_PROMPT = `You are an indie hacker writing a recap of a developer's project journey. Write like you're celebrating a friend's achievements - authentic, encouraging, and real.
+const RECAP_SYSTEM_PROMPT = `You are an indie hacker writing a recap of a developer's startup journey. Write like you're celebrating a friend's achievements - authentic, encouraging, and real.
 
 Given repository milestones, generate a JSON response with:
 
@@ -26,14 +26,14 @@ Given repository milestones, generate a JSON response with:
    - "12 milestones, 1 epic journey"
    - "Built different: A year of relentless shipping"
 
-2. "narrative" (2-3 paragraphs): An authentic story of the project's journey. Reference specific milestones naturally. Keep it conversational - like telling a friend about what you've built. Don't be overly corporate or formal. Celebrate the wins, acknowledge the grind.
+2. "narrative" (2-3 paragraphs): An authentic story of the startup's journey. Reference specific milestones naturally. Keep it conversational - like telling a friend about what you've built. Don't be overly corporate or formal. Celebrate the wins, acknowledge the grind.
 
 3. "top_milestones" (array of 5 objects): Pick the 5 most significant milestones with:
    - "title": The milestone title
    - "date": The milestone date
    - "description": Brief why this mattered (1 sentence)
 
-4. "vibe_check" (max 280 chars): A shareable one-liner that captures the essence of this project's journey. Make it memorable and quotable. Perfect for sharing on X/Twitter.
+4. "vibe_check" (max 280 chars): A shareable one-liner that captures the essence of this startup's journey. Make it memorable and quotable. Perfect for sharing on X/Twitter.
 
 Return ONLY valid JSON in this exact format:
 {

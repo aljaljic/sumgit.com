@@ -66,7 +66,7 @@
 			</div>
 
 			<h1 class="mb-6 text-4xl leading-tight font-bold tracking-tight md:text-6xl">
-				Share Your App's
+				Share Your Startup
 				<span
 					class="animate-shimmer bg-[length:200%_100%] bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 bg-clip-text text-transparent"
 				>
@@ -128,7 +128,7 @@
 				</div>
 				<h3 class="mb-2 font-semibold">Timeline View</h3>
 				<p class="text-sm text-muted-foreground">
-					See your project's journey organized by date with ready-to-post summaries.
+					See your startup's journey organized by date with ready-to-post summaries.
 				</p>
 			</div>
 
@@ -260,7 +260,7 @@
 				</Badge>
 				<h2 class="mb-3 text-3xl font-bold">Your app, transformed into a shareable narrative</h2>
 				<p class="text-lg text-muted-foreground">
-					Choose from 5 unique narrative styles to bring your project's journey to life
+					Choose from 5 unique narrative styles to bring your startup's journey to life
 				</p>
 			</div>
 
@@ -310,7 +310,7 @@
 					<Clock class="h-3 w-3" />
 					Sample Timeline
 				</Badge>
-				<h2 class="mb-3 text-3xl font-bold">Your project's journey, visualized</h2>
+				<h2 class="mb-3 text-3xl font-bold">Your startup's progress, visualized over time</h2>
 				<p class="text-lg text-muted-foreground">
 					See milestones with AI-generated images and summaries across your entire commit history
 				</p>
@@ -367,7 +367,7 @@
 				</Badge>
 				<h2 class="mb-3 text-3xl font-bold">Embed Anywhere</h2>
 				<p class="text-lg text-muted-foreground">
-					Generate embeddable widgets to showcase your project's journey on your website, portfolio, or README
+					Generate embeddable widgets to showcase your startup's journey on your website, portfolio, or README
 				</p>
 			</div>
 
@@ -554,7 +554,7 @@
 				/>
 				<FAQItem
 					question="What is the story feature?"
-					answer="The story feature transforms your development milestones into an illustrated fantasy epic. Our AI generates a narrative based on your project's journey, complete with custom AI-generated artwork for each chapter. It's a unique way to celebrate and share your coding achievements."
+					answer="The story feature transforms your development milestones into an illustrated fantasy epic. Our AI generates a narrative based on your startup's journey, complete with custom AI-generated artwork for each chapter. It's a unique way to celebrate and share your coding achievements."
 				/>
 				<FAQItem
 					question="Can I share my generated story?"

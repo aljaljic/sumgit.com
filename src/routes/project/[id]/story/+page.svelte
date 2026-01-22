@@ -331,7 +331,7 @@
 					<p class="mb-6 max-w-sm text-muted-foreground">
 						Transform your {data.milestones.length} milestone{data.milestones.length === 1
 							? ''
-							: 's'} into an engaging narrative about your project's journey
+							: 's'} into an engaging narrative about your startup's journey
 					</p>
 
 					<!-- Narrative Style Selector -->
