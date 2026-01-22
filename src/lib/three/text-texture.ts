@@ -48,19 +48,25 @@ export async function createTextTexture(
 			const imgWidth = contentWidth;
 			const imgHeight = IMAGE_HEIGHT;
 
-			// Draw a decorative border around the image
-			ctx.strokeStyle = '#8B4513';
-			ctx.lineWidth = 3;
-			ctx.strokeRect(imgX - 2, imgY - 2, imgWidth + 4, imgHeight + 4);
-
-			// Draw the image, scaling to fit
-			const scale = Math.min(imgWidth / img.width, imgHeight / img.height);
+			// Draw the image, scaling to cover (fill entire box) with clipping
+			const scale = Math.max(imgWidth / img.width, imgHeight / img.height);
 			const scaledWidth = img.width * scale;
 			const scaledHeight = img.height * scale;
 			const offsetX = imgX + (imgWidth - scaledWidth) / 2;
 			const offsetY = imgY + (imgHeight - scaledHeight) / 2;
 
+			// Clip to image bounds so it doesn't overflow
+			ctx.save();
+			ctx.beginPath();
+			ctx.rect(imgX, imgY, imgWidth, imgHeight);
+			ctx.clip();
 			ctx.drawImage(img, offsetX, offsetY, scaledWidth, scaledHeight);
+			ctx.restore();
+
+			// Draw a decorative border around the image
+			ctx.strokeStyle = '#8B4513';
+			ctx.lineWidth = 3;
+			ctx.strokeRect(imgX - 2, imgY - 2, imgWidth + 4, imgHeight + 4);
 
 			// Update content start position to below image
 			contentStartY = imgY + imgHeight + 40;
@@ -191,14 +197,7 @@ export async function createCoverTexture(repoName: string, imageUrl?: string): P
 			const imgX = imgPadding;
 			const imgY = 120;
 
-			// Draw decorative frame around image
-			ctx.strokeStyle = '#b8860b';
-			ctx.lineWidth = 4;
-			ctx.strokeRect(imgX - 4, imgY - 4, imgWidth + 8, imgHeight + 8);
-			ctx.lineWidth = 2;
-			ctx.strokeRect(imgX - 10, imgY - 10, imgWidth + 20, imgHeight + 20);
-
-			// Draw the image, scaling to fit
+			// Draw the image, scaling to contain (show full image)
 			const scale = Math.min(imgWidth / img.width, imgHeight / img.height);
 			const scaledWidth = img.width * scale;
 			const scaledHeight = img.height * scale;
@@ -206,6 +205,13 @@ export async function createCoverTexture(repoName: string, imageUrl?: string): P
 			const offsetY = imgY + (imgHeight - scaledHeight) / 2;
 
 			ctx.drawImage(img, offsetX, offsetY, scaledWidth, scaledHeight);
+
+			// Draw decorative frame around the actual image (not the box)
+			ctx.strokeStyle = '#b8860b';
+			ctx.lineWidth = 4;
+			ctx.strokeRect(offsetX - 4, offsetY - 4, scaledWidth + 8, scaledHeight + 8);
+			ctx.lineWidth = 2;
+			ctx.strokeRect(offsetX - 10, offsetY - 10, scaledWidth + 20, scaledHeight + 20);
 
 			// Move title below image
 			titleStartY = imgY + imgHeight + 150;

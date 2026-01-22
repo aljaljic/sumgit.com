@@ -36,7 +36,7 @@ export async function createBook(
 	const width = container.clientWidth || 800;
 	const height = container.clientHeight || 600;
 	const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
-	camera.position.set(0, 0.2, 5);
+	camera.position.set(0, 0.2, 8);
 	camera.lookAt(0, 0, 0);
 
 	const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -82,7 +82,7 @@ export async function createBook(
 
 	// Front cover
 	const frontCoverGeometry = new THREE.BoxGeometry(BOOK_WIDTH, BOOK_HEIGHT, 0.05);
-	frontCoverGeometry.translate(-BOOK_WIDTH / 2, 0, 0);
+	frontCoverGeometry.translate(BOOK_WIDTH / 2, 0, 0);
 	const frontCoverTexture = await createCoverTexture(repoName, chapters[0]?.image_url);
 	const frontCover = new THREE.Mesh(
 		frontCoverGeometry,
@@ -92,7 +92,7 @@ export async function createBook(
 			metalness: 0.1
 		})
 	);
-	frontCover.position.set(BOOK_WIDTH / 2, 0, BOOK_DEPTH / 2 + 0.025);
+	frontCover.position.set(-BOOK_WIDTH / 2, 0, BOOK_DEPTH / 2 + 0.025);
 	frontCover.castShadow = true;
 	group.add(frontCover);
 
@@ -126,7 +126,7 @@ export async function createBook(
 	);
 	// Position relative to frontCover's local coordinates (geometry is translated by -BOOK_WIDTH/2)
 	// So x=0 is the right edge (hinge), and we want spine just to the right of that
-	spine.position.set(spineWidth / 2, 0, -0.025 - BOOK_DEPTH / 2);
+	spine.position.set(-spineWidth / 2, 0, -0.025 - BOOK_DEPTH / 2);
 	spine.castShadow = true;
 	frontCover.add(spine);
 
@@ -250,7 +250,7 @@ export async function createBook(
 		frontCover.visible = true;
 		await Promise.all([
 			gsap.to(frontCover.rotation, { y: 0, duration: 0.8, ease: 'power2.inOut' }),
-			gsap.to(camera.position, { z: 5, duration: 0.8, ease: 'power2.inOut' })
+			gsap.to(camera.position, { z: 8, duration: 0.8, ease: 'power2.inOut' })
 		]);
 
 		currentPage = -1; // Reset to closed state (before first page)
@@ -288,7 +288,7 @@ export async function createBook(
 		// Animate front cover closing
 		await Promise.all([
 			gsap.to(frontCover.rotation, { y: 0, duration: 0.8, ease: 'power2.inOut' }),
-			gsap.to(camera.position, { z: 5, duration: 0.8, ease: 'power2.inOut' })
+			gsap.to(camera.position, { z: 8, duration: 0.8, ease: 'power2.inOut' })
 		]);
 
 		// Rotate group to show back cover
