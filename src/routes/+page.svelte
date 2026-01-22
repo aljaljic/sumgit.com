@@ -258,7 +258,7 @@
 					<BookOpen class="h-3 w-3" />
 					See it in action
 				</Badge>
-				<h2 class="mb-3 text-3xl font-bold">Transform your startup updates into a shareable narrative</h2>
+				<h2 class="mb-3 text-3xl font-bold">Transform your milestones into a shareable narrative</h2>
 				<p class="text-lg text-muted-foreground">
 					Choose from 5 unique narrative styles to bring your startup's journey to life
 				</p>
@@ -310,9 +310,9 @@
 					<Clock class="h-3 w-3" />
 					Sample Timeline
 				</Badge>
-				<h2 class="mb-3 text-3xl font-bold">Your startup's progress, visualized over time</h2>
+				<h2 class="mb-3 text-3xl font-bold">Track highligts over time</h2>
 				<p class="text-lg text-muted-foreground">
-					See milestones with AI-generated images and summaries across your entire commit history
+					visualize key highlights across your entire commit history
 				</p>
 			</div>
 
@@ -337,7 +337,7 @@
 					<FileText class="h-3 w-3" />
 					Sample Recap
 				</Badge>
-				<h2 class="mb-3 text-3xl font-bold">View your startup's all-time summary</h2>
+				<h2 class="mb-3 text-3xl font-bold">Rewind with an all-time summary recap</h2>
 				<p class="text-lg text-muted-foreground">
 					Generate a comprehensive PDF recap with stats, languages, milestones, and shareable highlights
 				</p>
@@ -365,7 +365,7 @@
 					<Share2 class="h-3 w-3" />
 					Shareable
 				</Badge>
-				<h2 class="mb-3 text-3xl font-bold">Showcase Your Progress</h2>
+				<h2 class="mb-3 text-3xl font-bold">Showcase your startup's progress</h2>
 				<p class="text-lg text-muted-foreground">
 					Generate embeddable widgets to showcase your startup's journey on your site
 				</p>
