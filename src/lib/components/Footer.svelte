@@ -12,7 +12,7 @@
 					<span class="text-xl font-bold tracking-tight">SumGit</span>
 				</div>
 				<p class="mt-3 text-sm text-muted-foreground">
-					Share your startup journey with the world.
+					SumGit is a git milestone summarizer for startups building in public.
 				</p>
 			</div>
 
