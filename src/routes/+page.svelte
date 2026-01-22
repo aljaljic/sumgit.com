@@ -310,7 +310,7 @@
 					<Clock class="h-3 w-3" />
 					Sample Timeline
 				</Badge>
-				<h2 class="mb-3 text-3xl font-bold">Track highligts over time</h2>
+				<h2 class="mb-3 text-3xl font-bold">Track highlights over time</h2>
 				<p class="text-lg text-muted-foreground">
 					visualize key highlights across your entire commit history
 				</p>
