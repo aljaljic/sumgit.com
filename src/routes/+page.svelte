@@ -2,7 +2,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '$lib/components/ui/card';
-	import { Github, Sparkles, Clock, Loader2, BookOpen, Coins, Gift, Zap, Check, FileText, Share2, ExternalLink } from '@lucide/svelte';
+	import { Github, Sparkles, Clock, Loader2, BookOpen, Coins, Gift, Zap, Check, FileText, Share2, ExternalLink, ArrowRight, FolderGit2, Play } from '@lucide/svelte';
 	import { FAQ, FAQItem } from '$lib/components/ui/faq';
 	import logo from '$lib/assets/logo.png';
 	import MilestoneMarquee from '$lib/components/MilestoneMarquee.svelte';
@@ -153,6 +153,68 @@
 			</div>
 		</div>
 
+		<!-- How it Works Section -->
+		<div class="mt-20 w-full max-w-4xl">
+			<div class="mb-10 text-center">
+				<Badge variant="secondary" class="mb-4 gap-1">
+					<Zap class="h-3 w-3" />
+					Simple setup
+				</Badge>
+				<h2 class="mb-3 text-3xl font-bold">How it Works</h2>
+				<p class="text-muted-foreground">
+					Get started in under a minute
+				</p>
+			</div>
+
+			<div class="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8">
+				<!-- Step 1 -->
+				<div class="flex flex-col items-center text-center p-6 rounded-lg border border-border/40 bg-card/50 w-full md:w-auto md:flex-1">
+					<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-xl">
+						1
+					</div>
+					<div class="mb-2 flex h-10 w-10 items-center justify-center rounded-md bg-primary/10">
+						<Github class="h-5 w-5 text-primary" />
+					</div>
+					<h3 class="font-semibold">Connect GitHub</h3>
+					<p class="text-sm text-muted-foreground mt-1">Sign in with your GitHub account</p>
+				</div>
+
+				<ArrowRight class="h-6 w-6 text-muted-foreground hidden md:block shrink-0" />
+				<div class="h-6 w-6 text-muted-foreground md:hidden rotate-90">
+					<ArrowRight class="h-6 w-6" />
+				</div>
+
+				<!-- Step 2 -->
+				<div class="flex flex-col items-center text-center p-6 rounded-lg border border-border/40 bg-card/50 w-full md:w-auto md:flex-1">
+					<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-xl">
+						2
+					</div>
+					<div class="mb-2 flex h-10 w-10 items-center justify-center rounded-md bg-primary/10">
+						<FolderGit2 class="h-5 w-5 text-primary" />
+					</div>
+					<h3 class="font-semibold">Choose a Repo</h3>
+					<p class="text-sm text-muted-foreground mt-1">Select any repository to analyze</p>
+				</div>
+
+				<ArrowRight class="h-6 w-6 text-muted-foreground hidden md:block shrink-0" />
+				<div class="h-6 w-6 text-muted-foreground md:hidden rotate-90">
+					<ArrowRight class="h-6 w-6" />
+				</div>
+
+				<!-- Step 3 -->
+				<div class="flex flex-col items-center text-center p-6 rounded-lg border border-border/40 bg-card/50 w-full md:w-auto md:flex-1">
+					<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-xl">
+						3
+					</div>
+					<div class="mb-2 flex h-10 w-10 items-center justify-center rounded-md bg-primary/10">
+						<Play class="h-5 w-5 text-primary" />
+					</div>
+					<h3 class="font-semibold">Start Analyzing</h3>
+					<p class="text-sm text-muted-foreground mt-1">AI extracts your milestones instantly</p>
+				</div>
+			</div>
+		</div>
+
 		<!-- Terminal preview -->
 		<div class="mt-20 w-full max-w-2xl">
 			<div class="overflow-hidden rounded-lg border border-border/60 bg-zinc-950">
@@ -238,6 +300,33 @@
 					View Demo Storybook
 					<ExternalLink class="h-4 w-4" />
 				</Button>
+			</div>
+		</div>
+
+		<!-- Timeline Demo Section -->
+		<div class="mt-20 w-full max-w-4xl">
+			<div class="mb-10 text-center">
+				<Badge variant="secondary" class="mb-4 gap-1">
+					<Clock class="h-3 w-3" />
+					Sample Timeline
+				</Badge>
+				<h2 class="mb-3 text-3xl font-bold">Your project's journey, visualized</h2>
+				<p class="text-muted-foreground">
+					See milestones with AI-generated images and summaries across your entire commit history
+				</p>
+			</div>
+
+			<!-- Timeline Embed -->
+			<div class="rounded-lg border border-border/40 bg-card/50 p-6">
+				<div class="rounded-lg overflow-hidden border border-border/40">
+					<iframe
+						src="https://sumgit.com/embed/lws7M1GvoewNkHJ3D8AQH"
+						title="PostChad Timeline Embed"
+						class="w-full h-[400px] bg-background"
+						style="border-radius: 8px;"
+						loading="lazy"
+					></iframe>
+				</div>
 			</div>
 		</div>
 
