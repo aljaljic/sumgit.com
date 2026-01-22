@@ -66,11 +66,11 @@
 			</div>
 
 			<h1 class="mb-6 text-4xl leading-tight font-bold tracking-tight md:text-6xl">
-				Turn your commits into
+				Share Your App's
 				<span
 					class="animate-shimmer bg-[length:200%_100%] bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 bg-clip-text text-transparent"
 				>
-					stories
+					Journey
 				</span>
 			</h1>
 

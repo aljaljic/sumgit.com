@@ -12,7 +12,7 @@
 					<span class="text-xl font-bold tracking-tight">SumGit</span>
 				</div>
 				<p class="mt-3 text-sm text-muted-foreground">
-					Turn your commits into stories worth sharing.
+					Share your app's journey with the world.
 				</p>
 			</div>
 
