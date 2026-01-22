@@ -241,6 +241,34 @@
 			</div>
 		</div>
 
+		<!-- Recap Demo Section -->
+		<div class="mt-20 w-full max-w-4xl">
+			<div class="mb-10 text-center">
+				<Badge variant="secondary" class="mb-4 gap-1">
+					<FileText class="h-3 w-3" />
+					Sample Recap
+				</Badge>
+				<h2 class="mb-3 text-3xl font-bold">Your project's all-time summary</h2>
+				<p class="text-muted-foreground">
+					Generate a comprehensive PDF recap with stats, languages, milestones, and shareable highlights
+				</p>
+			</div>
+
+			<!-- Demo Link -->
+			<div class="text-center">
+				<Button
+					href="/aljaljic_postchad.com - sample-Recap.pdf"
+					target="_blank"
+					variant="outline"
+					class="gap-2"
+				>
+					<FileText class="h-4 w-4" />
+					View Sample Recap PDF
+					<ExternalLink class="h-4 w-4" />
+				</Button>
+			</div>
+		</div>
+
 		<!-- Embeddable Widgets Section -->
 		<div class="mt-20 w-full max-w-4xl">
 			<div class="mb-10 text-center">
@@ -257,7 +285,7 @@
 			<!-- Embed Example -->
 			<div class="rounded-lg border border-border/40 bg-card/50 p-6">
 				<p class="mb-4 text-sm text-muted-foreground text-center">
-					Live example: PostChad project embed
+					Live example: PostChad milestones widget
 				</p>
 				<div class="rounded-lg overflow-hidden border border-border/40">
 					<iframe
@@ -268,7 +296,7 @@
 					></iframe>
 				</div>
 				<p class="mt-4 text-sm text-muted-foreground text-center">
-					Create embeds for timelines, stories, and recaps to share your development journey
+					Create embeds for milestones, timelines, stories, and recaps to share your development journey
 				</p>
 			</div>
 		</div>
