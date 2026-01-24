@@ -286,7 +286,7 @@
 			<!-- Before/After Widget Comparison -->
 			<div class="mt-10">
 				<p class="mb-6 text-center text-sm font-medium text-muted-foreground">
-					See the visual enhancements
+					Why use SumGit?
 				</p>
 				<BeforeAfterWidgets />
 			</div>
