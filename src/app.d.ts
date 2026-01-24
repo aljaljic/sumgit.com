@@ -12,7 +12,11 @@ declare global {
 			user: User | null;
 		}
 		// interface Error {}
-		// interface Platform {}
+		interface Platform {
+			env?: {
+				BROWSER?: import('@cloudflare/puppeteer').BrowserWorker;
+			};
+		}
 	}
 }
 

@@ -41,7 +41,10 @@
       "Bash(git show:*)",
       "Bash(git diff:*)",
       "WebFetch(domain:datafa.st)",
-      "Bash(git -C /Users/adel/projects/sumgit.com log --oneline)"
+      "Bash(git -C /Users/adel/projects/sumgit.com log --oneline)",
+      "Bash(pnpm install)",
+      "Bash(npm view:*)",
+      "WebFetch(domain:openai.github.io)"
     ]
   }
 }

@@ -16,12 +16,14 @@
 		Clock,
 		BookOpen,
 		FileText,
-		Code
+		Code,
+		Camera
 	} from '@lucide/svelte';
 	import { invalidateAll, goto } from '$app/navigation';
 	import logo from '$lib/assets/logo.png';
 	import PurchaseCreditsDialog from '$lib/components/PurchaseCreditsDialog.svelte';
 	import ShareEmbedDialog from '$lib/components/ShareEmbedDialog.svelte';
+	import ScreenshotChatPanel from '$lib/components/ScreenshotChatPanel.svelte';
 	import { CREDIT_COSTS } from '$lib/credits';
 
 	let { data } = $props();
@@ -30,6 +32,7 @@
 	let isDeleting = $state(false);
 	let showPurchaseDialog = $state(false);
 	let showEmbedDialog = $state(false);
+	let showScreenshotPanel = $state(false);
 	let insufficientCreditsMessage = $state<string | null>(null);
 
 	async function analyzeRepository() {
@@ -167,6 +170,15 @@
 						<span class="hidden sm:inline">Embed</span>
 					</Button>
 				{/if}
+				<Button
+					onclick={() => (showScreenshotPanel = true)}
+					variant="outline"
+					size="sm"
+					class="gap-2"
+				>
+					<Camera class="h-4 w-4" />
+					<span class="hidden sm:inline">Auth Screenshots</span>
+				</Button>
 				<Button
 					onclick={analyzeRepository}
 					disabled={isAnalyzing}
@@ -339,4 +351,10 @@
 	onOpenChange={(open) => (showEmbedDialog = open)}
 	repositoryId={data.repository.id}
 	contentType="milestones"
+/>
+
+<ScreenshotChatPanel
+	bind:open={showScreenshotPanel}
+	onOpenChange={(open) => (showScreenshotPanel = open)}
+	repositoryId={data.repository.id}
 />

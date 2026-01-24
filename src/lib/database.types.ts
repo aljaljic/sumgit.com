@@ -345,6 +345,52 @@ export interface Database {
 					}
 				];
 			};
+			chatkit_threads: {
+				Row: {
+					id: string;
+					user_id: string;
+					repository_id: string;
+					thread_id: string;
+					state: Json;
+					encryption_key: string;
+					created_at: string;
+					expires_at: string;
+				};
+				Insert: {
+					id?: string;
+					user_id: string;
+					repository_id: string;
+					thread_id: string;
+					state: Json;
+					encryption_key: string;
+					created_at?: string;
+					expires_at: string;
+				};
+				Update: {
+					id?: string;
+					user_id?: string;
+					repository_id?: string;
+					thread_id?: string;
+					state?: Json;
+					encryption_key?: string;
+					created_at?: string;
+					expires_at?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'chatkit_threads_user_id_fkey';
+						columns: ['user_id'];
+						referencedRelation: 'profiles';
+						referencedColumns: ['id'];
+					},
+					{
+						foreignKeyName: 'chatkit_threads_repository_id_fkey';
+						columns: ['repository_id'];
+						referencedRelation: 'repositories';
+						referencedColumns: ['id'];
+					}
+				];
+			};
 		};
 		Views: Record<string, never>;
 		Functions: {
@@ -406,3 +452,4 @@ export type CreditTransaction = Database['public']['Tables']['credit_transaction
 export type StripeCustomer = Database['public']['Tables']['stripe_customers']['Row'];
 export type DbStory = Database['public']['Tables']['stories']['Row'];
 export type DbShareToken = Database['public']['Tables']['share_tokens']['Row'];
+export type DbChatkitThread = Database['public']['Tables']['chatkit_threads']['Row'];
