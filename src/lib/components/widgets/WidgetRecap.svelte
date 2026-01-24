@@ -60,18 +60,21 @@
 	{#if milestones.length === 0}
 		<div class="empty">No milestones to display</div>
 	{:else}
+		<!-- Hero Stat -->
+		<div class="hero-stat">
+			<span class="hero-number">{stats.totalMilestones}</span>
+			<span class="pulse-dot"></span>
+		</div>
+		<span class="hero-label">TOTAL MILESTONES</span>
+
 		<!-- Stats Grid -->
 		<div class="stats-grid">
-			<div class="stat-card">
-				<span class="stat-value">{stats.totalMilestones}</span>
-				<span class="stat-label">Milestones</span>
-			</div>
 			<div class="stat-card">
 				<span class="stat-value">{stats.activeMonths}</span>
 				<span class="stat-label">Active Months</span>
 			</div>
 			{#if stats.firstDate && stats.lastDate}
-				<div class="stat-card wide">
+				<div class="stat-card">
 					<span class="stat-value stat-range">
 						{formatDate(stats.firstDate)} - {formatDate(stats.lastDate)}
 					</span>
@@ -83,7 +86,7 @@
 		<!-- Top Milestones -->
 		{#if topMilestones.length > 0}
 			<div class="top-milestones">
-				<h3 class="section-title">Top Milestones</h3>
+				<h3 class="section-header">Recent Highlights</h3>
 				<div class="milestone-list">
 					{#each topMilestones as milestone, index}
 						<div class="milestone-item">
@@ -105,7 +108,7 @@
 	}
 
 	.header {
-		margin-bottom: 16px;
+		margin-bottom: 20px;
 		text-align: center;
 	}
 
@@ -127,25 +130,78 @@
 		color: var(--widget-muted);
 	}
 
+	/* Hero Stat */
+	.hero-stat {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 12px;
+		margin-bottom: 4px;
+	}
+
+	.hero-number {
+		font-size: 56px;
+		font-weight: 700;
+		color: var(--widget-fg);
+		line-height: 1;
+	}
+
+	.pulse-dot {
+		width: 10px;
+		height: 10px;
+		background: var(--widget-accent);
+		border-radius: 50%;
+		animation: pulse 2s ease-in-out infinite;
+		box-shadow: 0 0 8px var(--widget-accent);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.pulse-dot {
+			animation: none;
+		}
+	}
+
+	.hero-label {
+		display: block;
+		text-align: center;
+		font-size: 11px;
+		font-weight: 500;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--widget-muted);
+		margin-bottom: 20px;
+	}
+
 	.stats-grid {
 		display: grid;
 		grid-template-columns: repeat(2, 1fr);
-		gap: 8px;
-		margin-bottom: 16px;
+		gap: 10px;
+		margin-bottom: 20px;
 	}
 
 	.stat-card {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		padding: 12px 8px;
+		padding: 14px 10px;
 		background: var(--widget-card-bg);
 		border: 1px solid var(--widget-border);
-		border-radius: 6px;
+		border-radius: 10px;
+		transition: transform 0.2s ease, box-shadow 0.2s ease;
 	}
 
-	.stat-card.wide {
-		grid-column: span 2;
+	.stat-card:hover {
+		transform: translateY(-2px);
+		box-shadow: var(--widget-shadow-hover);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.stat-card {
+			transition: none;
+		}
+		.stat-card:hover {
+			transform: none;
+		}
 	}
 
 	.stat-value {
@@ -155,7 +211,7 @@
 	}
 
 	.stat-value.stat-range {
-		font-size: 14px;
+		font-size: 13px;
 		font-weight: 600;
 	}
 
@@ -163,17 +219,19 @@
 		font-size: 11px;
 		color: var(--widget-muted);
 		text-transform: uppercase;
-		letter-spacing: 0.5px;
+		letter-spacing: 0.05em;
 	}
 
 	.top-milestones {
 		margin-top: 8px;
 	}
 
-	.section-title {
+	.section-header {
 		margin: 0 0 12px 0;
-		font-size: 13px;
-		font-weight: 600;
+		font-size: 11px;
+		font-weight: 500;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
 		color: var(--widget-muted);
 	}
 
@@ -187,10 +245,25 @@
 		display: flex;
 		align-items: flex-start;
 		gap: 10px;
-		padding: 10px;
+		padding: 12px;
 		background: var(--widget-card-bg);
 		border: 1px solid var(--widget-border);
-		border-radius: 6px;
+		border-radius: 10px;
+		transition: transform 0.2s ease, box-shadow 0.2s ease;
+	}
+
+	.milestone-item:hover {
+		transform: translateY(-1px);
+		box-shadow: var(--widget-shadow-hover);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.milestone-item {
+			transition: none;
+		}
+		.milestone-item:hover {
+			transform: none;
+		}
 	}
 
 	.milestone-number {

@@ -108,7 +108,7 @@
 	}
 
 	.header {
-		margin-bottom: 16px;
+		margin-bottom: 20px;
 	}
 
 	.title {
@@ -132,18 +132,20 @@
 	.timeline {
 		display: flex;
 		flex-direction: column;
-		gap: 16px;
+		gap: 20px;
 	}
 
 	.year-section {
 		display: flex;
 		flex-direction: column;
-		gap: 8px;
+		gap: 10px;
 	}
 
 	.year-header {
-		font-size: 14px;
+		font-size: 11px;
 		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
 		color: var(--widget-accent);
 	}
 
@@ -153,14 +155,14 @@
 
 	.month-badge {
 		display: inline-block;
-		padding: 2px 8px;
+		padding: 3px 10px;
 		font-size: 11px;
-		font-weight: 500;
-		background: var(--widget-card-bg);
-		border: 1px solid var(--widget-border);
-		border-radius: 4px;
-		color: var(--widget-muted);
-		margin-bottom: 8px;
+		font-weight: 600;
+		background: var(--widget-accent-light);
+		border: 1px solid var(--widget-accent);
+		border-radius: 6px;
+		color: var(--widget-accent);
+		margin-bottom: 10px;
 	}
 
 	.month-items {
@@ -171,7 +173,8 @@
 
 	.timeline-item {
 		position: relative;
-		padding-bottom: 12px;
+		padding-bottom: 14px;
+		cursor: default;
 	}
 
 	.timeline-dot {
@@ -183,6 +186,22 @@
 		background: var(--widget-bg);
 		border: 2px solid var(--widget-accent);
 		border-radius: 50%;
+		transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+	}
+
+	.timeline-item:hover .timeline-dot {
+		background: var(--widget-accent);
+		box-shadow: 0 0 0 4px var(--widget-accent-light);
+		transform: scale(1.2);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.timeline-dot {
+			transition: none;
+		}
+		.timeline-item:hover .timeline-dot {
+			transform: none;
+		}
 	}
 
 	.timeline-content {
@@ -194,6 +213,7 @@
 	.item-date {
 		font-size: 11px;
 		color: var(--widget-muted);
+		font-weight: 500;
 	}
 
 	.item-text {
@@ -207,5 +227,6 @@
 		font-size: 11px;
 		color: var(--widget-muted);
 		padding-top: 4px;
+		font-weight: 500;
 	}
 </style>

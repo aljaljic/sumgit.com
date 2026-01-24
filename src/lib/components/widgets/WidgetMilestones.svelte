@@ -34,7 +34,12 @@
 		<div class="milestone-list">
 			{#each milestones.slice(0, 10) as milestone}
 				<div class="milestone-card">
-					<p class="milestone-text">{milestone.x_post_suggestion || milestone.title}</p>
+					<div class="milestone-main">
+						<span class="type-icon">
+							{#if milestone.milestone_type === 'feature'}&#x2728;{:else if milestone.milestone_type === 'bugfix'}&#x1F41B;{:else if milestone.milestone_type === 'release'}&#x1F680;{:else}&#x1F4DD;{/if}
+						</span>
+						<p class="milestone-text">{milestone.x_post_suggestion || milestone.title}</p>
+					</div>
 					<div class="milestone-meta">
 						<span class="date">{formatDate(milestone.milestone_date)}</span>
 						{#if milestone.commit_sha}
@@ -65,7 +70,7 @@
 	}
 
 	.header {
-		margin-bottom: 16px;
+		margin-bottom: 20px;
 	}
 
 	.title {
@@ -89,18 +94,52 @@
 	.milestone-list {
 		display: flex;
 		flex-direction: column;
-		gap: 12px;
+		gap: 10px;
 	}
 
 	.milestone-card {
-		padding: 12px;
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		gap: 12px;
+		padding: 14px;
 		background: var(--widget-card-bg);
-		border-radius: 6px;
+		border-radius: 10px;
 		border: 1px solid var(--widget-border);
+		border-left: 3px solid var(--widget-accent);
+		transition: transform 0.2s ease, box-shadow 0.2s ease, border-left-color 0.2s ease;
+	}
+
+	.milestone-card:hover {
+		transform: translateY(-1px);
+		box-shadow: var(--widget-shadow-hover);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.milestone-card {
+			transition: none;
+		}
+		.milestone-card:hover {
+			transform: none;
+		}
+	}
+
+	.milestone-main {
+		display: flex;
+		align-items: flex-start;
+		gap: 10px;
+		flex: 1;
+		min-width: 0;
+	}
+
+	.type-icon {
+		font-size: 16px;
+		flex-shrink: 0;
+		line-height: 1.4;
 	}
 
 	.milestone-text {
-		margin: 0 0 8px 0;
+		margin: 0;
 		font-size: 14px;
 		line-height: 1.5;
 		color: var(--widget-fg);
@@ -108,18 +147,23 @@
 
 	.milestone-meta {
 		display: flex;
-		align-items: center;
-		gap: 12px;
+		flex-direction: column;
+		align-items: flex-end;
+		gap: 4px;
 		font-size: 12px;
 		color: var(--widget-muted);
+		flex-shrink: 0;
 	}
 
 	.date {
 		color: var(--widget-muted);
+		font-weight: 500;
+		white-space: nowrap;
 	}
 
 	.commit {
 		font-family: monospace;
+		font-size: 11px;
 		color: var(--widget-accent);
 	}
 
@@ -128,5 +172,6 @@
 		text-align: center;
 		font-size: 12px;
 		color: var(--widget-muted);
+		font-weight: 500;
 	}
 </style>
