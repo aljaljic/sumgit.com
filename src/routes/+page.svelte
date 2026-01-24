@@ -337,7 +337,7 @@
 					<FileText class="h-3 w-3" />
 					Sample Recap
 				</Badge>
-				<h2 class="mb-3 text-3xl font-bold">Rewind with a summary recap</h2>
+				<h2 class="mb-3 text-3xl font-bold">Rewind with an summary recap</h2>
 				<p class="text-lg text-muted-foreground">
 					Generate a comprehensive PDF recap with stats, languages, milestones, and shareable highlights
 				</p>
