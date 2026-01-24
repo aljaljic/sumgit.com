@@ -7,7 +7,6 @@
 	import logo from '$lib/assets/logo.png';
 	import MilestoneMarquee from '$lib/components/MilestoneMarquee.svelte';
 	import Footer from '$lib/components/Footer.svelte';
-	import BeforeAfterWidgets from '$lib/components/BeforeAfterWidgets.svelte';
 	import { CREDIT_COSTS, CREDIT_PACKAGES } from '$lib/credits';
 
 	let { data } = $props();
@@ -67,11 +66,11 @@
 			</div>
 
 			<h1 class="mb-6 text-4xl leading-tight font-bold tracking-tight md:text-6xl">
-				Turn git activity into
+				Turn Git Activity into
 				<span
 					class="animate-shimmer bg-[length:200%_100%] bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 bg-clip-text text-transparent"
 				>
-					shareable updates
+					Shareable Updates
 				</span>
 			</h1>
 
@@ -261,7 +260,7 @@
 				</Badge>
 				<h2 class="mb-3 text-3xl font-bold">Showcase your startup progress</h2>
 				<p class="text-lg text-muted-foreground">
-					Generate embeddable widgets to keep your users updated on your site
+					Generate embeddable widgets to keep your users updated
 				</p>
 			</div>
 
@@ -281,14 +280,6 @@
 				<p class="mt-4 text-sm text-muted-foreground text-center">
 					Create embeds for milestones, timelines, stories, and recaps to share your development journey
 				</p>
-			</div>
-
-			<!-- Before/After Widget Comparison -->
-			<div class="mt-10">
-				<p class="mb-6 text-center text-sm font-medium text-muted-foreground">
-					Why use SumGit?
-				</p>
-				<BeforeAfterWidgets />
 			</div>
 		</div>
 
@@ -326,7 +317,7 @@
 					<BookOpen class="h-3 w-3" />
 					See it in action
 				</Badge>
-				<h2 class="mb-3 text-3xl font-bold">Turn your milestones into an interactive storybook</h2>
+				<h2 class="mb-3 text-3xl font-bold">Transform your milestones into an interactive storybook</h2>
 				<p class="text-lg text-muted-foreground">
 					Choose from 5 unique narrative styles to bring your milestones to life
 				</p>
