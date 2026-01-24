@@ -35,9 +35,19 @@
 			{#each milestones.slice(0, 10) as milestone}
 				<div class="milestone-card">
 					<div class="milestone-main">
-						<span class="type-icon">
-							{#if milestone.milestone_type === 'feature'}&#x2728;{:else if milestone.milestone_type === 'bugfix'}&#x1F41B;{:else if milestone.milestone_type === 'release'}&#x1F680;{:else}&#x1F4DD;{/if}
-						</span>
+						{#if milestone.milestone_type === 'feature'}
+							<span class="type-badge" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">Feature</span>
+						{:else if milestone.milestone_type === 'bugfix'}
+							<span class="type-badge" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">Bugfix</span>
+						{:else if milestone.milestone_type === 'refactor'}
+							<span class="type-badge" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">Refactor</span>
+						{:else if milestone.milestone_type === 'docs'}
+							<span class="type-badge" style="background: rgba(168, 85, 247, 0.1); color: #a855f7;">Docs</span>
+						{:else if milestone.milestone_type === 'config'}
+							<span class="type-badge" style="background: rgba(249, 115, 22, 0.1); color: #f97316;">Config</span>
+						{:else if milestone.milestone_type === 'release'}
+							<span class="type-badge" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">Release</span>
+						{/if}
 						<p class="milestone-text">{milestone.x_post_suggestion || milestone.title}</p>
 					</div>
 					<div class="milestone-meta">
@@ -132,10 +142,13 @@
 		min-width: 0;
 	}
 
-	.type-icon {
-		font-size: 16px;
+	.type-badge {
+		font-size: 11px;
+		font-weight: 500;
+		padding: 2px 8px;
+		border-radius: 4px;
 		flex-shrink: 0;
-		line-height: 1.4;
+		white-space: nowrap;
 	}
 
 	.milestone-text {
