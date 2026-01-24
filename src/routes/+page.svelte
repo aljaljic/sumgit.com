@@ -251,6 +251,65 @@
 			</div>
 		</div>
 
+		<!-- Embeddable Widgets Section -->
+		<div class="mt-20 w-full max-w-4xl">
+			<div class="mb-10 text-center">
+				<Badge variant="secondary" class="mb-4 gap-1">
+					<Share2 class="h-3 w-3" />
+					Shareable
+				</Badge>
+				<h2 class="mb-3 text-3xl font-bold">Showcase your startup progress</h2>
+				<p class="text-lg text-muted-foreground">
+					Generate embeddable widgets to keep your users updated on your site
+				</p>
+			</div>
+
+			<!-- Embed Example -->
+			<div class="rounded-lg border border-border/40 bg-card/50 p-6">
+				<p class="mb-4 text-sm text-muted-foreground text-center">
+					Live example: PostChad milestones widget
+				</p>
+				<div class="rounded-lg overflow-hidden border border-border/40">
+					<iframe
+						src="https://sumgit.com/embed/A60Z0890sc6hMnMbLNf8x"
+						title="PostChad Project Embed"
+						class="w-full h-[400px] bg-background"
+						loading="lazy"
+					></iframe>
+				</div>
+				<p class="mt-4 text-sm text-muted-foreground text-center">
+					Create embeds for milestones, timelines, stories, and recaps to share your development journey
+				</p>
+			</div>
+		</div>
+
+		<!-- Timeline Demo Section -->
+		<div class="mt-20 w-full max-w-4xl">
+			<div class="mb-10 text-center">
+				<Badge variant="secondary" class="mb-4 gap-1">
+					<Clock class="h-3 w-3" />
+					Sample Timeline
+				</Badge>
+				<h2 class="mb-3 text-3xl font-bold">Track highlights over time</h2>
+				<p class="text-lg text-muted-foreground">
+					visualize key highlights across your entire commit history
+				</p>
+			</div>
+
+			<!-- Timeline Embed -->
+			<div class="rounded-lg border border-border/40 bg-card/50 p-6">
+				<div class="rounded-lg overflow-hidden border border-border/40">
+					<iframe
+						src="https://sumgit.com/embed/lws7M1GvoewNkHJ3D8AQH"
+						title="PostChad Timeline Embed"
+						class="w-full h-[400px] bg-background"
+						style="border-radius: 8px;"
+						loading="lazy"
+					></iframe>
+				</div>
+			</div>
+		</div>
+
 		<!-- Storybook Demo Section -->
 		<div class="mt-20 w-full max-w-4xl">
 			<div class="mb-10 text-center">
@@ -303,33 +362,6 @@
 			</div>
 		</div>
 
-		<!-- Timeline Demo Section -->
-		<div class="mt-20 w-full max-w-4xl">
-			<div class="mb-10 text-center">
-				<Badge variant="secondary" class="mb-4 gap-1">
-					<Clock class="h-3 w-3" />
-					Sample Timeline
-				</Badge>
-				<h2 class="mb-3 text-3xl font-bold">Track highlights over time</h2>
-				<p class="text-lg text-muted-foreground">
-					visualize key highlights across your entire commit history
-				</p>
-			</div>
-
-			<!-- Timeline Embed -->
-			<div class="rounded-lg border border-border/40 bg-card/50 p-6">
-				<div class="rounded-lg overflow-hidden border border-border/40">
-					<iframe
-						src="https://sumgit.com/embed/lws7M1GvoewNkHJ3D8AQH"
-						title="PostChad Timeline Embed"
-						class="w-full h-[400px] bg-background"
-						style="border-radius: 8px;"
-						loading="lazy"
-					></iframe>
-				</div>
-			</div>
-		</div>
-
 		<!-- Recap Demo Section -->
 		<div class="mt-20 w-full max-w-4xl">
 			<div class="mb-10 text-center">
@@ -355,38 +387,6 @@
 					View Sample Recap PDF
 					<ExternalLink class="h-4 w-4" />
 				</Button>
-			</div>
-		</div>
-
-		<!-- Embeddable Widgets Section -->
-		<div class="mt-20 w-full max-w-4xl">
-			<div class="mb-10 text-center">
-				<Badge variant="secondary" class="mb-4 gap-1">
-					<Share2 class="h-3 w-3" />
-					Shareable
-				</Badge>
-				<h2 class="mb-3 text-3xl font-bold">Showcase your startup progress</h2>
-				<p class="text-lg text-muted-foreground">
-					Generate embeddable widgets to showcase your milestones on your site
-				</p>
-			</div>
-
-			<!-- Embed Example -->
-			<div class="rounded-lg border border-border/40 bg-card/50 p-6">
-				<p class="mb-4 text-sm text-muted-foreground text-center">
-					Live example: PostChad milestones widget
-				</p>
-				<div class="rounded-lg overflow-hidden border border-border/40">
-					<iframe
-						src="https://sumgit.com/embed/A60Z0890sc6hMnMbLNf8x"
-						title="PostChad Project Embed"
-						class="w-full h-[400px] bg-background"
-						loading="lazy"
-					></iframe>
-				</div>
-				<p class="mt-4 text-sm text-muted-foreground text-center">
-					Create embeds for milestones, timelines, stories, and recaps to share your development journey
-				</p>
 			</div>
 		</div>
 
