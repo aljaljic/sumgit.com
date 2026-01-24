@@ -19,7 +19,8 @@
 		ExternalLink,
 		Shield,
 		Check,
-		Lock
+		Lock,
+		Settings
 	} from '@lucide/svelte';
 	import { invalidateAll } from '$app/navigation';
 	import logo from '$lib/assets/logo.png';
@@ -180,6 +181,10 @@
 					</Badge>
 				{/if}
 				<CreditBalance bind:this={creditBalanceRef} onclick={() => (showPurchaseDialog = true)} />
+				<Button href="/settings" variant="ghost" size="sm" class="gap-2">
+					<Settings class="h-4 w-4" />
+					<span class="hidden sm:inline">Settings</span>
+				</Button>
 				<Button onclick={signOut} variant="ghost" size="sm" class="gap-2">
 					<LogOut class="h-4 w-4" />
 					<span class="hidden sm:inline">Sign out</span>
