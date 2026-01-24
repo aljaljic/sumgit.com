@@ -479,7 +479,7 @@
 							<ul class="space-y-2 text-sm text-muted-foreground">
 								<li class="flex items-center gap-2">
 									<Check class="h-4 w-4 text-emerald-500" />
-									{pkg.credits} Quick Analyses
+									{Math.floor(pkg.credits / CREDIT_COSTS.quick_analyze)} Quick Analyses
 								</li>
 								<li class="flex items-center gap-2">
 									<Check class="h-4 w-4 text-emerald-500" />
