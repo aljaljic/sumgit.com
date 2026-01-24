@@ -246,7 +246,7 @@
 								<ul class="mb-6 space-y-2 text-sm">
 									<li class="flex items-center gap-2">
 										<Check class="h-4 w-4 text-emerald-500" />
-										<span>{pkg.credits} Quick Analyses</span>
+										<span>{Math.floor(pkg.credits / CREDIT_COSTS.quick_analyze)} Quick Analyses</span>
 									</li>
 									<li class="flex items-center gap-2">
 										<Check class="h-4 w-4 text-emerald-500" />

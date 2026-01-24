@@ -7,6 +7,7 @@
 	import logo from '$lib/assets/logo.png';
 	import MilestoneMarquee from '$lib/components/MilestoneMarquee.svelte';
 	import Footer from '$lib/components/Footer.svelte';
+	import BeforeAfterWidgets from '$lib/components/BeforeAfterWidgets.svelte';
 	import { CREDIT_COSTS, CREDIT_PACKAGES } from '$lib/credits';
 
 	let { data } = $props();
@@ -66,11 +67,11 @@
 			</div>
 
 			<h1 class="mb-6 text-4xl leading-tight font-bold tracking-tight md:text-6xl">
-				Turn Git Activity into
+				Turn git activity into
 				<span
 					class="animate-shimmer bg-[length:200%_100%] bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 bg-clip-text text-transparent"
 				>
-					Shareable Updates
+					shareable updates
 				</span>
 			</h1>
 
@@ -280,6 +281,14 @@
 				<p class="mt-4 text-sm text-muted-foreground text-center">
 					Create embeds for milestones, timelines, stories, and recaps to share your development journey
 				</p>
+			</div>
+
+			<!-- Before/After Widget Comparison -->
+			<div class="mt-10">
+				<p class="mb-6 text-center text-sm font-medium text-muted-foreground">
+					See the visual enhancements
+				</p>
+				<BeforeAfterWidgets />
 			</div>
 		</div>
 
