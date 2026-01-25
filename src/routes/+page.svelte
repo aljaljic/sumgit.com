@@ -326,8 +326,8 @@
 					<p class="text-sm font-medium">Fantasy</p>
 				</div>
 				<div class="rounded-lg border border-border/40 bg-card/50 p-4 text-center">
-					<div class="mb-2 text-2xl">🚀</div>
-					<p class="text-sm font-medium">Indie Hacker</p>
+					<div class="mb-2 text-2xl">🌿</div>
+					<p class="text-sm font-medium">Ghibli</p>
 				</div>
 				<div class="rounded-lg border border-border/40 bg-card/50 p-4 text-center">
 					<div class="mb-2 text-2xl">🌌</div>

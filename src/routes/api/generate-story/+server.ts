@@ -28,7 +28,7 @@ const IMAGE_STYLE_SUFFIXES: Record<NarrativeStyleId, string> = {
 	'space-opera': 'cinematic sci-fi concept art, dramatic space lighting, futuristic',
 	noir: 'black and white noir photography style, dramatic shadows, 1940s aesthetic',
 	anime: 'anime art style, dramatic action scene, vibrant colors, manga-inspired',
-	ghibli: 'Studio Ghibli style, hand-drawn animation aesthetic, soft watercolor textures, whimsical and dreamlike, lush nature details, warm nostalgic lighting'
+	ghibli: 'anime illustration inspired by Studio Ghibli, hand-drawn animation aesthetic, soft watercolor textures, whimsical and dreamlike, lush nature details, warm nostalgic lighting'
 };
 
 const NARRATIVE_PROMPTS: Record<NarrativeStyleId, string> = {
@@ -261,7 +261,7 @@ Transform these events into a compelling narrative (3-4 chapters, 100-150 words 
 				try {
 					// Generate image using GPT-4o image generation
 					const imageResponse = await openai.images.generate({
-						model: 'gpt-image-1',
+						model: 'gpt-image-1.5',
 						prompt: chapter.image_prompt,
 						n: 1,
 						size: '1024x1024',
