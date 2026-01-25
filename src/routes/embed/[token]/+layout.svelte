@@ -20,9 +20,11 @@
 		width: 100%;
 	}
 
+	:global(html),
 	:global(body) {
 		margin: 0;
 		padding: 0;
 		overflow: auto;
+		background: transparent !important;
 	}
 </style>
