@@ -24,10 +24,11 @@ const supabaseAdmin = createClient(PUBLIC_SUPABASE_URL, PRIVATE_SUPABASE_SERVICE
 
 const IMAGE_STYLE_SUFFIXES: Record<NarrativeStyleId, string> = {
 	fantasy: 'epic fantasy oil painting, dramatic lighting, rich colors',
-	'indie-hacker': 'modern flat illustration, vibrant startup aesthetic, clean minimal design',
+	changelog: 'modern product illustration, clean tech aesthetic, professional design, minimal and elegant',
 	'space-opera': 'cinematic sci-fi concept art, dramatic space lighting, futuristic',
 	noir: 'black and white noir photography style, dramatic shadows, 1940s aesthetic',
-	anime: 'anime art style, dramatic action scene, vibrant colors, manga-inspired'
+	anime: 'anime art style, dramatic action scene, vibrant colors, manga-inspired',
+	ghibli: 'Studio Ghibli style, hand-drawn animation aesthetic, soft watercolor textures, whimsical and dreamlike, lush nature details, warm nostalgic lighting'
 };
 
 const NARRATIVE_PROMPTS: Record<NarrativeStyleId, string> = {
@@ -49,23 +50,23 @@ Each chapter should:
 
 Write exactly 3-4 chapters total. Keep them SHORT but evocative.`,
 
-	'indie-hacker': `You are a fellow indie hacker telling the story of a builder's journey. Write like you're sharing war stories over coffee.
+	changelog: `You are telling the story of a product's evolution - like a founder updating users on the journey. Professional but human, proud of what's built, honest about the process.
 
-Given a list of development milestones from a repository, transform them into a compelling founder's journey narrative:
+Given a list of development milestones from a repository, transform them into a compelling product evolution narrative:
 
-- Code = building, shipping, hacking together
-- Bugs = fires to put out, things breaking at 2am
-- Features = MVPs, launches, shipped features
-- Deployments = launches, going live, shipping day
-- Refactoring = paying down tech debt, cleaning up the mess
+- Code = product capabilities, features shipped
+- Bugs = issues squashed, user pain points fixed
+- Features = new capabilities, things users can now do
+- Deployments = releases, launches, going live
+- Refactoring = performance wins, under-the-hood improvements
 
 Each chapter should:
 - Be 100-150 words MAXIMUM (keep it short!)
-- Keep it real, casual, and relatable
-- Use phrases like "shipped it", "went live", "fixed that bug", "pivoted"
-- Feel like a genuine indie hacker sharing their journey
+- Focus on user value - what can people do now?
+- Professional but warm, not corporate/stiff
+- Feel like a product team celebrating milestones with their users
 
-Write exactly 3-4 chapters total. Keep them SHORT but authentic.`,
+Write exactly 3-4 chapters total. Keep them SHORT but meaningful.`,
 
 	'space-opera': `You are the ship's AI chronicling a crew's expedition across the digital cosmos in the style of Star Trek captain's logs.
 
@@ -119,7 +120,26 @@ Each chapter should:
 - Emphasize friendship powering everything
 - Have "I won't give up!" energy
 
-Write exactly 3-4 chapters total. Keep them SHORT but INTENSE.`
+Write exactly 3-4 chapters total. Keep them SHORT but INTENSE.`,
+
+	ghibli: `You are narrating a whimsical Studio Ghibli film about a developer's gentle journey through a magical world of code. Think Spirited Away meets a cozy coding adventure.
+
+Given a list of development milestones from a repository, transform them into a heartwarming Ghibli-style tale:
+
+- Code = magical spells, enchanted objects, spirit companions
+- Bugs = mischievous spirits, small troubles that teach lessons
+- Features = magical gifts, discoveries in enchanted forests
+- Deployments = festivals, celebrations in spirit villages
+- Refactoring = cleaning the bathhouse, tending magical gardens
+
+Each chapter should:
+- Be 100-150 words MAXIMUM (keep it short!)
+- Feel contemplative and gentle, with wonder at small things
+- Include nature imagery - forests, rivers, wind, clouds
+- Have moments of quiet magic and heartfelt connection
+- Emphasize growth, kindness, and finding one's place
+
+Write exactly 3-4 chapters total. Keep them SHORT but magical.`
 };
 
 function buildSystemPrompt(style: NarrativeStyleId): string {
@@ -239,13 +259,13 @@ Transform these events into a compelling narrative (3-4 chapters, 100-150 words 
 				}
 
 				try {
-					// Generate image using dall-e-3
+					// Generate image using GPT-4o image generation
 					const imageResponse = await openai.images.generate({
-						model: 'dall-e-3',
+						model: 'gpt-image-1',
 						prompt: chapter.image_prompt,
 						n: 1,
 						size: '1024x1024',
-						quality: 'standard'
+						quality: 'medium'
 					});
 
 					const imageData = imageResponse.data?.[0];

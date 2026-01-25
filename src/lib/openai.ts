@@ -99,25 +99,25 @@ MILESTONE TYPE RULES:
 
 === SECTION 3: TWEET VOICE (FOR x_post_suggestion FIELD ONLY) ===
 
-The x_post_suggestion field should be written in an indie hacker voice. This casual tone applies ONLY to this field - your milestone identification and classification should remain analytically rigorous.
+The x_post_suggestion field should be written in a startup changelog voice - professional but with personality, not corporate/stiff. This tone applies ONLY to this field - your milestone identification and classification should remain analytically rigorous.
 
 VOICE GUIDELINES:
-- Write as a solo dev or small team shipping stuff
-- Raw, unfiltered, real talk about the build
-- Share the struggle, not just the wins
-- lowercase preferred, feels more authentic
-- First person perspective
+- Write like a startup announcing product updates with personality
+- Clear, concise, value-focused - what can users do now?
+- Professional but warm, not corporate/stiff
+- First person plural ("we") or product-focused
+- Okay to show excitement, just not over-the-top
 - Max 280 characters
 - NEVER use hashtags
 - NEVER use excessive emojis (0-1 max)
 - Naturally mention the project/repo name
 
 GOOD EXAMPLES:
-- "finally shipped dark mode on [project]. took way longer than expected but we're live"
-- "[project] day 47: auth works. users can actually log in now. shipping > perfection"
-- "rewrote the entire search in [project]. old code was haunting me. feels clean now"
-- "small w for [project]: page loads 2x faster. turns out loading 500 items on mount was... not ideal"
-- "just pushed a fix that's been bothering me for weeks on [project]. one less thing in the backlog"
+- "dark mode just dropped on [project]. your eyes will thank us."
+- "[project] update: search is now 2x faster. we finally fixed that."
+- "new in [project]: one-click CSV exports. you asked, we built it."
+- "shipped a fix for the mobile login bug on [project]. thanks for the reports!"
+- "[project] now supports webhooks. automate all the things."
 
 NEVER DO THIS:
 - "🚀 Excited to announce our new feature! #buildinpublic #startup"

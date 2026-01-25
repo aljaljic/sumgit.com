@@ -23,7 +23,7 @@ export interface GenerateStoryResponse {
 	error?: string;
 }
 
-export type NarrativeStyleId = 'fantasy' | 'indie-hacker' | 'space-opera' | 'noir' | 'anime';
+export type NarrativeStyleId = 'fantasy' | 'changelog' | 'space-opera' | 'noir' | 'anime' | 'ghibli';
 
 export interface NarrativeStyle {
 	id: NarrativeStyleId;
@@ -40,10 +40,10 @@ export const NARRATIVE_STYLES: NarrativeStyle[] = [
 		icon: '⚔️'
 	},
 	{
-		id: 'indie-hacker',
-		name: 'Indie Hacker',
-		description: 'Startup founder journey',
-		icon: '🚀'
+		id: 'changelog',
+		name: 'Changelog',
+		description: 'Product update announcements',
+		icon: '📋'
 	},
 	{
 		id: 'space-opera',
@@ -62,5 +62,11 @@ export const NARRATIVE_STYLES: NarrativeStyle[] = [
 		name: 'Anime',
 		description: 'Shonen dramatic journey',
 		icon: '⚡'
+	},
+	{
+		id: 'ghibli',
+		name: 'Ghibli',
+		description: 'Whimsical Studio Ghibli tale',
+		icon: '🌿'
 	}
 ];
