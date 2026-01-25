@@ -20,6 +20,7 @@
 	} from '@lucide/svelte';
 	import { Code as CodeIcon } from '@lucide/svelte';
 	import logo from '$lib/assets/logo.png';
+	import IconRecap from '$lib/components/icons/IconRecap.svelte';
 	import PurchaseCreditsDialog from '$lib/components/PurchaseCreditsDialog.svelte';
 	import ShareEmbedDialog from '$lib/components/ShareEmbedDialog.svelte';
 	import type { RepoRecap } from '$lib/types/recap';
@@ -497,10 +498,8 @@ Built with sumgit.com`;
 			{:else}
 				<!-- Generate recap state -->
 				<div class="flex flex-1 flex-col items-center justify-center py-20 text-center">
-					<div
-						class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-purple-500/10"
-					>
-						<FileText class="h-8 w-8 text-purple-500" />
+					<div class="mb-4">
+						<IconRecap size={48} />
 					</div>
 					<h3 class="mb-2 text-lg font-semibold">Generate Your Recap</h3>
 					<p class="mb-6 max-w-sm text-muted-foreground">

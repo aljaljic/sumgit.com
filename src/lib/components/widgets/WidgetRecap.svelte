@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Milestone, Repository } from '$lib/database.types';
 	import WidgetBranding from './WidgetBranding.svelte';
+	import IconRecap from '$lib/components/icons/IconRecap.svelte';
 
 	interface Props {
 		repository: Repository;
@@ -51,10 +52,10 @@
 
 <div class="widget-recap">
 	<div class="header">
-		<h2 class="title">
-			{repository.repo_name}
-		</h2>
-		<span class="subtitle">Project Recap</span>
+		<div class="header-label">
+			<IconRecap />
+			<span>Project Recap</span>
+		</div>
 	</div>
 
 	{#if milestones.length === 0}
@@ -109,20 +110,18 @@
 
 	.header {
 		margin-bottom: 20px;
-		text-align: center;
 	}
 
-	.title {
-		margin: 0 0 4px 0;
+	.header-label {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
 		font-size: 18px;
 		font-weight: 600;
 		color: var(--widget-fg);
 	}
 
-	.subtitle {
-		font-size: 12px;
-		color: var(--widget-muted);
-	}
 
 	.empty {
 		text-align: center;

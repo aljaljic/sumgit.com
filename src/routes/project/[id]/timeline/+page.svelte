@@ -12,6 +12,7 @@
 		Code
 	} from '@lucide/svelte';
 	import logo from '$lib/assets/logo.png';
+	import IconTimeline from '$lib/components/icons/IconTimeline.svelte';
 	import { invalidateAll } from '$app/navigation';
 	import PurchaseCreditsDialog from '$lib/components/PurchaseCreditsDialog.svelte';
 	import ShareEmbedDialog from '$lib/components/ShareEmbedDialog.svelte';
@@ -148,6 +149,9 @@
 				<p class="mt-1 text-sm text-muted-foreground">
 					{data.milestones.length} milestone{data.milestones.length === 1 ? '' : 's'} total
 				</p>
+				<div class="mt-3">
+					<IconTimeline size={32} />
+				</div>
 			</div>
 
 			<!-- Empty state -->

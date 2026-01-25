@@ -4,6 +4,7 @@
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { ArrowLeft, BookOpen, Loader2, Share2, Link, Check, X, Code } from '@lucide/svelte';
 	import logo from '$lib/assets/logo.png';
+	import IconStory from '$lib/components/icons/IconStory.svelte';
 	import StoryLoader from '$lib/components/storybook/StoryLoader.svelte';
 	import PageControls from '$lib/components/storybook/PageControls.svelte';
 	import type { StoryChapter, NarrativeStyleId, Story } from '$lib/types/story';
@@ -322,10 +323,8 @@
 			{:else}
 				<!-- Generate story state -->
 				<div class="flex flex-1 flex-col items-center justify-center py-20 text-center">
-					<div
-						class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-500/10"
-					>
-						<BookOpen class="h-8 w-8 text-amber-500" />
+					<div class="mb-4">
+						<IconStory size={48} />
 					</div>
 					<h3 class="mb-2 text-lg font-semibold">Tell Your Story</h3>
 					<p class="mb-6 max-w-sm text-muted-foreground">

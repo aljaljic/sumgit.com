@@ -2,6 +2,7 @@
 	import type { Repository, DbStory } from '$lib/database.types';
 	import type { StoryChapter } from '$lib/types/story';
 	import WidgetBranding from './WidgetBranding.svelte';
+	import IconStory from '$lib/components/icons/IconStory.svelte';
 
 	interface Props {
 		repository: Repository;
@@ -41,10 +42,10 @@
 
 <div class="widget-story">
 	<div class="header">
-		<h2 class="title">
-			{repository.repo_name}
-		</h2>
-		<span class="subtitle">Story</span>
+		<div class="header-label">
+			<IconStory />
+			<span>Story</span>
+		</div>
 	</div>
 
 	{#if !story || chapters.length === 0}
@@ -126,20 +127,18 @@
 
 	.header {
 		margin-bottom: 16px;
-		text-align: center;
 	}
 
-	.title {
-		margin: 0 0 4px 0;
+	.header-label {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
 		font-size: 16px;
 		font-weight: 600;
 		color: var(--widget-fg);
 	}
 
-	.subtitle {
-		font-size: 12px;
-		color: var(--widget-muted);
-	}
 
 	.empty {
 		text-align: center;
