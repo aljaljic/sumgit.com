@@ -293,6 +293,37 @@ export interface Database {
 					}
 				];
 			};
+			recaps: {
+				Row: {
+					id: string;
+					repository_id: string;
+					user_id: string;
+					recap_data: Json;
+					created_at: string;
+				};
+				Insert: {
+					id?: string;
+					repository_id: string;
+					user_id: string;
+					recap_data: Json;
+					created_at?: string;
+				};
+				Update: {
+					id?: string;
+					repository_id?: string;
+					user_id?: string;
+					recap_data?: Json;
+					created_at?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'recaps_repository_id_fkey';
+						columns: ['repository_id'];
+						referencedRelation: 'repositories';
+						referencedColumns: ['id'];
+					}
+				];
+			};
 			share_tokens: {
 				Row: {
 					id: string;
@@ -405,4 +436,5 @@ export type CreditBalance = Database['public']['Tables']['credit_balances']['Row
 export type CreditTransaction = Database['public']['Tables']['credit_transactions']['Row'];
 export type StripeCustomer = Database['public']['Tables']['stripe_customers']['Row'];
 export type DbStory = Database['public']['Tables']['stories']['Row'];
+export type DbRecap = Database['public']['Tables']['recaps']['Row'];
 export type DbShareToken = Database['public']['Tables']['share_tokens']['Row'];

@@ -26,10 +26,22 @@
 
 <div class="widget-milestones">
 	<div class="header">
-		<h2 class="title">
-			{repository.repo_name}
-		</h2>
-		<span class="subtitle">{milestones.length} milestone{milestones.length === 1 ? '' : 's'}</span>
+		<div class="header-label">
+			<svg width="40" height="40" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+				<circle fill="#76C2AF" cx="32" cy="32" r="32"/>
+				<path fill="#231F20" opacity="0.2" d="M24.6,41.9c0.4,1.1-0.2,2-1.4,2h-2c-1.1,0-2.3-0.9-2.6-2l-3.2-10c-0.4-1.1,0.2-2,1.4-2h2c1.1,0,2.3,0.9,2.6,2L24.6,41.9z"/>
+				<path fill="#231F20" opacity="0.2" d="M24,46.9c0.4,1.1-0.2,2-1.4,2h-2c-1.1,0-2-0.1-2.4-1.2l-3.5-10.8c-0.4-1.1,0.2-2,1.4-2h2c1.1,0,2.3,0.9,2.6,2L24,46.9z"/>
+				<path fill="#C75C5C" d="M24.6,39.9c0.4,1.1-0.2,2-1.4,2h-2c-1.1,0-2.3-0.9-2.6-2l-3.2-10c-0.4-1.1,0.2-2,1.4-2h2c1.1,0,2.3,0.9,2.6,2L24.6,39.9z"/>
+				<path fill="#4F5D73" d="M24,44.9c0.4,1.1-0.2,2-1.4,2h-2c-1.1,0-2.2-0.5-2.6-1.6l-3.3-10.4c-0.4-1.1,0.2-2,1.4-2h2c1.1,0,2.3,0.9,2.6,2L24,44.9z"/>
+				<path fill="#231F20" opacity="0.2" d="M48,28.9V18.5c0-0.8-0.7-1.5-1.5-1.5c-0.8,0-1.5,0.7-1.5,1.5v1c-2.8,2.5-6.3,6.4-16,6.4H18h-2h-2c-1.1,0-2,0.9-2,2c-1.1,0-2,0.9-2,2v6c0,1.1,0.9,2,2,2c0,1.1,0.9,2,2,2h1h1h2h11c9.7,0,13.2,3.9,16,6.4v1.1c0,0.8,0.7,1.5,1.5,1.5c0.8,0,1.5-0.7,1.5-1.5V36.9c1.1,0,2-0.9,2-2v-4C50,29.8,49.1,28.9,48,28.9z"/>
+				<path fill="#E0E0D1" d="M50,32.9c0,1.1-0.9,2-2,2h-8c-1.1,0-2-0.9-2-2v-4c0-1.1,0.9-2,2-2h8c1.1,0,2,0.9,2,2V32.9z"/>
+				<path fill="#4F5D73" d="M22,33.9c0,1.1-0.9,2-2,2h-8c-1.1,0-2-0.9-2-2v-6c0-1.1,0.9-2,2-2h8c1.1,0,2,0.9,2,2V33.9z"/>
+				<path fill="#FFFFFF" d="M46.1,16.6c-3,2.3-6.1,7.3-17.1,7.3H16l-1,14h14c11,0,14.1,5,17.1,7.3V16.6z"/>
+				<path fill="#C75C5C" d="M18,37.9c0,0-0.9,0-2,0h-2c-1.1,0-2-0.9-2-2v-10c0-1.1,0.9-2,2-2h2c1.1,0,2,0,2,0V37.9z"/>
+				<path fill="#4F5D73" d="M48,45.4c0,0.8-0.7,1.5-1.5,1.5l0,0c-0.8,0-1.5-0.7-1.5-1.5V16.5c0-0.8,0.7-1.5,1.5-1.5l0,0c0.8,0,1.5,0.7,1.5,1.5V45.4z"/>
+			</svg>
+			<span>Latest Changes</span>
+		</div>
 	</div>
 
 	{#if milestones.length === 0}
@@ -95,16 +107,13 @@
 		margin-bottom: 20px;
 	}
 
-	.title {
-		margin: 0 0 4px 0;
+	.header-label {
+		display: flex;
+		align-items: center;
+		gap: 8px;
 		font-size: 16px;
 		font-weight: 600;
 		color: var(--widget-fg);
-	}
-
-	.subtitle {
-		font-size: 12px;
-		color: var(--widget-muted);
 	}
 
 	.empty {

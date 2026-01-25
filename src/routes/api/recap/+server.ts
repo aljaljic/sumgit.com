@@ -324,6 +324,25 @@ Create an engaging recap that celebrates this journey. Reference the tech stack 
 			generated_at: new Date().toISOString()
 		};
 
+		// Save or update the recap in the database
+		const { error: upsertError } = await locals.supabase
+			.from('recaps')
+			.upsert(
+				{
+					repository_id,
+					user_id: user.id,
+					recap_data: recap as unknown as Record<string, unknown>
+				},
+				{
+					onConflict: 'repository_id'
+				}
+			);
+
+		if (upsertError) {
+			secureLog.error('Error saving recap:', upsertError);
+			// Don't fail the request if saving fails, just log it
+		}
+
 		return json({
 			success: true,
 			recap,

@@ -15,7 +15,8 @@
 		Clock,
 		Code,
 		Users,
-		Download
+		Download,
+		RefreshCw
 	} from '@lucide/svelte';
 	import { Code as CodeIcon } from '@lucide/svelte';
 	import logo from '$lib/assets/logo.png';
@@ -26,7 +27,7 @@
 	let { data } = $props();
 
 	let isGenerating = $state(false);
-	let recap = $state<RepoRecap | null>(null);
+	let recap = $state<RepoRecap | null>(data.existingRecap);
 	let errorMessage = $state<string | null>(null);
 	let showPurchaseDialog = $state(false);
 	let showEmbedDialog = $state(false);
@@ -481,6 +482,15 @@ Built with sumgit.com`;
 						<Button onclick={downloadAsPdf} variant="outline" class="gap-2">
 							<Download class="h-4 w-4" />
 							Download PDF
+						</Button>
+						<Button onclick={generateRecap} variant="outline" class="gap-2" disabled={isGenerating}>
+							{#if isGenerating}
+								<Loader2 class="h-4 w-4 animate-spin" />
+								Regenerating...
+							{:else}
+								<RefreshCw class="h-4 w-4" />
+								Regenerate
+							{/if}
 						</Button>
 					</div>
 				</div>
