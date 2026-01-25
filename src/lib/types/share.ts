@@ -4,6 +4,8 @@ export type WidgetTheme = 'light' | 'dark' | 'auto';
 export interface WidgetConfig {
 	theme: WidgetTheme;
 	showBranding: boolean;
+	showDate?: boolean;
+	showCommit?: boolean;
 }
 
 export interface ShareToken {

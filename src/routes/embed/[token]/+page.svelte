@@ -20,6 +20,10 @@
 			repository={data.repository}
 			milestones={data.milestones}
 			showBranding={data.config.showBranding}
+			showDate={data.config.showDate ?? true}
+			showCommit={data.config.showCommit ?? true}
+			textColor={data.textColor}
+			textSize={data.textSize}
 		/>
 	{:else if data.contentType === 'timeline'}
 		<WidgetTimeline

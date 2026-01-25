@@ -63,7 +63,9 @@ export const POST: RequestHandler = async ({ request, locals, url }) => {
 		const existingConfig = existingToken.config as unknown as WidgetConfig | null;
 		const updatedConfig: WidgetConfig = {
 			theme: config?.theme ?? existingConfig?.theme ?? 'light',
-			showBranding: config?.showBranding ?? existingConfig?.showBranding ?? true
+			showBranding: config?.showBranding ?? existingConfig?.showBranding ?? true,
+			showDate: config?.showDate ?? existingConfig?.showDate,
+			showCommit: config?.showCommit ?? existingConfig?.showCommit
 		};
 
 		const { error: updateError } = await supabaseAdmin
@@ -94,7 +96,9 @@ export const POST: RequestHandler = async ({ request, locals, url }) => {
 	const token = generateShareToken();
 	const tokenConfig: WidgetConfig = {
 		theme: config?.theme ?? 'light',
-		showBranding: config?.showBranding ?? true
+		showBranding: config?.showBranding ?? true,
+		showDate: config?.showDate,
+		showCommit: config?.showCommit
 	};
 
 	const { error: insertError } = await supabaseAdmin.from('share_tokens').insert({

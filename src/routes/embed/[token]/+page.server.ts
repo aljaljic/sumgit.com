@@ -8,8 +8,12 @@ import type { Repository, Milestone, DbStory } from '$lib/database.types';
 
 const supabaseAdmin = createClient(PUBLIC_SUPABASE_URL, PRIVATE_SUPABASE_SERVICE_ROLE_KEY);
 
-export const load: PageServerLoad = async ({ params }) => {
+export const load: PageServerLoad = async ({ params, url }) => {
 	const { token } = params;
+
+	// Read URL query params for styling
+	const textColor = url.searchParams.get('textColor') || undefined;
+	const textSize = url.searchParams.get('textSize') || undefined;
 
 	if (!token) {
 		throw error(400, 'Token required');
@@ -72,6 +76,8 @@ export const load: PageServerLoad = async ({ params }) => {
 		config: shareToken.config as WidgetConfig,
 		repository: repository as Repository,
 		milestones: (milestones || []) as Milestone[],
-		story
+		story,
+		textColor,
+		textSize
 	};
 };

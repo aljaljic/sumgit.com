@@ -25,9 +25,14 @@
 	let embedUrl = $state<string | null>(null);
 	let iframeCode = $state<string | null>(null);
 	let existingTokens = $state<ShareTokenListItem[]>([]);
+	let currentToken = $state<string | null>(null);
 
 	// Config
 	let selectedTheme = $state<WidgetTheme>('light');
+	let showDate = $state(true);
+	let showCommit = $state(true);
+	let textColor = $state('');
+	let textSize = $state('');
 
 	const CONTENT_TYPE_LABELS: Record<WidgetContentType, string> = {
 		milestones: 'Milestones',
@@ -41,6 +46,31 @@
 		{ value: 'dark', label: 'Dark' },
 		{ value: 'auto', label: 'Auto' }
 	];
+
+	function buildEmbedUrls(token: string) {
+		const params = new URLSearchParams();
+		if (textColor) params.set('textColor', textColor);
+		if (textSize) params.set('textSize', textSize);
+		const queryString = params.toString();
+		const baseUrl = `${window.location.origin}/embed/${token}`;
+		embedUrl = queryString ? `${baseUrl}?${queryString}` : baseUrl;
+		iframeCode = `<iframe src="${embedUrl}" width="100%" height="400" frameborder="0" style="border-radius: 8px;"></iframe>`;
+	}
+
+	function updateEmbedUrls(token: string) {
+		currentToken = token;
+		buildEmbedUrls(token);
+	}
+
+	// Update URLs when textColor or textSize changes
+	$effect(() => {
+		// Track these values
+		const _color = textColor;
+		const _size = textSize;
+		if (currentToken) {
+			buildEmbedUrls(currentToken);
+		}
+	});
 
 	// Load existing tokens when dialog opens
 	$effect(() => {
@@ -61,9 +91,11 @@
 				// If there's an existing token, pre-fill the embed data
 				if (existingTokens.length > 0) {
 					const token = existingTokens[0];
-					embedUrl = `${window.location.origin}/embed/${token.token}`;
-					iframeCode = `<iframe src="${embedUrl}" width="100%" height="400" frameborder="0" style="border-radius: 8px;"></iframe>`;
-					selectedTheme = (token.config as { theme: WidgetTheme })?.theme || 'light';
+					const config = token.config as { theme: WidgetTheme; showDate?: boolean; showCommit?: boolean };
+					selectedTheme = config?.theme || 'light';
+					showDate = config?.showDate ?? true;
+					showCommit = config?.showCommit ?? true;
+					updateEmbedUrls(token.token);
 				}
 			}
 		} catch (err) {
@@ -86,7 +118,9 @@
 					content_type: contentType,
 					config: {
 						theme: selectedTheme,
-						showBranding: true
+						showBranding: true,
+						showDate,
+						showCommit
 					}
 				})
 			});
@@ -97,8 +131,7 @@
 			}
 
 			const data = await response.json();
-			embedUrl = data.embed_url;
-			iframeCode = data.iframe_code;
+			updateEmbedUrls(data.token);
 
 			// Reload tokens list
 			await loadExistingTokens();
@@ -201,6 +234,70 @@
 						{/each}
 					</div>
 				</div>
+
+				<!-- Milestones-specific options -->
+				{#if contentType === 'milestones'}
+					<div class="space-y-3">
+						<label class="text-sm font-medium mb-2 block">Display Options</label>
+
+						<div class="flex flex-wrap gap-4">
+							<label class="flex items-center gap-2 cursor-pointer">
+								<input
+									type="checkbox"
+									bind:checked={showDate}
+									class="h-4 w-4 rounded border-border"
+								/>
+								<span class="text-sm">Show Date</span>
+							</label>
+
+							<label class="flex items-center gap-2 cursor-pointer">
+								<input
+									type="checkbox"
+									bind:checked={showCommit}
+									class="h-4 w-4 rounded border-border"
+								/>
+								<span class="text-sm">Show Commit</span>
+							</label>
+						</div>
+
+						<div class="flex items-center gap-3">
+							<label class="text-sm">Text Color</label>
+							<input
+								type="color"
+								bind:value={textColor}
+								class="h-8 w-12 rounded border border-border cursor-pointer"
+							/>
+							{#if textColor}
+								<button
+									type="button"
+									onclick={() => textColor = ''}
+									class="text-xs text-muted-foreground hover:text-foreground"
+								>
+									Reset
+								</button>
+							{/if}
+						</div>
+
+						<div class="flex items-center gap-3">
+							<label class="text-sm">Text Size</label>
+							<input
+								type="text"
+								bind:value={textSize}
+								placeholder="e.g. 12px, 1rem"
+								class="w-24 px-2 py-1 text-sm rounded border border-border"
+							/>
+							{#if textSize}
+								<button
+									type="button"
+									onclick={() => textSize = ''}
+									class="text-xs text-muted-foreground hover:text-foreground"
+								>
+									Reset
+								</button>
+							{/if}
+						</div>
+					</div>
+				{/if}
 
 				{#if error}
 					<div

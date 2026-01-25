@@ -6,9 +6,13 @@
 		repository: Repository;
 		milestones: Milestone[];
 		showBranding?: boolean;
+		showDate?: boolean;
+		showCommit?: boolean;
+		textColor?: string;
+		textSize?: string;
 	}
 
-	let { repository, milestones, showBranding = true }: Props = $props();
+	let { repository, milestones, showBranding = true, showDate = true, showCommit = true, textColor, textSize }: Props = $props();
 
 	function formatDate(dateString: string): string {
 		const date = new Date(dateString);
@@ -34,33 +38,41 @@
 		<div class="milestone-list">
 			{#each milestones.slice(0, 10) as milestone}
 				<div class="milestone-card">
-					<div class="milestone-main">
-						{#if milestone.milestone_type === 'feature'}
-							<span class="type-badge" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">Feature</span>
-						{:else if milestone.milestone_type === 'bugfix'}
-							<span class="type-badge" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">Bugfix</span>
-						{:else if milestone.milestone_type === 'refactor'}
-							<span class="type-badge" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">Refactor</span>
-						{:else if milestone.milestone_type === 'docs'}
-							<span class="type-badge" style="background: rgba(168, 85, 247, 0.1); color: #a855f7;">Docs</span>
-						{:else if milestone.milestone_type === 'config'}
-							<span class="type-badge" style="background: rgba(249, 115, 22, 0.1); color: #f97316;">Config</span>
-						{:else if milestone.milestone_type === 'release'}
-							<span class="type-badge" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">Release</span>
-						{/if}
-						<p class="milestone-text">{milestone.x_post_suggestion || milestone.title}</p>
-					</div>
-					<div class="milestone-meta">
-						<span class="date">{formatDate(milestone.milestone_date)}</span>
-						{#if milestone.commit_sha}
-							<a
-								href="{repository.github_repo_url}/commit/{milestone.commit_sha}"
-								target="_blank"
-								rel="noopener noreferrer"
-								class="commit"
-							>
-								{milestone.commit_sha.slice(0, 7)}
-							</a>
+					<div class="milestone-content">
+						<div class="milestone-main">
+							{#if milestone.milestone_type === 'feature'}
+								<span class="type-badge" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">Feature</span>
+							{:else if milestone.milestone_type === 'bugfix'}
+								<span class="type-badge" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">Bugfix</span>
+							{:else if milestone.milestone_type === 'refactor'}
+								<span class="type-badge" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">Refactor</span>
+							{:else if milestone.milestone_type === 'docs'}
+								<span class="type-badge" style="background: rgba(168, 85, 247, 0.1); color: #a855f7;">Docs</span>
+							{:else if milestone.milestone_type === 'config'}
+								<span class="type-badge" style="background: rgba(249, 115, 22, 0.1); color: #f97316;">Config</span>
+							{:else if milestone.milestone_type === 'release'}
+								<span class="type-badge" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">Release</span>
+							{:else}
+								<span class="type-badge" style="background: rgba(107, 114, 128, 0.1); color: #6b7280;">Other</span>
+							{/if}
+							<p class="milestone-text" style={`${textColor ? `color: ${textColor};` : ''}${textSize ? `font-size: ${textSize};` : ''}`}>{milestone.x_post_suggestion || milestone.title}</p>
+						</div>
+						{#if showDate || showCommit}
+							<div class="milestone-meta">
+								{#if showDate}
+									<span class="date">{formatDate(milestone.milestone_date)}</span>
+								{/if}
+								{#if showCommit && milestone.commit_sha}
+									<a
+										href="{repository.github_repo_url}/commit/{milestone.commit_sha}"
+										target="_blank"
+										rel="noopener noreferrer"
+										class="commit"
+									>
+										{milestone.commit_sha.slice(0, 7)}
+									</a>
+								{/if}
+							</div>
 						{/if}
 					</div>
 				</div>
@@ -108,16 +120,18 @@
 	}
 
 	.milestone-card {
-		display: flex;
-		justify-content: space-between;
-		align-items: flex-start;
-		gap: 12px;
 		padding: 14px;
 		background: var(--widget-card-bg);
 		border-radius: 10px;
 		border: 1px solid var(--widget-border);
 		border-left: 3px solid var(--widget-accent);
 		transition: transform 0.2s ease, box-shadow 0.2s ease, border-left-color 0.2s ease;
+	}
+
+	.milestone-content {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
 	}
 
 	.milestone-card:hover {
@@ -160,24 +174,21 @@
 
 	.milestone-meta {
 		display: flex;
-		flex-direction: column;
-		align-items: flex-end;
-		gap: 4px;
+		align-items: center;
+		gap: 12px;
 		font-size: 12px;
 		color: var(--widget-muted);
-		flex-shrink: 0;
 	}
 
 	.date {
-		color: var(--widget-muted);
 		font-weight: 500;
 		white-space: nowrap;
 	}
 
 	.commit {
 		font-family: monospace;
-		font-size: 11px;
-		color: var(--widget-accent);
+		font-size: inherit;
+		color: inherit;
 	}
 
 	.more {
