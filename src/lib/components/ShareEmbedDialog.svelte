@@ -32,7 +32,7 @@
 	let showDate = $state(true);
 	let showCommit = $state(true);
 	let textColor = $state('');
-	let textSize = $state('');
+	let textSize = $state<number | null>(null);
 
 	const CONTENT_TYPE_LABELS: Record<WidgetContentType, string> = {
 		milestones: 'Milestones',
@@ -50,7 +50,7 @@
 	function buildEmbedUrls(token: string) {
 		const params = new URLSearchParams();
 		if (textColor) params.set('textColor', textColor);
-		if (textSize) params.set('textSize', textSize);
+		if (textSize !== null) params.set('textSize', `${textSize}px`);
 		const queryString = params.toString();
 		const baseUrl = `${window.location.origin}/embed/${token}`;
 		embedUrl = queryString ? `${baseUrl}?${queryString}` : baseUrl;
@@ -281,15 +281,18 @@
 						<div class="flex items-center gap-3">
 							<label class="text-sm">Text Size</label>
 							<input
-								type="text"
+								type="number"
 								bind:value={textSize}
-								placeholder="e.g. 12px, 1rem"
-								class="w-24 px-2 py-1 text-sm rounded border border-border"
+								min="10"
+								max="32"
+								placeholder="14"
+								class="w-20 px-2 py-1 text-sm rounded border border-border"
 							/>
-							{#if textSize}
+							<span class="text-sm text-muted-foreground">px</span>
+							{#if textSize !== null}
 								<button
 									type="button"
-									onclick={() => textSize = ''}
+									onclick={() => textSize = null}
 									class="text-xs text-muted-foreground hover:text-foreground"
 								>
 									Reset

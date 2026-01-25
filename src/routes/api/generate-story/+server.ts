@@ -32,21 +32,21 @@ const IMAGE_STYLE_SUFFIXES: Record<NarrativeStyleId, string> = {
 };
 
 const NARRATIVE_PROMPTS: Record<NarrativeStyleId, string> = {
-	fantasy: `You are a bard of ancient times, chronicling the epic tales of code-smiths and their magical creations in the style of J.R.R. Tolkien.
+	fantasy: `You are a bard of ancient times, chronicling the epic rise of a legendary product in the style of J.R.R. Tolkien.
 
-Given a list of development milestones from a repository, weave them into a SHORT fantasy epic. Transform the technical journey into a tale of magic and adventure:
+Given a list of development milestones from a repository, weave them into SHORT fantasy product announcements:
 
-- Code and programming = arcane magic, spells, enchantments
-- Bugs and errors = orcs, shadow creatures, dark forces
-- Features = magical artifacts, enchantments, blessed items
-- Deployments = great battles, triumphant moments
-- Refactoring = forging anew, purifying with ancient fire
+- Features = magical artifacts forged, powerful enchantments bestowed
+- Bug fixes = dark forces vanquished, shadow creatures defeated
+- Launches = kingdoms united, great victories won
+- Updates = new powers awakened, ancient wisdom unlocked
+- Improvements = the realm strengthened, defenses fortified
 
 Each chapter should:
 - Be 100-150 words MAXIMUM (keep it short!)
-- Use rich, epic fantasy language (thee, thy, hath, verily, etc.)
-- Include dramatic imagery of quests, forges, and mystical realms
-- Flow as an interconnected saga
+- Announce product updates with epic fantasy grandeur
+- Frame each feature as a legendary achievement
+- Use rich fantasy language (thee, thy, hath, verily, etc.)
 
 Write exactly 3-4 chapters total. Keep them SHORT but evocative.`,
 
@@ -68,39 +68,39 @@ Each chapter should:
 
 Write exactly 3-4 chapters total. Keep them SHORT but meaningful.`,
 
-	'space-opera': `You are the ship's AI chronicling a crew's expedition across the digital cosmos in the style of Star Trek captain's logs.
+	'space-opera': `You are a starship AI announcing mission updates about a product's voyage across the cosmos in the style of Star Trek captain's logs.
 
-Given a list of development milestones from a repository, transform them into a galactic exploration narrative:
+Given a list of development milestones from a repository, transform them into galactic product announcements:
 
-- Code = ship systems, quantum algorithms, subspace protocols
-- Bugs = anomalies, system malfunctions, hostile code signatures
-- Features = new modules, upgraded systems, discoveries
-- Deployments = warp jumps, arriving at new sectors
-- Refactoring = recalibrating systems, optimizing warp cores
+- Features = new systems online, capabilities discovered in uncharted space
+- Bug fixes = anomalies neutralized, system malfunctions resolved
+- Launches = new sectors reached, warp jumps successful
+- Updates = ship upgrades complete, new modules integrated
+- Improvements = warp core optimized, shields strengthened
 
 Each chapter should:
 - Be 100-150 words MAXIMUM (keep it short!)
-- Use formal but evocative language
+- Announce product updates as official starship transmissions
+- Frame each feature as a cosmic achievement
 - Reference stardate-style entries
-- Feel like official ship's logs from a space exploration mission
 
 Write exactly 3-4 chapters total. Keep them SHORT but evocative.`,
 
-	noir: `You are a hard-boiled detective narrating a case file about tracking down bugs and building features, in the style of Raymond Chandler.
+	noir: `You are a hard-boiled detective announcing case breakthroughs about a product's evolution, in the style of Raymond Chandler.
 
-Given a list of development milestones from a repository, transform them into a noir mystery narrative:
+Given a list of development milestones from a repository, transform them into noir-style product announcements:
 
-- Code = the dame, the case, the puzzle pieces
-- Bugs = criminals, suspects, things that don't add up
-- Features = breakthroughs, solved cases, cracked codes
-- Deployments = closing the case, justice served
-- Refactoring = cleaning up the mess, tying loose ends
+- Features = cases cracked, mysteries solved, breakthroughs in the night
+- Bug fixes = criminals caught, loose ends tied up
+- Launches = justice served, the city sleeps safer tonight
+- Updates = new leads followed, pieces falling into place
+- Improvements = cleaning up the streets, order restored
 
 Each chapter should:
 - Be 100-150 words MAXIMUM (keep it short!)
-- Write in first person, past tense
-- Be moody, atmospheric, cynical but with heart
-- Feel like pages from a detective's case file
+- Announce product updates with noir atmosphere
+- Frame each feature as a case solved
+- Write in first person, past tense, moody but triumphant
 
 Write exactly 3-4 chapters total. Keep them SHORT but atmospheric.`,
 
