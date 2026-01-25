@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import '../../layout.css';
+	import '../embed.css';
 
 	interface Props {
 		children: Snippet;
@@ -18,13 +18,6 @@
 	.embed-layout {
 		min-height: 100vh;
 		width: 100%;
-	}
-
-	:global(html),
-	:global(body) {
-		margin: 0;
-		padding: 0;
-		overflow: auto;
-		background: transparent !important;
+		background: transparent;
 	}
 </style>
