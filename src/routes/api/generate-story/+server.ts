@@ -104,40 +104,40 @@ Each chapter should:
 
 Write exactly 3-4 chapters total. Keep them SHORT but atmospheric.`,
 
-	anime: `You are narrating a shonen anime about a young developer's journey to become the greatest code master. Think Naruto meets Silicon Valley.
+	anime: `You are narrating a shonen anime about a product's epic evolution into the ultimate app. Think Naruto meets product launches.
 
-Given a list of development milestones from a repository, transform them into an epic anime journey:
+Given a list of development milestones from a repository, transform them into epic product announcements in anime style:
 
-- Code = techniques, jutsu, special moves, ultimate abilities
-- Bugs = villains, final bosses, rivals who push the protagonist
-- Features = power-ups, new techniques mastered, level ups
-- Deployments = tournament victories, boss battles won
-- Refactoring = intense training arcs, pushing past limits
+- Features = new ultimate abilities unlocked, power-ups revealed
+- Bug fixes = villains defeated, obstacles overcome
+- Launches = tournament victories, epic battle wins
+- Updates = training arcs complete, new forms achieved
+- Improvements = breaking through limits, leveling up
 
 Each chapter should:
 - Be 100-150 words MAXIMUM (keep it short!)
-- Be over-the-top dramatic with inner monologues
-- Emphasize friendship powering everything
-- Have "I won't give up!" energy
+- Announce product updates with over-the-top dramatic energy
+- Frame each feature/update as an epic achievement
+- Have "This isn't even our final form!" energy
 
 Write exactly 3-4 chapters total. Keep them SHORT but INTENSE.`,
 
-	ghibli: `You are narrating a whimsical Studio Ghibli film about a developer's gentle journey through a magical world of code. Think Spirited Away meets a cozy coding adventure.
+	ghibli: `You are narrating a whimsical Studio Ghibli film about a product blossoming into something wonderful. Think Spirited Away meets heartfelt product updates.
 
-Given a list of development milestones from a repository, transform them into a heartwarming Ghibli-style tale:
+Given a list of development milestones from a repository, transform them into gentle product announcements in Ghibli style:
 
-- Code = magical spells, enchanted objects, spirit companions
-- Bugs = mischievous spirits, small troubles that teach lessons
-- Features = magical gifts, discoveries in enchanted forests
-- Deployments = festivals, celebrations in spirit villages
-- Refactoring = cleaning the bathhouse, tending magical gardens
+- Features = magical gifts appearing, new spirits joining the journey
+- Bug fixes = mischievous spirits befriended, small troubles resolved
+- Launches = festivals in spirit villages, celebrations of growth
+- Updates = seasons changing, the garden blooming anew
+- Improvements = tending the bathhouse, nurturing what matters
 
 Each chapter should:
 - Be 100-150 words MAXIMUM (keep it short!)
-- Feel contemplative and gentle, with wonder at small things
+- Announce product updates with gentle wonder and warmth
+- Frame each feature as a small magic worth celebrating
 - Include nature imagery - forests, rivers, wind, clouds
-- Have moments of quiet magic and heartfelt connection
-- Emphasize growth, kindness, and finding one's place
+- Emphasize the product growing and finding its place
 
 Write exactly 3-4 chapters total. Keep them SHORT but magical.`
 };
