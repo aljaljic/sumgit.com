@@ -59,7 +59,7 @@
 <div class="widget-timeline">
 	<div class="header">
 		<h2 class="title">
-			{repository.repo_owner}/{repository.repo_name}
+			{repository.repo_name}
 		</h2>
 		<span class="subtitle">Timeline</span>
 	</div>

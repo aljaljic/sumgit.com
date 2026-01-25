@@ -66,17 +66,13 @@
 			</div>
 
 			<h1 class="mb-6 text-4xl leading-tight font-bold tracking-tight md:text-6xl">
-				Turn Git Activity into
-				<span
+				Share Your Startup <span
 					class="animate-shimmer bg-[length:200%_100%] bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 bg-clip-text text-transparent"
-				>
-					Shareable Updates
-				</span>
+				>Journey</span>
 			</h1>
 
 			<p class="mb-10 text-lg text-muted-foreground md:text-xl">
-				SumGit analyzes your git history and extracts significant milestones worth sharing. Perfect
-				for building in public.
+				SumGit analyzes your git history and extracts significant milestones worth sharing.
 			</p>
 
 			{#if data.user}
@@ -574,10 +570,10 @@
 		<!-- Final CTA Section -->
 		<div class="mt-20 w-full max-w-2xl text-center">
 			<h2 class="mb-6 text-3xl font-bold md:text-4xl">
-				You're not afraid to commit.
+				Turn Product Updates into
 				<br />
 				<span class="bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 bg-clip-text text-transparent">
-					Don't be afraid to share.
+					Announcements
 				</span>
 			</h2>
 			{#if data.user}
