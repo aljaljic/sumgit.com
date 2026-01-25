@@ -150,7 +150,7 @@
 					{data.milestones.length} milestone{data.milestones.length === 1 ? '' : 's'} total
 				</p>
 				<div class="mt-3">
-					<IconTimeline size={32} />
+					<IconTimeline size={40} />
 				</div>
 			</div>
 

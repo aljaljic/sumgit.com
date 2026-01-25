@@ -499,7 +499,7 @@ Built with sumgit.com`;
 				<!-- Generate recap state -->
 				<div class="flex flex-1 flex-col items-center justify-center py-20 text-center">
 					<div class="mb-4">
-						<IconRecap size={48} />
+						<IconRecap size={40} />
 					</div>
 					<h3 class="mb-2 text-lg font-semibold">Generate Your Recap</h3>
 					<p class="mb-6 max-w-sm text-muted-foreground">

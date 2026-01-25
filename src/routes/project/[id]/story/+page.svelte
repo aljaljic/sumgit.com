@@ -324,7 +324,7 @@
 				<!-- Generate story state -->
 				<div class="flex flex-1 flex-col items-center justify-center py-20 text-center">
 					<div class="mb-4">
-						<IconStory size={48} />
+						<IconStory size={40} />
 					</div>
 					<h3 class="mb-2 text-lg font-semibold">Tell Your Story</h3>
 					<p class="mb-6 max-w-sm text-muted-foreground">
