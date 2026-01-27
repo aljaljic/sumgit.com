@@ -313,7 +313,7 @@
 					<BookOpen class="h-3 w-3" />
 					See it in action
 				</Badge>
-				<h2 class="mb-3 text-3xl font-bold">Transform your milestones into an interactive storybook</h2>
+				<h2 class="mb-3 text-3xl font-bold">Bring your progress to life with an interactive storybook</h2>
 				<p class="text-lg text-muted-foreground">
 					Choose from 5 unique narrative styles to bring your milestones to life
 				</p>
