@@ -423,7 +423,7 @@
 			</div>
 
 			<!-- Credit costs -->
-			<div class="mb-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+			<div class="mb-8 grid gap-4 md:grid-cols-2 lg:grid-cols-5">
 				<div class="flex items-center gap-3 rounded-lg border border-border/40 bg-card/50 p-4">
 					<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-500/10">
 						<Zap class="h-5 w-5 text-blue-500" />

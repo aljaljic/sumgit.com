@@ -131,7 +131,7 @@
 			<!-- Credit costs -->
 			<div class="mb-12">
 				<h2 class="mb-6 text-2xl font-semibold text-center">How credits work</h2>
-				<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+				<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
 					<Card class="border-border/40">
 						<CardHeader class="pb-3">
 							<div class="flex items-center gap-3">
@@ -196,7 +196,7 @@
 									<FileText class="h-5 w-5 text-purple-500" />
 								</div>
 								<div>
-									<CardTitle class="text-base">Recap</CardTitle>
+									<CardTitle class="text-base">Recap Report</CardTitle>
 									<CardDescription>{CREDIT_COSTS.generate_recap} credits</CardDescription>
 								</div>
 							</div>
