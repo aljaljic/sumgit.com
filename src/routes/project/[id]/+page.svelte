@@ -16,7 +16,8 @@
 		Clock,
 		BookOpen,
 		FileText,
-		Code
+		Code,
+		ScrollText
 	} from '@lucide/svelte';
 	import { invalidateAll, goto } from '$app/navigation';
 	import logo from '$lib/assets/logo.png';
@@ -122,10 +123,7 @@
 					<span class="hidden sm:inline ml-2">Back</span>
 				</Button>
 				<Separator orientation="vertical" class="h-6 hidden sm:block" />
-				<div class="flex items-center gap-2 min-w-0">
-					<img src={logo} alt="SumGit" class="h-6 w-6 sm:h-7 sm:w-7 rounded-md shrink-0" />
-					<span class="font-semibold truncate text-sm sm:text-base">{data.repository.repo_owner}/{data.repository.repo_name}</span>
-				</div>
+				<img src={logo} alt="SumGit" class="h-6 w-6 sm:h-7 sm:w-7 rounded-md shrink-0" />
 			</div>
 			<!-- Right side: Actions -->
 			<div class="flex items-center gap-2 justify-end">
@@ -156,6 +154,15 @@
 					>
 						<FileText class="h-4 w-4" />
 						<span class="hidden sm:inline">Recap</span>
+					</Button>
+					<Button
+						href="/project/{data.repository.id}/changelog"
+						variant="outline"
+						size="sm"
+						class="gap-2"
+					>
+						<ScrollText class="h-4 w-4" />
+						<span class="hidden sm:inline">Changelog</span>
 					</Button>
 					<Button
 						onclick={() => (showEmbedDialog = true)}

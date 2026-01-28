@@ -4,6 +4,7 @@
 	import WidgetTimeline from '$lib/components/widgets/WidgetTimeline.svelte';
 	import WidgetRecap from '$lib/components/widgets/WidgetRecap.svelte';
 	import WidgetStory from '$lib/components/widgets/WidgetStory.svelte';
+	import WidgetChangelog from '$lib/components/widgets/WidgetChangelog.svelte';
 	import WidgetError from '$lib/components/widgets/WidgetError.svelte';
 
 	let { data } = $props();
@@ -41,6 +42,12 @@
 		<WidgetStory
 			repository={data.repository}
 			story={data.story}
+			showBranding={data.config.showBranding}
+		/>
+	{:else if data.contentType === 'changelog'}
+		<WidgetChangelog
+			repository={data.repository}
+			milestones={data.milestones}
 			showBranding={data.config.showBranding}
 		/>
 	{:else}

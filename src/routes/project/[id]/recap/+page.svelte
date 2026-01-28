@@ -267,12 +267,7 @@ Built with sumgit.com`;
 					<span class="ml-2 hidden sm:inline">Back</span>
 				</Button>
 				<Separator orientation="vertical" class="hidden h-6 sm:block" />
-				<div class="flex min-w-0 items-center gap-2">
-					<img src={logo} alt="SumGit" class="h-6 w-6 shrink-0 rounded-md sm:h-7 sm:w-7" />
-					<span class="truncate text-sm font-semibold sm:text-base"
-						>{data.repository.repo_owner}/{data.repository.repo_name}</span
-					>
-				</div>
+				<img src={logo} alt="SumGit" class="h-6 w-6 shrink-0 rounded-md sm:h-7 sm:w-7" />
 			</div>
 			<div class="flex items-center gap-2">
 				{#if data.milestones.length > 0}

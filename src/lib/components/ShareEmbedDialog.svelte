@@ -38,7 +38,8 @@
 		milestones: 'Milestones',
 		timeline: 'Timeline',
 		recap: 'Recap',
-		story: 'Story'
+		story: 'Story',
+		changelog: 'Changelog'
 	};
 
 	const THEME_OPTIONS: { value: WidgetTheme; label: string }[] = [

@@ -33,7 +33,7 @@ export const POST: RequestHandler = async ({ request, locals, url }) => {
 		throw error(400, 'Repository ID required');
 	}
 
-	if (!content_type || !['milestones', 'timeline', 'recap', 'story'].includes(content_type)) {
+	if (!content_type || !['milestones', 'timeline', 'recap', 'story', 'changelog'].includes(content_type)) {
 		throw error(400, 'Valid content type required');
 	}
 

@@ -330,7 +330,7 @@ export interface Database {
 					token: string;
 					user_id: string;
 					repository_id: string;
-					content_type: 'milestones' | 'timeline' | 'recap' | 'story';
+					content_type: 'milestones' | 'timeline' | 'recap' | 'story' | 'changelog';
 					config: Json;
 					is_active: boolean;
 					view_count: number;
@@ -342,7 +342,7 @@ export interface Database {
 					token: string;
 					user_id: string;
 					repository_id: string;
-					content_type: 'milestones' | 'timeline' | 'recap' | 'story';
+					content_type: 'milestones' | 'timeline' | 'recap' | 'story' | 'changelog';
 					config?: Json;
 					is_active?: boolean;
 					view_count?: number;
@@ -354,7 +354,7 @@ export interface Database {
 					token?: string;
 					user_id?: string;
 					repository_id?: string;
-					content_type?: 'milestones' | 'timeline' | 'recap' | 'story';
+					content_type?: 'milestones' | 'timeline' | 'recap' | 'story' | 'changelog';
 					config?: Json;
 					is_active?: boolean;
 					view_count?: number;

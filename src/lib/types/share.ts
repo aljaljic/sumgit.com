@@ -1,4 +1,4 @@
-export type WidgetContentType = 'milestones' | 'timeline' | 'recap' | 'story';
+export type WidgetContentType = 'milestones' | 'timeline' | 'recap' | 'story' | 'changelog';
 export type WidgetTheme = 'light' | 'dark' | 'auto';
 
 export interface WidgetConfig {

@@ -13,7 +13,8 @@
 		Gift,
 		ArrowLeft,
 		Loader2,
-		FileText
+		FileText,
+		ScrollText
 	} from '@lucide/svelte';
 	import logo from '$lib/assets/logo.png';
 	import { CREDIT_PACKAGES, CREDIT_COSTS } from '$lib/credits';
@@ -130,7 +131,7 @@
 			<!-- Credit costs -->
 			<div class="mb-12">
 				<h2 class="mb-6 text-2xl font-semibold text-center">How credits work</h2>
-				<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+				<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
 					<Card class="border-border/40">
 						<CardHeader class="pb-3">
 							<div class="flex items-center gap-3">
@@ -206,6 +207,25 @@
 							</p>
 						</CardContent>
 					</Card>
+
+					<Card class="border-border/40">
+						<CardHeader class="pb-3">
+							<div class="flex items-center gap-3">
+								<div class="flex h-10 w-10 items-center justify-center rounded-full bg-teal-500/10">
+									<ScrollText class="h-5 w-5 text-teal-500" />
+								</div>
+								<div>
+									<CardTitle class="text-base">Changelog</CardTitle>
+									<CardDescription>{CREDIT_COSTS.generate_changelog} credits</CardDescription>
+								</div>
+							</div>
+						</CardHeader>
+						<CardContent>
+							<p class="text-sm text-muted-foreground">
+								Generate CHANGELOG.md files following Keep a Changelog format with semantic versioning.
+							</p>
+						</CardContent>
+					</Card>
 				</div>
 			</div>
 
@@ -259,6 +279,10 @@
 									<li class="flex items-center gap-2">
 										<Check class="h-4 w-4 text-emerald-500" />
 										<span>{Math.floor(pkg.credits / CREDIT_COSTS.generate_recap)} Recaps</span>
+									</li>
+									<li class="flex items-center gap-2">
+										<Check class="h-4 w-4 text-emerald-500" />
+										<span>{Math.floor(pkg.credits / CREDIT_COSTS.generate_changelog)} Changelogs</span>
 									</li>
 								</ul>
 								<Button
