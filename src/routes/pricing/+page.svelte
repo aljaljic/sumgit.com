@@ -140,7 +140,7 @@
 								</div>
 								<div>
 									<CardTitle class="text-base">Quick Analysis</CardTitle>
-									<CardDescription>{CREDIT_COSTS.quick_analyze} credit</CardDescription>
+									<CardDescription class="whitespace-nowrap">{CREDIT_COSTS.quick_analyze} credit</CardDescription>
 								</div>
 							</div>
 						</CardHeader>
@@ -159,7 +159,7 @@
 								</div>
 								<div>
 									<CardTitle class="text-base">Timeline Analysis</CardTitle>
-									<CardDescription>{CREDIT_COSTS.timeline_analyze} credits</CardDescription>
+									<CardDescription class="whitespace-nowrap">{CREDIT_COSTS.timeline_analyze} credits</CardDescription>
 								</div>
 							</div>
 						</CardHeader>
@@ -178,7 +178,7 @@
 								</div>
 								<div>
 									<CardTitle class="text-base">Story Generation</CardTitle>
-									<CardDescription>{CREDIT_COSTS.generate_story} credits</CardDescription>
+									<CardDescription class="whitespace-nowrap">{CREDIT_COSTS.generate_story} credits</CardDescription>
 								</div>
 							</div>
 						</CardHeader>
@@ -196,8 +196,8 @@
 									<FileText class="h-5 w-5 text-purple-500" />
 								</div>
 								<div>
-									<CardTitle class="text-base">Recap Report</CardTitle>
-									<CardDescription>{CREDIT_COSTS.generate_recap} credits</CardDescription>
+									<CardTitle class="text-base">Recap</CardTitle>
+									<CardDescription class="whitespace-nowrap">{CREDIT_COSTS.generate_recap} credits</CardDescription>
 								</div>
 							</div>
 						</CardHeader>
@@ -216,7 +216,7 @@
 								</div>
 								<div>
 									<CardTitle class="text-base">Changelog</CardTitle>
-									<CardDescription>{CREDIT_COSTS.generate_changelog} credits</CardDescription>
+									<CardDescription class="whitespace-nowrap">{CREDIT_COSTS.generate_changelog} credits</CardDescription>
 								</div>
 							</div>
 						</CardHeader>
