@@ -224,11 +224,15 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			}
 		}
 
-		// Update last_analyzed_at
-		await locals.supabase
+		// Update last_analyzed_at with error checking
+		const { error: updateError } = await locals.supabase
 			.from('repositories')
-			.update({ last_analyzed_at: new Date().toISOString() } as Partial<Repository>)
+			.update({ last_analyzed_at: new Date().toISOString() })
 			.eq('id', repository_id);
+
+		if (updateError) {
+			secureLog.error('Failed to update last_analyzed_at:', updateError);
+		}
 
 		return json({
 			success: true,
