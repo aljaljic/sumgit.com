@@ -1,6 +1,6 @@
 import { redirect, error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import type { Repository, Milestone } from '$lib/database.types';
+import type { Repository, Milestone, DbChangelog } from '$lib/database.types';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const { session, user } = await locals.safeGetSession();
@@ -34,11 +34,22 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		console.error('Error fetching milestones:', milestonesError);
 	}
 
+	// Fetch existing changelog for this repository
+	const { data: existingChangelog } = await locals.supabase
+		.from('changelogs')
+		.select('*')
+		.eq('repository_id', id)
+		.eq('user_id', user.id)
+		.order('created_at', { ascending: false })
+		.limit(1)
+		.single();
+
 	const typedMilestones = (milestones ?? []) as Milestone[];
 	const typedRepository = repository as Repository;
 
 	return {
 		repository: typedRepository,
-		milestones: typedMilestones
+		milestones: typedMilestones,
+		existingChangelog: (existingChangelog as DbChangelog) ?? null
 	};
 };

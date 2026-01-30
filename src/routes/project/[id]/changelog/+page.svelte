@@ -23,15 +23,27 @@
 	let { data } = $props();
 
 	let isGenerating = $state(false);
-	let changelog = $state<Changelog | null>(null);
-	let markdown = $state<string | null>(null);
+	let changelog = $state<Changelog | null>(
+		(data.existingChangelog?.changelog_data as Changelog) ?? null
+	);
+	let markdown = $state<string | null>(data.existingChangelog?.markdown ?? null);
 	let errorMessage = $state<string | null>(null);
 	let showPurchaseDialog = $state(false);
 	let showEmbedDialog = $state(false);
 	let copied = $state(false);
 	let copiedFormat = $state<'markdown' | 'github' | null>(null);
-	let grouping = $state<ChangelogGrouping>('date');
-	let expandedVersions = $state<Set<string>>(new Set());
+	let grouping = $state<ChangelogGrouping>(
+		(data.existingChangelog?.grouping as ChangelogGrouping) ?? 'date'
+	);
+	let expandedVersions = $state<Set<string>>(
+		new Set(
+			data.existingChangelog?.changelog_data
+				? [(data.existingChangelog.changelog_data as Changelog).versions[0]?.version].filter(
+						Boolean
+					)
+				: []
+		)
+	);
 
 	const groupingOptions = [
 		{ value: 'date', label: 'By Date' },

@@ -324,6 +324,43 @@ export interface Database {
 					}
 				];
 			};
+			changelogs: {
+				Row: {
+					id: string;
+					repository_id: string;
+					user_id: string;
+					grouping: string;
+					changelog_data: Json;
+					markdown: string;
+					created_at: string;
+				};
+				Insert: {
+					id?: string;
+					repository_id: string;
+					user_id: string;
+					grouping: string;
+					changelog_data: Json;
+					markdown: string;
+					created_at?: string;
+				};
+				Update: {
+					id?: string;
+					repository_id?: string;
+					user_id?: string;
+					grouping?: string;
+					changelog_data?: Json;
+					markdown?: string;
+					created_at?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'changelogs_repository_id_fkey';
+						columns: ['repository_id'];
+						referencedRelation: 'repositories';
+						referencedColumns: ['id'];
+					}
+				];
+			};
 			share_tokens: {
 				Row: {
 					id: string;
@@ -437,4 +474,5 @@ export type CreditTransaction = Database['public']['Tables']['credit_transaction
 export type StripeCustomer = Database['public']['Tables']['stripe_customers']['Row'];
 export type DbStory = Database['public']['Tables']['stories']['Row'];
 export type DbRecap = Database['public']['Tables']['recaps']['Row'];
+export type DbChangelog = Database['public']['Tables']['changelogs']['Row'];
 export type DbShareToken = Database['public']['Tables']['share_tokens']['Row'];

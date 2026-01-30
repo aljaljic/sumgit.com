@@ -2,6 +2,9 @@ import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import OpenAI from 'openai';
 import { PRIVATE_OPENAI_API_KEY } from '$env/static/private';
+import { PRIVATE_SUPABASE_SERVICE_ROLE_KEY } from '$env/static/private';
+import { PUBLIC_SUPABASE_URL } from '$env/static/public';
+import { createClient } from '@supabase/supabase-js';
 import type { Milestone } from '$lib/database.types';
 import { checkAndDeductCredits, refundCredits } from '$lib/server/credits';
 import { CREDIT_COSTS } from '$lib/credits';
@@ -21,6 +24,9 @@ const openai = new OpenAI({
 	timeout: 60000,
 	maxRetries: 0
 });
+
+// Supabase client with service role for database operations
+const supabaseAdmin = createClient(PUBLIC_SUPABASE_URL, PRIVATE_SUPABASE_SERVICE_ROLE_KEY);
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	const { session, user } = await locals.safeGetSession();
@@ -91,6 +97,22 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		// Generate markdown
 		const markdown = generateMarkdown(changelog, repository.github_repo_url);
+
+		// Persist changelog to database
+		await supabaseAdmin
+			.from('changelogs')
+			.upsert(
+				{
+					repository_id,
+					user_id: user.id,
+					grouping,
+					changelog_data: changelog,
+					markdown
+				},
+				{ onConflict: 'repository_id,user_id' }
+			)
+			.select()
+			.single();
 
 		return json({
 			success: true,
