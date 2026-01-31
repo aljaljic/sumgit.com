@@ -9,7 +9,8 @@
 		Clock,
 		Loader2,
 		History,
-		Code
+		Code,
+		X
 	} from '@lucide/svelte';
 	import logo from '$lib/assets/logo.png';
 	import IconTimeline from '$lib/components/icons/IconTimeline.svelte';
@@ -23,6 +24,21 @@
 	let isAnalyzing = $state(false);
 	let showPurchaseDialog = $state(false);
 	let showEmbedDialog = $state(false);
+	let errorMessage = $state<string | null>(null);
+	let errorTimeout: ReturnType<typeof setTimeout> | null = null;
+
+	function showError(message: string) {
+		errorMessage = message;
+		if (errorTimeout) clearTimeout(errorTimeout);
+		errorTimeout = setTimeout(() => {
+			errorMessage = null;
+		}, 5000);
+	}
+
+	function dismissError() {
+		errorMessage = null;
+		if (errorTimeout) clearTimeout(errorTimeout);
+	}
 
 	async function analyzeTimeline() {
 		if (isAnalyzing) return;
@@ -51,7 +67,7 @@
 			await invalidateAll();
 		} catch (err) {
 			console.error('Timeline analysis error:', err);
-			alert(err instanceof Error ? err.message : 'Failed to analyze timeline');
+			showError(err instanceof Error ? err.message : 'Failed to analyze timeline');
 		} finally {
 			isAnalyzing = false;
 		}
@@ -126,6 +142,18 @@
 			</div>
 		</div>
 	</header>
+
+	<!-- Error Banner -->
+	{#if errorMessage}
+		<div class="mx-auto max-w-4xl px-4 pt-4 sm:px-6">
+			<div class="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-md flex items-center justify-between">
+				<span>{errorMessage}</span>
+				<button onclick={dismissError} class="hover:opacity-70 transition-opacity">
+					<X class="h-4 w-4" />
+				</button>
+			</div>
+		</div>
+	{/if}
 
 	<!-- Main content -->
 	<main class="flex-1 px-4 py-6 sm:px-6 sm:py-8">

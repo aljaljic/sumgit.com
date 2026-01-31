@@ -17,7 +17,8 @@
 		BookOpen,
 		FileText,
 		Code,
-		ScrollText
+		ScrollText,
+		X
 	} from '@lucide/svelte';
 	import { invalidateAll, goto } from '$app/navigation';
 	import logo from '$lib/assets/logo.png';
@@ -32,6 +33,21 @@
 	let showPurchaseDialog = $state(false);
 	let showEmbedDialog = $state(false);
 	let insufficientCreditsMessage = $state<string | null>(null);
+	let errorMessage = $state<string | null>(null);
+	let errorTimeout: ReturnType<typeof setTimeout> | null = null;
+
+	function showError(message: string) {
+		errorMessage = message;
+		if (errorTimeout) clearTimeout(errorTimeout);
+		errorTimeout = setTimeout(() => {
+			errorMessage = null;
+		}, 5000);
+	}
+
+	function dismissError() {
+		errorMessage = null;
+		if (errorTimeout) clearTimeout(errorTimeout);
+	}
 
 	async function analyzeRepository() {
 		isAnalyzing = true;
@@ -52,11 +68,11 @@
 				showPurchaseDialog = true;
 			} else {
 				const error = await response.json();
-				alert(error.message || 'Analysis failed');
+				showError(error.message || 'Analysis failed');
 			}
 		} catch (error) {
 			console.error('Analysis error:', error);
-			alert('Failed to analyze repository');
+			showError('Failed to analyze repository');
 		} finally {
 			isAnalyzing = false;
 		}
@@ -201,6 +217,18 @@
 			</div>
 		</div>
 	</header>
+
+	<!-- Error Banner -->
+	{#if errorMessage}
+		<div class="mx-auto max-w-4xl px-6 pt-4">
+			<div class="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-md flex items-center justify-between">
+				<span>{errorMessage}</span>
+				<button onclick={dismissError} class="hover:opacity-70 transition-opacity">
+					<X class="h-4 w-4" />
+				</button>
+			</div>
+		</div>
+	{/if}
 
 	<!-- Main content -->
 	<main class="flex-1 px-6 py-8">
