@@ -432,6 +432,16 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			}
 		}
 
+		// Update last_analyzed_at BEFORE screenshot processing to avoid Cloudflare subrequest limit
+		const { error: updateError } = await supabaseAdmin
+			.from('repositories')
+			.update({ last_analyzed_at: new Date().toISOString() })
+			.eq('id', repository_id);
+
+		if (updateError) {
+			secureLog.error('Failed to update last_analyzed_at:', updateError);
+		}
+
 		// Process screenshots for feature milestones (non-blocking, don't fail entire analysis)
 		let screenshotCount = 0;
 		try {
@@ -451,16 +461,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		} catch (screenshotErr) {
 			// Log but don't fail the analysis for screenshot errors
 			secureLog.warn('Screenshot capture failed (non-fatal):', screenshotErr);
-		}
-
-		// Update last_analyzed_at using service role client (bypasses RLS which can fail on long requests)
-		const { error: updateError } = await supabaseAdmin
-			.from('repositories')
-			.update({ last_analyzed_at: new Date().toISOString() })
-			.eq('id', repository_id);
-
-		if (updateError) {
-			secureLog.error('Failed to update last_analyzed_at:', updateError);
 		}
 
 		const commitsWithDiffsCount = commitsForAnalysis.filter(c => c.diff).length;
