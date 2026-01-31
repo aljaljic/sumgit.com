@@ -1,12 +1,18 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { createClient } from '@supabase/supabase-js';
+import { PUBLIC_SUPABASE_URL } from '$env/static/public';
+import { PRIVATE_SUPABASE_SERVICE_ROLE_KEY } from '$env/static/private';
 import { getInstallationOctokit } from '$lib/github-app';
 import { analyzeMilestones, analyzeCommitsInChunks, type Commit, type MilestoneInput } from '$lib/openai';
-import type { Repository, Milestone, GitHubInstallation } from '$lib/database.types';
+import type { Repository, Milestone, GitHubInstallation, Database } from '$lib/database.types';
 import { checkAndDeductCredits, refundCredits } from '$lib/server/credits';
 import { CREDIT_COSTS } from '$lib/credits';
 import { handleError } from '$lib/server/errors';
 import { secureLog } from '$lib/server/logger';
+
+// Service role client for admin operations (bypasses RLS)
+const supabaseAdmin = createClient<Database>(PUBLIC_SUPABASE_URL, PRIVATE_SUPABASE_SERVICE_ROLE_KEY);
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	const { session, user } = await locals.safeGetSession();
@@ -224,8 +230,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			}
 		}
 
-		// Update last_analyzed_at with error checking
-		const { error: updateError } = await locals.supabase
+		// Update last_analyzed_at using service role client (bypasses RLS which can fail on long requests)
+		const { error: updateError } = await supabaseAdmin
 			.from('repositories')
 			.update({ last_analyzed_at: new Date().toISOString() })
 			.eq('id', repository_id);
